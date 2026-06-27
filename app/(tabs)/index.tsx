@@ -5,7 +5,6 @@ import { useRouter } from 'expo-router';
 import { Bell, ChevronRight } from 'lucide-react-native';
 import { useAuth } from '@/hooks/useAuth';
 import { useEnrolledCourses } from '@/hooks/useCourses';
-import { CourseCard } from '@/components/course';
 import { CourseCardSkeleton } from '@/components/ui';
 
 export default function HomeScreen() {
