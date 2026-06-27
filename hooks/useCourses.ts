@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { coursesService } from '@/services/api';
+import { coursesService, categoriesService, enrollmentsService } from '@/services/api';
 import { QUERY_KEYS } from '@/constants/config';
+import { useAuthStore } from '@/stores';
 import type { CoursesFilter } from '@/types';
 
 export const useCourses = (filters?: CoursesFilter) => {
@@ -11,27 +12,29 @@ export const useCourses = (filters?: CoursesFilter) => {
   });
 };
 
-export const useCourse = (id: string) => {
+export const useCourse = (slug: string) => {
   return useQuery({
-    queryKey: QUERY_KEYS.COURSES.DETAIL(id),
-    queryFn: () => coursesService.getById(id),
-    enabled: !!id,
+    queryKey: QUERY_KEYS.COURSES.DETAIL(slug),
+    queryFn: () => coursesService.getBySlug(slug),
+    enabled: !!slug,
     staleTime: 1000 * 60 * 5,
   });
 };
 
 export const useEnrolledCourses = () => {
+  const { isAuthenticated } = useAuthStore();
   return useQuery({
-    queryKey: QUERY_KEYS.COURSES.ENROLLED,
-    queryFn: () => coursesService.getEnrolled(),
+    queryKey: QUERY_KEYS.ENROLLMENTS.ALL,
+    queryFn: () => enrollmentsService.getAll({ sort: 'recently_accessed' }),
+    enabled: isAuthenticated,
     staleTime: 1000 * 60 * 2,
   });
 };
 
 export const useCategories = () => {
   return useQuery({
-    queryKey: QUERY_KEYS.COURSES.CATEGORIES,
-    queryFn: () => coursesService.getCategories(),
+    queryKey: QUERY_KEYS.CATEGORIES.ALL,
+    queryFn: () => categoriesService.getAll(),
     staleTime: 1000 * 60 * 30,
   });
 };
@@ -39,19 +42,30 @@ export const useCategories = () => {
 export const useEnrollCourse = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (courseId: string) => coursesService.enroll(courseId),
+    mutationFn: (courseId: number) => enrollmentsService.enroll(courseId),
     onSuccess: (_, courseId) => {
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.COURSES.ENROLLED });
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.COURSES.DETAIL(courseId) });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ENROLLMENTS.ALL });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ENROLLMENTS.DETAIL(courseId) });
     },
   });
 };
 
-export const useCourseSections = (courseId: string) => {
+export const useCourseProgress = (courseId: number) => {
+  const { isAuthenticated } = useAuthStore();
   return useQuery({
-    queryKey: QUERY_KEYS.LESSONS.BY_COURSE(courseId),
-    queryFn: () => coursesService.getCourseSections(courseId),
-    enabled: !!courseId,
-    staleTime: 1000 * 60 * 5,
+    queryKey: QUERY_KEYS.COURSES.PROGRESS(courseId),
+    queryFn: () => coursesService.getProgress(courseId),
+    enabled: isAuthenticated && !!courseId,
+    staleTime: 1000 * 60 * 2,
+  });
+};
+
+export const useEnrollmentDetail = (courseId: number) => {
+  const { isAuthenticated } = useAuthStore();
+  return useQuery({
+    queryKey: QUERY_KEYS.ENROLLMENTS.DETAIL(courseId),
+    queryFn: () => enrollmentsService.getDetail(courseId),
+    enabled: isAuthenticated && !!courseId,
+    staleTime: 1000 * 60 * 2,
   });
 };

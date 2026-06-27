@@ -3,26 +3,42 @@ import { useRouter } from 'expo-router';
 import { authService } from '@/services/api';
 import { useAuthStore } from '@/stores';
 import { QUERY_KEYS } from '@/constants/config';
-import type { LoginRequest, RegisterRequest } from '@/types';
+import type {
+  SendOtpRequest,
+  VerifyOtpRequest,
+  RegisterCompleteRequest,
+  PasswordLoginRequest,
+  UpdateProfileRequest,
+  ChangePasswordRequest,
+} from '@/types';
 
 export const useAuth = () => {
   const { user, isAuthenticated, setAuth, clearAuth } = useAuthStore();
   const queryClient = useQueryClient();
   const router = useRouter();
 
-  const loginMutation = useMutation({
-    mutationFn: (data: LoginRequest) => authService.login(data),
+  const sendOtpMutation = useMutation({
+    mutationFn: (data: SendOtpRequest) => authService.sendOtp(data),
+  });
+
+  const verifyOtpMutation = useMutation({
+    mutationFn: (data: VerifyOtpRequest) => authService.verifyOtp(data),
+  });
+
+  const registerCompleteMutation = useMutation({
+    mutationFn: (data: RegisterCompleteRequest) => authService.registerComplete(data),
     onSuccess: async (data) => {
-      await setAuth(data.user, data.tokens);
+      await setAuth(data.user, data.token);
       queryClient.setQueryData(QUERY_KEYS.AUTH.ME, data.user);
       router.replace('/(tabs)');
     },
   });
 
-  const registerMutation = useMutation({
-    mutationFn: (data: RegisterRequest) => authService.register(data),
+  const loginWithPasswordMutation = useMutation({
+    mutationFn: (data: PasswordLoginRequest) => authService.loginWithPassword(data),
     onSuccess: async (data) => {
-      await setAuth(data.user, data.tokens);
+      await setAuth(data.user, data.token);
+      queryClient.setQueryData(QUERY_KEYS.AUTH.ME, data.user);
       router.replace('/(tabs)');
     },
   });
@@ -42,6 +58,21 @@ export const useAuth = () => {
     },
   });
 
+  const updateProfileMutation = useMutation({
+    mutationFn: (data: UpdateProfileRequest) => authService.updateProfile(data),
+    onSuccess: (data) => {
+      queryClient.setQueryData(QUERY_KEYS.AUTH.ME, data);
+    },
+  });
+
+  const changePasswordMutation = useMutation({
+    mutationFn: (data: ChangePasswordRequest) => authService.changePassword(data),
+    onSuccess: async () => {
+      await clearAuth();
+      router.replace('/(auth)/login');
+    },
+  });
+
   const meQuery = useQuery({
     queryKey: QUERY_KEYS.AUTH.ME,
     queryFn: () => authService.getMe(),
@@ -53,15 +84,29 @@ export const useAuth = () => {
     user: meQuery.data ?? user,
     isAuthenticated,
     isLoadingMe: meQuery.isLoading,
-    login: loginMutation.mutate,
-    loginAsync: loginMutation.mutateAsync,
-    isLoggingIn: loginMutation.isPending,
-    loginError: loginMutation.error,
-    register: registerMutation.mutate,
-    registerAsync: registerMutation.mutateAsync,
-    isRegistering: registerMutation.isPending,
-    registerError: registerMutation.error,
+
+    sendOtp: sendOtpMutation.mutateAsync,
+    isSendingOtp: sendOtpMutation.isPending,
+    sendOtpError: sendOtpMutation.error,
+
+    verifyOtp: verifyOtpMutation.mutateAsync,
+    isVerifyingOtp: verifyOtpMutation.isPending,
+    verifyOtpError: verifyOtpMutation.error,
+
+    registerComplete: registerCompleteMutation.mutateAsync,
+    isRegisteringComplete: registerCompleteMutation.isPending,
+
+    loginWithPassword: loginWithPasswordMutation.mutateAsync,
+    isLoggingIn: loginWithPasswordMutation.isPending,
+    loginError: loginWithPasswordMutation.error,
+
     logout: logoutMutation.mutate,
     isLoggingOut: logoutMutation.isPending,
+
+    updateProfile: updateProfileMutation.mutateAsync,
+    isUpdatingProfile: updateProfileMutation.isPending,
+
+    changePassword: changePasswordMutation.mutateAsync,
+    isChangingPassword: changePasswordMutation.isPending,
   };
 };

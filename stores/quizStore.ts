@@ -1,23 +1,23 @@
 import { create } from 'zustand';
-import type { QuizAnswer, QuizResult } from '@/types';
+import type { QuizAnswers, QuizSubmitResult } from '@/types';
 
 interface QuizState {
   currentQuestionIndex: number;
-  answers: QuizAnswer[];
-  result: QuizResult | null;
+  answers: QuizAnswers;
+  result: QuizSubmitResult | null;
   startTime: number | null;
   isCompleted: boolean;
   startQuiz: () => void;
-  answerQuestion: (answer: QuizAnswer) => void;
+  answerQuestion: (questionId: number, answer: string | string[] | boolean) => void;
   nextQuestion: () => void;
-  setResult: (result: QuizResult) => void;
+  setResult: (result: QuizSubmitResult) => void;
   resetQuiz: () => void;
-  getAnswerForQuestion: (questionId: string) => QuizAnswer | undefined;
+  getAnswerForQuestion: (questionId: number) => string | string[] | boolean | undefined;
 }
 
 export const useQuizStore = create<QuizState>((set, get) => ({
   currentQuestionIndex: 0,
-  answers: [],
+  answers: {},
   result: null,
   startTime: null,
   isCompleted: false,
@@ -26,20 +26,15 @@ export const useQuizStore = create<QuizState>((set, get) => ({
     set({
       startTime: Date.now(),
       currentQuestionIndex: 0,
-      answers: [],
+      answers: {},
       isCompleted: false,
       result: null,
     }),
 
-  answerQuestion: (answer) => {
-    const existing = get().answers.findIndex((a) => a.questionId === answer.questionId);
+  answerQuestion: (questionId, answer) =>
     set((state) => ({
-      answers:
-        existing >= 0
-          ? state.answers.map((a, i) => (i === existing ? answer : a))
-          : [...state.answers, answer],
-    }));
-  },
+      answers: { ...state.answers, [String(questionId)]: answer },
+    })),
 
   nextQuestion: () => set((state) => ({ currentQuestionIndex: state.currentQuestionIndex + 1 })),
 
@@ -48,11 +43,11 @@ export const useQuizStore = create<QuizState>((set, get) => ({
   resetQuiz: () =>
     set({
       currentQuestionIndex: 0,
-      answers: [],
+      answers: {},
       result: null,
       startTime: null,
       isCompleted: false,
     }),
 
-  getAnswerForQuestion: (questionId) => get().answers.find((a) => a.questionId === questionId),
+  getAnswerForQuestion: (questionId) => get().answers[String(questionId)],
 }));

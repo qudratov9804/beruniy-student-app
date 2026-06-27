@@ -1,0 +1,60 @@
+name: EAS Dev Build
+
+# dev branchga push bo'lganda Android preview APK quradi
+# Testerlar yuklab qurilmada sinab ko'rishi uchun
+
+on:
+  push:
+    branches: [dev]
+  workflow_dispatch:
+
+concurrency:
+  group: eas-dev-build
+  cancel-in-progress: true
+
+jobs:
+  build-android:
+    name: Android Preview APK
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci --legacy-peer-deps
+
+      - name: Setup EAS
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Build preview APK
+        run: eas build --platform android --profile preview --non-interactive
+
+  build-ios-simulator:
+    name: iOS Simulator Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci --legacy-peer-deps
+
+      - name: Setup EAS
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Build iOS simulator
+        run: eas build --platform ios --profile preview --non-interactive

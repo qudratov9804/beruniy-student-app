@@ -13,7 +13,7 @@ import {
   HelpCircle,
 } from 'lucide-react-native';
 import { useAuth } from '@/hooks/useAuth';
-import { Card, StreakBadge, XpBadge } from '@/components/ui';
+import { Card } from '@/components/ui';
 
 interface MenuItemProps {
   icon: React.ReactNode;
@@ -52,6 +52,8 @@ export default function ProfileScreen() {
     ]);
   };
 
+  const initials = user?.name ? user.name.charAt(0).toUpperCase() : 'U';
+
   return (
     <SafeAreaView className="flex-1 bg-slate-50">
       <ScrollView showsVerticalScrollIndicator={false}>
@@ -62,32 +64,35 @@ export default function ProfileScreen() {
               <Image source={user.avatar} style={{ width: 96, height: 96 }} contentFit="cover" />
             ) : (
               <View className="w-full h-full items-center justify-center">
-                <Text className="text-4xl font-sans-bold text-primary-600">
-                  {user?.firstName?.[0] ?? 'U'}
-                </Text>
+                <Text className="text-4xl font-sans-bold text-primary-600">{initials}</Text>
               </View>
             )}
           </View>
-          <Text className="text-xl font-sans-bold text-slate-800">
-            {user?.firstName} {user?.lastName}
-          </Text>
-          <Text className="text-sm text-slate-500 mt-1">{user?.email}</Text>
-          <View className="flex-row gap-3 mt-4">
-            <StreakBadge count={user?.streak ?? 0} />
-            <XpBadge xp={user?.xp ?? 0} />
+          <Text className="text-xl font-sans-bold text-slate-800">{user?.name ?? '—'}</Text>
+          <Text className="text-sm text-slate-500 mt-1">{user?.phone ?? ''}</Text>
+          {user?.email && (
+            <Text className="text-sm text-slate-400 mt-0.5">{user.email}</Text>
+          )}
+          <View className="mt-3 px-4 py-1.5 bg-primary-50 rounded-2xl">
+            <Text className="text-primary-700 font-sans-semibold text-sm">
+              {user?.role === 'student' ? 'Talaba' : 'Instructor'}
+            </Text>
           </View>
         </View>
 
-        {/* Stats */}
+        {/* Info Cards */}
         <View className="flex-row mx-5 mt-4 gap-3">
           {[
-            { label: 'Daraja', value: user?.level ?? 1, icon: '🎯' },
-            { label: 'XP', value: user?.xp ?? 0, icon: '⚡' },
-            { label: 'Streak', value: `${user?.streak ?? 0}d`, icon: '🔥' },
+            { label: 'Status', value: user?.is_active ? 'Faol' : 'Nofaol', icon: '✅' },
+            {
+              label: 'Parol',
+              value: user?.has_password ? "O'rnatilgan" : "O'rnatilmagan",
+              icon: '🔑',
+            },
           ].map(({ label, value, icon }) => (
             <Card key={label} variant="default" padding="sm" className="flex-1 items-center">
               <Text className="text-xl mb-1">{icon}</Text>
-              <Text className="text-lg font-sans-bold text-slate-800">{value}</Text>
+              <Text className="text-sm font-sans-bold text-slate-800">{value}</Text>
               <Text className="text-xs text-slate-500">{label}</Text>
             </Card>
           ))}
@@ -109,7 +114,7 @@ export default function ProfileScreen() {
           <View className="h-px bg-slate-100 ml-14" />
           <MenuItem
             icon={<Trophy size={20} color="#F59E0B" />}
-            label="Yutuqlarim"
+            label="Sertifikatlarim"
             onPress={() => {}}
           />
         </Card>

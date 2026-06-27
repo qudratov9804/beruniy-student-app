@@ -11,6 +11,8 @@ import { Button, Skeleton } from '@/components/ui';
 export default function QuizScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
+  const lessonId = Number(id);
+
   const {
     currentQuestionIndex,
     answers,
@@ -25,20 +27,13 @@ export default function QuizScreen() {
   } = useQuizStore();
 
   const { data: quiz, isLoading } = useQuery({
-    queryKey: ['quiz', id],
-    queryFn: () => quizService.getById(id),
-    enabled: !!id,
+    queryKey: ['quiz', lessonId],
+    queryFn: () => quizService.getQuiz(lessonId),
+    enabled: !!lessonId,
   });
 
   const submitMutation = useMutation({
-    mutationFn: () =>
-      quizService.submit({
-        quizId: id,
-        answers,
-        timeTaken: Math.floor(
-          (Date.now() - (useQuizStore.getState().startTime ?? Date.now())) / 1000
-        ),
-      }),
+    mutationFn: () => quizService.submit(lessonId, answers),
     onSuccess: (data) => setResult(data),
   });
 
@@ -46,7 +41,7 @@ export default function QuizScreen() {
     if (quiz) startQuiz();
     return () => resetQuiz();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [quiz?.id]);
+  }, [quiz?.questions_count]);
 
   const handleClose = () => {
     Alert.alert('Testni tark etish', 'Hozir chiqsangiz, progress saqlanmaydi.', [
@@ -95,13 +90,15 @@ export default function QuizScreen() {
   }
 
   const currentQuestion = quiz.questions[currentQuestionIndex];
-  const selectedAnswer = currentQuestion ? getAnswerForQuestion(currentQuestion.id) : undefined;
+  const selectedAnswer = currentQuestion
+    ? getAnswerForQuestion(currentQuestion.id)
+    : undefined;
   const isLastQuestion = currentQuestionIndex === quiz.questions.length - 1;
 
   if (!currentQuestion) return null;
 
   const handleSelect = (optionId: string) => {
-    answerQuestion({ questionId: currentQuestion.id, selectedOptionId: optionId });
+    answerQuestion(currentQuestion.id, optionId);
   };
 
   const handleNext = () => {
@@ -133,7 +130,7 @@ export default function QuizScreen() {
             <QuizOption
               key={option.id}
               option={option}
-              selected={selectedAnswer?.selectedOptionId === option.id}
+              selected={selectedAnswer === option.id}
               onSelect={handleSelect}
               index={index}
             />

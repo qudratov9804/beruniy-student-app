@@ -7,6 +7,7 @@ interface QuizOptionProps {
   option: IQuizOption;
   selected: boolean;
   showResult?: boolean;
+  isCorrectOption?: boolean;
   onSelect: (optionId: string) => void;
   index: number;
 }
@@ -17,11 +18,12 @@ export const QuizOption: React.FC<QuizOptionProps> = ({
   option,
   selected,
   showResult = false,
+  isCorrectOption = false,
   onSelect,
   index,
 }) => {
-  const isCorrect = showResult && option.isCorrect;
-  const isWrong = showResult && selected && !option.isCorrect;
+  const isCorrect = showResult && isCorrectOption;
+  const isWrong = showResult && selected && !isCorrectOption;
 
   let containerStyle = 'bg-white border-2 border-slate-200';
   let textStyle = 'text-slate-700';
@@ -49,7 +51,7 @@ export const QuizOption: React.FC<QuizOptionProps> = ({
       className={`flex-row items-center p-4 rounded-2xl mb-3 ${containerStyle}`}
     >
       <View className={`w-8 h-8 rounded-xl items-center justify-center mr-3 ${letterStyle}`}>
-        <Text className="text-sm font-sans-bold">{letters[index]}</Text>
+        <Text className="text-sm font-sans-bold">{letters[index] ?? index + 1}</Text>
       </View>
       <Text className={`flex-1 text-base font-sans-medium ${textStyle}`}>{option.text}</Text>
       {isCorrect && <Check size={20} color="#22C55E" />}

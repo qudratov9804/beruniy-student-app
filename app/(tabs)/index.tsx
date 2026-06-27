@@ -5,20 +5,14 @@ import { useRouter } from 'expo-router';
 import { Bell, ChevronRight } from 'lucide-react-native';
 import { useAuth } from '@/hooks/useAuth';
 import { useEnrolledCourses } from '@/hooks/useCourses';
-import { useUserStats } from '@/hooks/useProgress';
 import { CourseCard } from '@/components/course';
-import { StreakBadge, XpBadge, ProgressBar, CourseCardSkeleton } from '@/components/ui';
-import { XP_PER_LEVEL } from '@/constants/config';
-import { getLevelProgress } from '@/utils';
+import { CourseCardSkeleton } from '@/components/ui';
 
 export default function HomeScreen() {
   const router = useRouter();
   const { user } = useAuth();
-  const { data: enrolledCourses, isLoading: loadingCourses, refetch } = useEnrolledCourses();
-  const { data: stats } = useUserStats();
+  const { data: enrollments, isLoading: loadingCourses, refetch } = useEnrolledCourses();
   const [refreshing, setRefreshing] = React.useState(false);
-
-  const levelProgress = getLevelProgress(user?.xp ?? 0, XP_PER_LEVEL);
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -26,7 +20,8 @@ export default function HomeScreen() {
     setRefreshing(false);
   };
 
-  const activeCourses = enrolledCourses?.filter((c) => c.progress && !c.progress.isCompleted) ?? [];
+  const activeCourses =
+    enrollments?.filter((e) => e.status === 'active' && e.progress_percent < 100) ?? [];
 
   return (
     <SafeAreaView className="flex-1 bg-slate-50">
@@ -40,59 +35,33 @@ export default function HomeScreen() {
         <View className="flex-row items-center justify-between px-5 py-4 bg-white">
           <View>
             <Text className="text-xs text-slate-400 font-sans-medium">Xush kelibsiz 👋</Text>
-            <Text className="text-xl font-sans-bold text-slate-800">
-              {user?.firstName ?? 'Talaba'}
-            </Text>
+            <Text className="text-xl font-sans-bold text-slate-800">{user?.name ?? 'Talaba'}</Text>
           </View>
           <TouchableOpacity className="w-10 h-10 items-center justify-center">
             <Bell size={24} color="#475569" />
           </TouchableOpacity>
         </View>
 
-        {/* Stats Banner */}
+        {/* Profile Banner */}
         <View className="mx-5 mt-4 bg-primary-600 rounded-3xl p-5">
-          <View className="flex-row items-center justify-between mb-4">
+          <View className="flex-row items-center justify-between mb-2">
             <View>
-              <Text className="text-white text-sm opacity-80">Daraja</Text>
-              <Text className="text-white text-2xl font-sans-bold">{user?.level ?? 1}</Text>
+              <Text className="text-white text-sm opacity-80">Telefon</Text>
+              <Text className="text-white text-lg font-sans-bold">{user?.phone ?? '—'}</Text>
             </View>
-            <View className="flex-row gap-3">
-              <StreakBadge count={user?.streak ?? 0} size="md" />
-              <XpBadge xp={user?.xp ?? 0} size="md" />
-            </View>
-          </View>
-          <View>
-            <View className="flex-row justify-between mb-1">
-              <Text className="text-white text-xs opacity-70">Keyingi daraja</Text>
-              <Text className="text-white text-xs opacity-70">
-                {levelProgress.current}/{levelProgress.total} XP
+            <View className="bg-white/20 px-4 py-2 rounded-2xl">
+              <Text className="text-white font-sans-semibold text-sm">
+                {user?.role === 'student' ? 'Talaba' : 'Instructor'}
               </Text>
             </View>
-            <ProgressBar
-              progress={levelProgress.percentage}
-              height={8}
-              color="#FFFFFF"
-              backgroundColor="rgba(255,255,255,0.3)"
-            />
           </View>
-        </View>
-
-        {/* Daily Challenge Reminder */}
-        <View className="mx-5 mt-4 bg-orange-50 border border-orange-100 rounded-3xl p-4 flex-row items-center justify-between">
-          <View className="flex-row items-center gap-3">
-            <Text className="text-2xl">🔥</Text>
-            <View>
-              <Text className="font-sans-bold text-slate-800">Kunlik vazifa</Text>
-              <Text className="text-xs text-slate-500">Bugungi streakni saqlang!</Text>
-            </View>
-          </View>
-          <TouchableOpacity className="bg-orange-500 rounded-2xl px-4 py-2">
-            <Text className="text-white font-sans-bold text-sm">Boshlash</Text>
-          </TouchableOpacity>
+          <Text className="text-white opacity-70 text-sm mt-1">
+            {activeCourses.length} ta faol kurs
+          </Text>
         </View>
 
         {/* Active Courses */}
-        {activeCourses.length > 0 && (
+        {(activeCourses.length > 0 || loadingCourses) && (
           <View className="mt-6">
             <View className="flex-row items-center justify-between px-5 mb-3">
               <Text className="text-base font-sans-bold text-slate-800">
@@ -112,14 +81,27 @@ export default function HomeScreen() {
               </View>
             ) : (
               <FlatList
-                data={activeCourses.slice(0, 3)}
-                keyExtractor={(item) => item.id}
+                data={activeCourses.slice(0, 5)}
+                keyExtractor={(item) => String(item.id)}
                 horizontal
                 showsHorizontalScrollIndicator={false}
                 contentContainerStyle={{ paddingHorizontal: 20 }}
                 renderItem={({ item }) => (
                   <View className="w-72 mr-4">
-                    <CourseCard course={item} variant="enrolled" />
+                    <View className="bg-white rounded-3xl p-4 shadow-sm shadow-slate-100">
+                      <Text className="font-sans-semibold text-slate-800" numberOfLines={2}>
+                        {item.course?.title}
+                      </Text>
+                      <Text className="text-xs text-slate-500 mt-2">
+                        {item.progress_percent}% tugatildi
+                      </Text>
+                      <View className="h-2 bg-slate-100 rounded-full mt-2">
+                        <View
+                          className="h-2 bg-primary-600 rounded-full"
+                          style={{ width: `${item.progress_percent}%` }}
+                        />
+                      </View>
+                    </View>
                   </View>
                 )}
               />
@@ -128,26 +110,34 @@ export default function HomeScreen() {
         )}
 
         {/* Stats Grid */}
-        <View className="px-5 mt-6">
-          <Text className="text-base font-sans-bold text-slate-800 mb-3">Statistika</Text>
-          <View className="flex-row flex-wrap gap-3">
-            {[
-              { label: 'Tugatilgan kurslar', value: stats?.completedCourses ?? 0, emoji: '🎓' },
-              { label: 'Tugatilgan darslar', value: stats?.completedLessons ?? 0, emoji: '📚' },
-              { label: 'Testlar', value: stats?.completedQuizzes ?? 0, emoji: '✅' },
-              { label: 'Eng uzun streak', value: stats?.longestStreak ?? 0, emoji: '🔥' },
-            ].map(({ label, value, emoji }) => (
-              <View
-                key={label}
-                className="flex-1 min-w-[140px] bg-white rounded-3xl p-4 shadow-sm shadow-slate-100"
-              >
-                <Text className="text-2xl mb-2">{emoji}</Text>
-                <Text className="text-xl font-sans-bold text-slate-800">{value}</Text>
-                <Text className="text-xs text-slate-500 mt-1">{label}</Text>
-              </View>
-            ))}
+        {enrollments && (
+          <View className="px-5 mt-6">
+            <Text className="text-base font-sans-bold text-slate-800 mb-3">Statistika</Text>
+            <View className="flex-row flex-wrap gap-3">
+              {[
+                {
+                  label: 'Faol kurslar',
+                  value: enrollments.filter((e) => e.status === 'active').length,
+                  emoji: '📚',
+                },
+                {
+                  label: 'Tugatilgan kurslar',
+                  value: enrollments.filter((e) => e.status === 'completed').length,
+                  emoji: '🎓',
+                },
+              ].map(({ label, value, emoji }) => (
+                <View
+                  key={label}
+                  className="flex-1 min-w-[140px] bg-white rounded-3xl p-4 shadow-sm shadow-slate-100"
+                >
+                  <Text className="text-2xl mb-2">{emoji}</Text>
+                  <Text className="text-xl font-sans-bold text-slate-800">{value}</Text>
+                  <Text className="text-xs text-slate-500 mt-1">{label}</Text>
+                </View>
+              ))}
+            </View>
           </View>
-        </View>
+        )}
 
         <View className="h-6" />
       </ScrollView>

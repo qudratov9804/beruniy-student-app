@@ -14,10 +14,8 @@ export default function CoursesScreen() {
 
   const filters: CoursesFilter = {
     search: search.trim() || undefined,
-    category: selectedCategory?.slug,
+    category_id: selectedCategory?.id,
     level: selectedLevel ?? undefined,
-    page: 1,
-    limit: 20,
   };
 
   const { data, isLoading } = useCourses(filters);
@@ -104,7 +102,7 @@ export default function CoursesScreen() {
       ) : (
         <FlatList
           data={data?.data ?? []}
-          keyExtractor={(item) => item.id}
+          keyExtractor={(item) => String(item.id)}
           contentContainerStyle={{ padding: 20 }}
           showsVerticalScrollIndicator={false}
           ListEmptyComponent={

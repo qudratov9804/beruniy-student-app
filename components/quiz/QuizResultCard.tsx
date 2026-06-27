@@ -1,19 +1,16 @@
 import React from 'react';
 import { View, Text } from 'react-native';
-import { Trophy, Star, CheckCircle, XCircle, Clock } from 'lucide-react-native';
+import { Trophy, CheckCircle, XCircle } from 'lucide-react-native';
 import { Card, Button } from '@/components/ui';
-import { formatDuration } from '@/utils';
-import type { QuizResult } from '@/types';
+import type { QuizSubmitResult } from '@/types';
 
 interface QuizResultCardProps {
-  result: QuizResult;
+  result: QuizSubmitResult;
   onContinue: () => void;
   onRetry?: () => void;
 }
 
 export const QuizResultCard: React.FC<QuizResultCardProps> = ({ result, onContinue, onRetry }) => {
-  const accuracy = Math.round((result.correctAnswers / result.totalQuestions) * 100);
-
   return (
     <View className="flex-1 items-center justify-center px-6">
       <View className="items-center mb-8">
@@ -36,37 +33,25 @@ export const QuizResultCard: React.FC<QuizResultCardProps> = ({ result, onContin
         </Text>
       </View>
 
-      <View className="w-full grid grid-cols-2 gap-3 mb-6 flex-row flex-wrap">
+      <View className="w-full flex-row flex-wrap gap-3 mb-6">
         <Card variant="filled" padding="md" className="flex-1 items-center mr-2">
           <CheckCircle size={24} color="#22C55E" className="mb-2" />
-          <Text className="text-xl font-sans-bold text-slate-800">{accuracy}%</Text>
-          <Text className="text-xs text-slate-500 mt-1">To'g'ri javoblar</Text>
+          <Text className="text-xl font-sans-bold text-slate-800">{result.score}%</Text>
+          <Text className="text-xs text-slate-500 mt-1">Ball</Text>
         </Card>
         <Card variant="filled" padding="md" className="flex-1 items-center ml-2">
-          <Star size={24} color="#9333EA" className="mb-2" />
-          <Text className="text-xl font-sans-bold text-purple-600">+{result.earnedXp}</Text>
-          <Text className="text-xs text-slate-500 mt-1">XP qo'shildi</Text>
-        </Card>
-        <Card variant="filled" padding="md" className="flex-1 items-center mr-2 mt-3">
           <CheckCircle size={24} color="#2563EB" className="mb-2" />
           <Text className="text-xl font-sans-bold text-slate-800">
-            {result.correctAnswers}/{result.totalQuestions}
+            {result.correct}/{result.total_questions}
           </Text>
           <Text className="text-xs text-slate-500 mt-1">To'g'ri/Hammasi</Text>
-        </Card>
-        <Card variant="filled" padding="md" className="flex-1 items-center ml-2 mt-3">
-          <Clock size={24} color="#F59E0B" className="mb-2" />
-          <Text className="text-xl font-sans-bold text-slate-800">
-            {formatDuration(result.timeTaken)}
-          </Text>
-          <Text className="text-xs text-slate-500 mt-1">Vaqt</Text>
         </Card>
       </View>
 
       <Button fullWidth onPress={onContinue} size="lg">
         Davom etish
       </Button>
-      {!result.passed && onRetry && (
+      {!result.passed && result.can_retake && onRetry && (
         <Button fullWidth variant="outline" onPress={onRetry} size="lg" className="mt-3">
           Qaytadan urinish
         </Button>

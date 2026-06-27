@@ -1,27 +1,41 @@
 import { apiClient } from './client';
 import type {
   ApiResponse,
-  AuthResponse,
   User,
-  LoginRequest,
-  RegisterRequest,
-  ForgotPasswordRequest,
-  ResetPasswordRequest,
+  SendOtpRequest,
+  SendOtpResponse,
+  VerifyOtpRequest,
+  VerifyOtpResponse,
+  RegisterCompleteRequest,
+  AuthResponse,
+  PasswordLoginRequest,
+  UpdateProfileRequest,
+  SetPasswordRequest,
   ChangePasswordRequest,
 } from '@/types';
 
 export const authService = {
-  login: async (data: LoginRequest) => {
-    const res = await apiClient.post<ApiResponse<AuthResponse>>('/auth/login', data);
+  sendOtp: async (data: SendOtpRequest): Promise<SendOtpResponse> => {
+    const res = await apiClient.post<ApiResponse<SendOtpResponse>>('/auth/send-otp', data);
     return res.data.data;
   },
 
-  register: async (data: RegisterRequest) => {
-    const res = await apiClient.post<ApiResponse<AuthResponse>>('/auth/register', data);
+  verifyOtp: async (data: VerifyOtpRequest): Promise<VerifyOtpResponse> => {
+    const res = await apiClient.post<ApiResponse<VerifyOtpResponse>>('/auth/verify-otp', data);
     return res.data.data;
   },
 
-  logout: async () => {
+  registerComplete: async (data: RegisterCompleteRequest): Promise<AuthResponse> => {
+    const res = await apiClient.post<ApiResponse<AuthResponse>>('/auth/register/complete', data);
+    return res.data.data;
+  },
+
+  loginWithPassword: async (data: PasswordLoginRequest): Promise<AuthResponse> => {
+    const res = await apiClient.post<ApiResponse<AuthResponse>>('/auth/login/password', data);
+    return res.data.data;
+  },
+
+  logout: async (): Promise<void> => {
     await apiClient.post('/auth/logout');
   },
 
@@ -30,34 +44,16 @@ export const authService = {
     return res.data.data;
   },
 
-  forgotPassword: async (data: ForgotPasswordRequest) => {
-    const res = await apiClient.post<ApiResponse<{ message: string }>>(
-      '/auth/forgot-password',
-      data
-    );
+  updateProfile: async (data: UpdateProfileRequest): Promise<User> => {
+    const res = await apiClient.patch<ApiResponse<User>>('/auth/profile', data);
     return res.data.data;
   },
 
-  resetPassword: async (data: ResetPasswordRequest) => {
-    const res = await apiClient.post<ApiResponse<{ message: string }>>(
-      '/auth/reset-password',
-      data
-    );
-    return res.data.data;
+  setPassword: async (data: SetPasswordRequest): Promise<void> => {
+    await apiClient.post('/auth/password/set', data);
   },
 
-  changePassword: async (data: ChangePasswordRequest) => {
-    const res = await apiClient.post<ApiResponse<{ message: string }>>(
-      '/auth/change-password',
-      data
-    );
-    return res.data.data;
-  },
-
-  updateProfile: async (
-    data: Partial<Pick<User, 'firstName' | 'lastName' | 'phone' | 'avatar'>>
-  ) => {
-    const res = await apiClient.patch<ApiResponse<User>>('/auth/me', data);
-    return res.data.data;
+  changePassword: async (data: ChangePasswordRequest): Promise<void> => {
+    await apiClient.post('/auth/password/change', data);
   },
 };

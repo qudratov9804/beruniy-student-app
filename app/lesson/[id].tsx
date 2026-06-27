@@ -5,25 +5,29 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ChevronLeft, CheckCircle, BookOpen, Video } from 'lucide-react-native';
 import { lessonsService } from '@/services/api';
-import { Button, XpBadge, Skeleton } from '@/components/ui';
+import { Button, Skeleton } from '@/components/ui';
 import { QUERY_KEYS } from '@/constants/config';
-import { formatDuration } from '@/utils';
 
 export default function LessonScreen() {
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const { id, courseId } = useLocalSearchParams<{ id: string; courseId: string }>();
   const router = useRouter();
   const queryClient = useQueryClient();
 
+  const lessonId = Number(id);
+  const cId = Number(courseId);
+
   const { data: lesson, isLoading } = useQuery({
-    queryKey: QUERY_KEYS.LESSONS.DETAIL(id),
-    queryFn: () => lessonsService.getById(id),
-    enabled: !!id,
+    queryKey: QUERY_KEYS.LESSONS.DETAIL(cId, lessonId),
+    queryFn: () => lessonsService.getById(cId, lessonId),
+    enabled: !!lessonId && !!cId,
   });
 
   const completeMutation = useMutation({
-    mutationFn: () => lessonsService.complete(id),
+    mutationFn: () =>
+      lessonsService.saveProgress(cId, lessonId, { watch_seconds: 0, is_completed: true }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.COURSES.ENROLLED });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ENROLLMENTS.ALL });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.COURSES.PROGRESS(cId) });
       router.back();
     },
   });
@@ -41,6 +45,9 @@ export default function LessonScreen() {
     );
   }
 
+  const isCompleted = lesson.progress?.is_completed ?? false;
+  const durationMin = Math.round(lesson.duration_seconds / 60);
+
   return (
     <SafeAreaView className="flex-1 bg-white">
       <View className="flex-row items-center px-5 py-4 border-b border-slate-100">
@@ -52,10 +59,9 @@ export default function LessonScreen() {
             {lesson.title}
           </Text>
           <Text className="text-xs text-slate-400">
-            {lesson.type === 'video' ? '🎬 Video' : '📖 Matn'} · {formatDuration(lesson.duration)}
+            {lesson.type === 'video' ? '🎬 Video' : '📖 Matn'} · {durationMin} min
           </Text>
         </View>
-        <XpBadge xp={lesson.xpReward} size="sm" />
       </View>
 
       <ScrollView className="flex-1 px-5" showsVerticalScrollIndicator={false}>
@@ -74,10 +80,6 @@ export default function LessonScreen() {
 
         <Text className="text-xl font-sans-bold text-slate-800 mb-3">{lesson.title}</Text>
 
-        {lesson.description && (
-          <Text className="text-sm text-slate-500 leading-6 mb-6">{lesson.description}</Text>
-        )}
-
         {lesson.content && (
           <Text className="text-base text-slate-700 leading-7 mb-8">{lesson.content}</Text>
         )}
@@ -87,7 +89,7 @@ export default function LessonScreen() {
 
       <View className="px-5 pb-6 pt-3 border-t border-slate-100">
         {lesson.type === 'quiz' ? (
-          <Button fullWidth size="lg" onPress={() => router.push(`/quiz/${lesson.id}`)}>
+          <Button fullWidth size="lg" onPress={() => router.push(`/quiz/${lesson.id}?courseId=${courseId}`)}>
             Testni boshlash
           </Button>
         ) : (
@@ -96,10 +98,10 @@ export default function LessonScreen() {
             size="lg"
             onPress={() => completeMutation.mutate()}
             loading={completeMutation.isPending}
-            disabled={lesson.isCompleted}
-            icon={lesson.isCompleted ? <CheckCircle size={20} color="#fff" /> : undefined}
+            disabled={isCompleted}
+            icon={isCompleted ? <CheckCircle size={20} color="#fff" /> : undefined}
           >
-            {lesson.isCompleted ? 'Tugatildi' : 'Tugatdim'}
+            {isCompleted ? 'Tugatildi' : 'Tugatdim'}
           </Button>
         )}
       </View>

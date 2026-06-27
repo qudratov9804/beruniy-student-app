@@ -1,55 +1,26 @@
-export interface Achievement {
+export interface Notification {
   id: string;
+  type: string;
   title: string;
-  description: string;
-  icon: string;
-  xpReward: number;
-  unlockedAt?: string;
-  isUnlocked: boolean;
-  condition: {
-    type: 'streak' | 'xp' | 'courses' | 'lessons' | 'quizzes';
-    value: number;
-  };
+  body: string;
+  data: Record<string, unknown>;
+  is_read: boolean;
+  read_at: string | null;
+  created_at: string;
 }
 
-export interface LeaderboardEntry {
-  rank: number;
-  userId: string;
-  firstName: string;
-  lastName: string;
-  avatar?: string;
-  xp: number;
-  streak: number;
-  level: number;
-  isCurrentUser?: boolean;
+export interface Certificate {
+  id: number;
+  enrollment_id: number;
+  course_title: string;
+  student_name: string;
+  code: string;
+  issued_at: string;
+  download_url: string;
+  verify_url: string;
 }
 
-export interface DailyProgress {
-  date: string;
-  xpEarned: number;
-  lessonsCompleted: number;
-  quizzesCompleted: number;
-  streakDay: number;
-}
-
-export interface UserStats {
-  totalXp: number;
-  currentStreak: number;
-  longestStreak: number;
-  level: number;
-  nextLevelXp: number;
-  currentLevelXp: number;
-  enrolledCourses: number;
-  completedCourses: number;
-  completedLessons: number;
-  completedQuizzes: number;
-  achievements: Achievement[];
-  weeklyProgress: DailyProgress[];
-}
-
-export interface StreakInfo {
-  current: number;
-  longest: number;
-  todayCompleted: boolean;
-  lastActivityDate: string;
+export interface WishlistItem {
+  course: import('./course').Course;
+  added_at: string;
 }

@@ -2,33 +2,34 @@ import React, { useState } from 'react';
 import { View, Text, KeyboardAvoidingView, Platform, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { Mail, ChevronLeft, CheckCircle } from 'lucide-react-native';
-import { useMutation } from '@tanstack/react-query';
+import { Phone, ChevronLeft, CheckCircle } from 'lucide-react-native';
 import { Button, Input } from '@/components/ui';
-import { authService } from '@/services/api';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function ForgotPasswordScreen() {
   const router = useRouter();
-  const [email, setEmail] = useState('');
-  const [emailError, setEmailError] = useState('');
+  const { sendOtp, isSendingOtp } = useAuth();
+  const [phone, setPhone] = useState('');
+  const [phoneError, setPhoneError] = useState('');
   const [sent, setSent] = useState(false);
 
-  const mutation = useMutation({
-    mutationFn: () => authService.forgotPassword({ email: email.trim().toLowerCase() }),
-    onSuccess: () => setSent(true),
-  });
-
-  const handleSubmit = () => {
-    if (!email.trim()) {
-      setEmailError('Email kiritish shart');
+  const handleSubmit = async () => {
+    const trimmed = phone.trim();
+    if (!trimmed) {
+      setPhoneError('Telefon raqam kiritish shart');
       return;
     }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      setEmailError("Email noto'g'ri");
+    if (!/^\+998\d{9}$/.test(trimmed)) {
+      setPhoneError("Telefon raqam noto'g'ri (+998XXXXXXXXX)");
       return;
     }
-    setEmailError('');
-    mutation.mutate();
+    setPhoneError('');
+    try {
+      await sendOtp({ phone: trimmed, type: 'reset' });
+      setSent(true);
+    } catch {
+      setPhoneError('OTP yuborishda xato yuz berdi');
+    }
   };
 
   return (
@@ -48,10 +49,10 @@ export default function ForgotPasswordScreen() {
                 <CheckCircle size={40} color="#22C55E" />
               </View>
               <Text className="text-xl font-sans-bold text-slate-800 mb-2 text-center">
-                Xat yuborildi!
+                SMS yuborildi!
               </Text>
               <Text className="text-base text-slate-500 text-center mb-8">
-                {email} manziliga parolni tiklash uchun xat yuborildi.
+                {phone} raqamiga tasdiqlash kodi yuborildi.
               </Text>
               <Button fullWidth onPress={() => router.back()}>
                 Ortga qaytish
@@ -61,20 +62,19 @@ export default function ForgotPasswordScreen() {
             <>
               <Text className="text-2xl font-sans-bold text-slate-800 mb-2">Parolni tiklash</Text>
               <Text className="text-base text-slate-500 mb-8">
-                Email manzilingizni kiriting, tiklash uchun xat yuboramiz.
+                Telefon raqamingizni kiriting, SMS kod yuboramiz.
               </Text>
               <Input
-                label="Email"
-                placeholder="email@example.com"
-                value={email}
-                onChangeText={setEmail}
-                keyboardType="email-address"
-                autoCapitalize="none"
-                error={emailError}
-                leftIcon={<Mail size={20} color="#94A3B8" />}
+                label="Telefon raqam"
+                placeholder="+998901234567"
+                value={phone}
+                onChangeText={setPhone}
+                keyboardType="phone-pad"
+                error={phoneError}
+                leftIcon={<Phone size={20} color="#94A3B8" />}
               />
-              <Button fullWidth size="lg" onPress={handleSubmit} loading={mutation.isPending}>
-                Xat yuborish
+              <Button fullWidth size="lg" onPress={handleSubmit} loading={isSendingOtp}>
+                SMS yuborish
               </Button>
             </>
           )}

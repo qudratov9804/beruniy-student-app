@@ -3,13 +3,14 @@ import { View, Text, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Image } from 'expo-image';
 import { Star, Clock, Users, BookOpen } from 'lucide-react-native';
-import { Card, Badge, ProgressBar, XpBadge } from '@/components/ui';
-import { formatDuration, formatPrice } from '@/utils';
+import { Card, Badge, ProgressBar } from '@/components/ui';
+import { formatPrice } from '@/utils';
 import type { Course } from '@/types';
 
 interface CourseCardProps {
   course: Course;
   variant?: 'full' | 'compact' | 'enrolled';
+  progressPercent?: number;
 }
 
 const levelColors: Record<string, string> = {
@@ -24,10 +25,14 @@ const levelLabels: Record<string, string> = {
   advanced: 'Yuqori',
 };
 
-export const CourseCard: React.FC<CourseCardProps> = ({ course, variant = 'full' }) => {
+export const CourseCard: React.FC<CourseCardProps> = ({
+  course,
+  variant = 'full',
+  progressPercent,
+}) => {
   const router = useRouter();
 
-  const handlePress = () => router.push(`/course/${course.id}`);
+  const handlePress = () => router.push(`/course/${course.slug}`);
 
   if (variant === 'compact') {
     return (
@@ -42,17 +47,14 @@ export const CourseCard: React.FC<CourseCardProps> = ({ course, variant = 'full'
             <Text className="text-sm font-sans-bold text-slate-800 mb-1" numberOfLines={2}>
               {course.title}
             </Text>
-            <View className="flex-row items-center justify-between mt-1">
-              <XpBadge xp={course.xpReward} size="sm" />
-              <Text className="text-xs text-slate-400">{formatDuration(course.duration)}</Text>
-            </View>
+            <Text className="text-xs text-slate-400">{course.duration_hours.toFixed(1)}h</Text>
           </View>
         </Card>
       </TouchableOpacity>
     );
   }
 
-  if (variant === 'enrolled' && course.progress) {
+  if (variant === 'enrolled' && progressPercent !== undefined) {
     return (
       <TouchableOpacity onPress={handlePress} activeOpacity={0.85} className="mb-4">
         <Card variant="elevated" padding="none" className="overflow-hidden">
@@ -71,13 +73,8 @@ export const CourseCard: React.FC<CourseCardProps> = ({ course, variant = 'full'
             <Text className="text-base font-sans-bold text-slate-800 mt-2 mb-1" numberOfLines={2}>
               {course.title}
             </Text>
-            <View className="flex-row items-center mb-3">
-              <Text className="text-xs text-slate-500">
-                {course.progress.completedLessons}/{course.progress.totalLessons} dars
-              </Text>
-              <Text className="text-xs text-slate-400 ml-auto">{course.progress.percentage}%</Text>
-            </View>
-            <ProgressBar progress={course.progress.percentage} height={6} />
+            <Text className="text-xs text-slate-500 mb-2">{progressPercent}% tugatildi</Text>
+            <ProgressBar progress={progressPercent} height={6} />
           </View>
         </Card>
       </TouchableOpacity>
@@ -100,7 +97,7 @@ export const CourseCard: React.FC<CourseCardProps> = ({ course, variant = 'full'
             >
               {levelLabels[course.level]}
             </Badge>
-            {course.isFree && (
+            {course.is_free && (
               <Badge variant="success" size="sm">
                 Bepul
               </Badge>
@@ -109,9 +106,11 @@ export const CourseCard: React.FC<CourseCardProps> = ({ course, variant = 'full'
           <Text className="text-base font-sans-bold text-slate-800 mb-1" numberOfLines={2}>
             {course.title}
           </Text>
-          <Text className="text-sm text-slate-500 mb-3" numberOfLines={2}>
-            {course.description}
-          </Text>
+          {course.short_description && (
+            <Text className="text-sm text-slate-500 mb-3" numberOfLines={2}>
+              {course.short_description}
+            </Text>
+          )}
           <View className="flex-row items-center gap-4">
             <View className="flex-row items-center gap-1">
               <Star size={14} color="#F59E0B" fill="#F59E0B" />
@@ -121,21 +120,20 @@ export const CourseCard: React.FC<CourseCardProps> = ({ course, variant = 'full'
             </View>
             <View className="flex-row items-center gap-1">
               <Users size={14} color="#94A3B8" />
-              <Text className="text-xs text-slate-500">{course.studentsCount}</Text>
+              <Text className="text-xs text-slate-500">{course.enrolled_count}</Text>
             </View>
             <View className="flex-row items-center gap-1">
               <BookOpen size={14} color="#94A3B8" />
-              <Text className="text-xs text-slate-500">{course.lessonsCount} dars</Text>
+              <Text className="text-xs text-slate-500">{course.lessons_count} dars</Text>
             </View>
             <View className="flex-row items-center gap-1">
               <Clock size={14} color="#94A3B8" />
-              <Text className="text-xs text-slate-500">{formatDuration(course.duration)}</Text>
+              <Text className="text-xs text-slate-500">{course.duration_hours.toFixed(1)}h</Text>
             </View>
           </View>
           <View className="flex-row items-center justify-between mt-3 pt-3 border-t border-slate-100">
-            <XpBadge xp={course.xpReward} size="sm" />
             <Text className="text-base font-sans-bold text-primary-600">
-              {formatPrice(course.price)}
+              {formatPrice(course.effective_price)}
             </Text>
           </View>
         </View>

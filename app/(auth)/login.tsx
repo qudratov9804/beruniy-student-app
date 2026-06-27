@@ -9,30 +9,29 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { Mail, Lock } from 'lucide-react-native';
+import { Phone, Lock } from 'lucide-react-native';
 import { Button, Input } from '@/components/ui';
 import { useAuth } from '@/hooks';
 
 export default function LoginScreen() {
   const router = useRouter();
-  const { login, isLoggingIn, loginError } = useAuth();
-  const [email, setEmail] = useState('');
+  const { loginWithPassword, isLoggingIn, loginError } = useAuth();
+  const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
-  const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
+  const [errors, setErrors] = useState<{ phone?: string; password?: string }>({});
 
   const validate = (): boolean => {
     const newErrors: typeof errors = {};
-    if (!email.trim()) newErrors.email = 'Email kiritish shart';
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) newErrors.email = "Email noto'g'ri";
+    if (!phone.trim()) newErrors.phone = 'Telefon raqam kiritish shart';
+    else if (!/^\+998\d{9}$/.test(phone.trim())) newErrors.phone = "Telefon raqam noto'g'ri (+998XXXXXXXXX)";
     if (!password) newErrors.password = 'Parol kiritish shart';
-    else if (password.length < 6) newErrors.password = 'Parol kamida 6 ta belgi';
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleLogin = () => {
     if (!validate()) return;
-    login({ email: email.trim().toLowerCase(), password });
+    loginWithPassword({ phone: phone.trim(), password });
   };
 
   return (
@@ -61,15 +60,13 @@ export default function LoginScreen() {
             {/* Form */}
             <View className="mb-6">
               <Input
-                label="Email"
-                placeholder="email@example.com"
-                value={email}
-                onChangeText={setEmail}
-                keyboardType="email-address"
-                autoCapitalize="none"
-                autoComplete="email"
-                error={errors.email}
-                leftIcon={<Mail size={20} color="#94A3B8" />}
+                label="Telefon raqam"
+                placeholder="+998901234567"
+                value={phone}
+                onChangeText={setPhone}
+                keyboardType="phone-pad"
+                error={errors.phone}
+                leftIcon={<Phone size={20} color="#94A3B8" />}
               />
               <Input
                 label="Parol"
@@ -93,7 +90,9 @@ export default function LoginScreen() {
 
             {loginError && (
               <View className="bg-red-50 border border-red-200 rounded-2xl p-4 mb-4">
-                <Text className="text-red-600 text-sm text-center">Email yoki parol noto'g'ri</Text>
+                <Text className="text-red-600 text-sm text-center">
+                  Telefon yoki parol noto&apos;g&apos;ri
+                </Text>
               </View>
             )}
 
