@@ -23,9 +23,7 @@ module.exports = function (api) {
           },
         },
       ],
-      // react-native-reanimated/plugin re-exports react-native-worklets/plugin,
-      // but react-native-worklets is not installed; use worklets-core directly
-      ...(!isTest ? ['react-native-worklets-core/plugin'] : []),
+      ...(!isTest ? ['react-native-reanimated/plugin'] : []),
     ],
   };
 };
