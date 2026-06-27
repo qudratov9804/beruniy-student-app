@@ -41,6 +41,11 @@ jobs:
           npm run test -- --watchAll=false
 
       - name: Build on EAS
-        run: eas build --platform ${{ matrix.platform }} --profile production --non-interactive
+        run: |
+          if [ "${{ matrix.platform }}" = "ios" ]; then
+            eas build --platform ios --profile preview --non-interactive
+          else
+            eas build --platform android --profile production --non-interactive
+          fi
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
