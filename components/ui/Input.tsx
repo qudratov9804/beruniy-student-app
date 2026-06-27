@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, TextInput, Text, TouchableOpacity, type TextInputProps } from 'react-native';
-import { Eye, EyeOff, type LucideIcon } from 'lucide-react-native';
+import { Eye, EyeOff } from 'lucide-react-native';
 
 interface InputProps extends TextInputProps {
   label?: string;
@@ -25,9 +25,7 @@ export const Input: React.FC<InputProps> = ({
 
   return (
     <View className="mb-4">
-      {label && (
-        <Text className="mb-2 text-sm font-sans-semibold text-slate-700">{label}</Text>
-      )}
+      {label && <Text className="mb-2 text-sm font-sans-semibold text-slate-700">{label}</Text>}
       <View
         className={`flex-row items-center border rounded-2xl bg-slate-50 px-4 ${
           hasError ? 'border-red-400' : 'border-slate-200'

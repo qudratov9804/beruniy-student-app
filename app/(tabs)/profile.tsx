@@ -3,8 +3,14 @@ import { View, Text, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
 import {
-  User, Settings, BookOpen, Trophy, LogOut,
-  ChevronRight, Bell, Shield, HelpCircle,
+  User,
+  BookOpen,
+  Trophy,
+  LogOut,
+  ChevronRight,
+  Bell,
+  Shield,
+  HelpCircle,
 } from 'lucide-react-native';
 import { useAuth } from '@/hooks/useAuth';
 import { Card, StreakBadge, XpBadge } from '@/components/ui';
@@ -22,10 +28,14 @@ const MenuItem: React.FC<MenuItemProps> = ({ icon, label, onPress, danger }) => 
     className="flex-row items-center py-4 px-1"
     activeOpacity={0.7}
   >
-    <View className={`w-10 h-10 rounded-2xl items-center justify-center mr-4 ${danger ? 'bg-red-50' : 'bg-slate-100'}`}>
+    <View
+      className={`w-10 h-10 rounded-2xl items-center justify-center mr-4 ${danger ? 'bg-red-50' : 'bg-slate-100'}`}
+    >
       {icon}
     </View>
-    <Text className={`flex-1 text-base font-sans-medium ${danger ? 'text-red-500' : 'text-slate-700'}`}>
+    <Text
+      className={`flex-1 text-base font-sans-medium ${danger ? 'text-red-500' : 'text-slate-700'}`}
+    >
       {label}
     </Text>
     <ChevronRight size={20} color={danger ? '#EF4444' : '#CBD5E1'} />
@@ -85,19 +95,43 @@ export default function ProfileScreen() {
 
         {/* Menu */}
         <Card variant="default" padding="md" className="mx-5 mt-4">
-          <MenuItem icon={<User size={20} color="#2563EB" />} label="Profilni tahrirlash" onPress={() => {}} />
+          <MenuItem
+            icon={<User size={20} color="#2563EB" />}
+            label="Profilni tahrirlash"
+            onPress={() => {}}
+          />
           <View className="h-px bg-slate-100 ml-14" />
-          <MenuItem icon={<BookOpen size={20} color="#22C55E" />} label="Mening kurslarim" onPress={() => {}} />
+          <MenuItem
+            icon={<BookOpen size={20} color="#22C55E" />}
+            label="Mening kurslarim"
+            onPress={() => {}}
+          />
           <View className="h-px bg-slate-100 ml-14" />
-          <MenuItem icon={<Trophy size={20} color="#F59E0B" />} label="Yutuqlarim" onPress={() => {}} />
+          <MenuItem
+            icon={<Trophy size={20} color="#F59E0B" />}
+            label="Yutuqlarim"
+            onPress={() => {}}
+          />
         </Card>
 
         <Card variant="default" padding="md" className="mx-5 mt-3">
-          <MenuItem icon={<Bell size={20} color="#6366F1" />} label="Bildirishnomalar" onPress={() => {}} />
+          <MenuItem
+            icon={<Bell size={20} color="#6366F1" />}
+            label="Bildirishnomalar"
+            onPress={() => {}}
+          />
           <View className="h-px bg-slate-100 ml-14" />
-          <MenuItem icon={<Shield size={20} color="#64748B" />} label="Maxfiylik" onPress={() => {}} />
+          <MenuItem
+            icon={<Shield size={20} color="#64748B" />}
+            label="Maxfiylik"
+            onPress={() => {}}
+          />
           <View className="h-px bg-slate-100 ml-14" />
-          <MenuItem icon={<HelpCircle size={20} color="#64748B" />} label="Yordam" onPress={() => {}} />
+          <MenuItem
+            icon={<HelpCircle size={20} color="#64748B" />}
+            label="Yordam"
+            onPress={() => {}}
+          />
         </Card>
 
         <Card variant="default" padding="md" className="mx-5 mt-3 mb-8">

@@ -15,9 +15,8 @@ export const progressService = {
   },
 
   getAchievements: async () => {
-    const res = await apiClient.get<ApiResponse<import('@/types').Achievement[]>>(
-      '/progress/achievements'
-    );
+    const res =
+      await apiClient.get<ApiResponse<import('@/types').Achievement[]>>('/progress/achievements');
     return res.data.data;
   },
 };

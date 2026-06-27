@@ -18,7 +18,9 @@ describe('Button component', () => {
   it('does not call onPress when disabled', async () => {
     const onPress = jest.fn();
     const { getByText } = await render(
-      <Button onPress={onPress} disabled>Disabled</Button>
+      <Button onPress={onPress} disabled>
+        Disabled
+      </Button>
     );
     const text = getByText('Disabled');
     expect(text).toBeTruthy();

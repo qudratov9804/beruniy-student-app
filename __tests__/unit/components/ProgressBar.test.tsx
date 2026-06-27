@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, act } from '@testing-library/react-native';
+import { render } from '@testing-library/react-native';
 import { ProgressBar } from '@/components/ui/ProgressBar';
 
 describe('ProgressBar', () => {

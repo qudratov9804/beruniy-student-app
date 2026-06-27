@@ -1,12 +1,5 @@
 import React from 'react';
-import {
-  View,
-  Text,
-  ScrollView,
-  FlatList,
-  TouchableOpacity,
-  RefreshControl,
-} from 'react-native';
+import { View, Text, ScrollView, FlatList, TouchableOpacity, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Bell, ChevronRight } from 'lucide-react-native';
@@ -22,7 +15,7 @@ export default function HomeScreen() {
   const router = useRouter();
   const { user } = useAuth();
   const { data: enrolledCourses, isLoading: loadingCourses, refetch } = useEnrolledCourses();
-  const { data: stats, isLoading: loadingStats } = useUserStats();
+  const { data: stats } = useUserStats();
   const [refreshing, setRefreshing] = React.useState(false);
 
   const levelProgress = getLevelProgress(user?.xp ?? 0, XP_PER_LEVEL);
@@ -39,7 +32,9 @@ export default function HomeScreen() {
     <SafeAreaView className="flex-1 bg-slate-50">
       <ScrollView
         showsVerticalScrollIndicator={false}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#2563EB']} />}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#2563EB']} />
+        }
       >
         {/* Header */}
         <View className="flex-row items-center justify-between px-5 py-4 bg-white">
@@ -59,9 +54,7 @@ export default function HomeScreen() {
           <View className="flex-row items-center justify-between mb-4">
             <View>
               <Text className="text-white text-sm opacity-80">Daraja</Text>
-              <Text className="text-white text-2xl font-sans-bold">
-                {user?.level ?? 1}
-              </Text>
+              <Text className="text-white text-2xl font-sans-bold">{user?.level ?? 1}</Text>
             </View>
             <View className="flex-row gap-3">
               <StreakBadge count={user?.streak ?? 0} size="md" />
@@ -102,8 +95,13 @@ export default function HomeScreen() {
         {activeCourses.length > 0 && (
           <View className="mt-6">
             <View className="flex-row items-center justify-between px-5 mb-3">
-              <Text className="text-base font-sans-bold text-slate-800">Davom etayotgan kurslar</Text>
-              <TouchableOpacity onPress={() => router.push('/(tabs)/courses')} className="flex-row items-center gap-1">
+              <Text className="text-base font-sans-bold text-slate-800">
+                Davom etayotgan kurslar
+              </Text>
+              <TouchableOpacity
+                onPress={() => router.push('/(tabs)/courses')}
+                className="flex-row items-center gap-1"
+              >
                 <Text className="text-primary-600 text-sm font-sans-semibold">Hammasi</Text>
                 <ChevronRight size={16} color="#2563EB" />
               </TouchableOpacity>
@@ -139,7 +137,10 @@ export default function HomeScreen() {
               { label: 'Testlar', value: stats?.completedQuizzes ?? 0, emoji: '✅' },
               { label: 'Eng uzun streak', value: stats?.longestStreak ?? 0, emoji: '🔥' },
             ].map(({ label, value, emoji }) => (
-              <View key={label} className="flex-1 min-w-[140px] bg-white rounded-3xl p-4 shadow-sm shadow-slate-100">
+              <View
+                key={label}
+                className="flex-1 min-w-[140px] bg-white rounded-3xl p-4 shadow-sm shadow-slate-100"
+              >
                 <Text className="text-2xl mb-2">{emoji}</Text>
                 <Text className="text-xl font-sans-bold text-slate-800">{value}</Text>
                 <Text className="text-xs text-slate-500 mt-1">{label}</Text>

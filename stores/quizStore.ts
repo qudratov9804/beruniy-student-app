@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { QuizQuestion, QuizAnswer, QuizResult } from '@/types';
+import type { QuizAnswer, QuizResult } from '@/types';
 
 interface QuizState {
   currentQuestionIndex: number;
@@ -22,7 +22,14 @@ export const useQuizStore = create<QuizState>((set, get) => ({
   startTime: null,
   isCompleted: false,
 
-  startQuiz: () => set({ startTime: Date.now(), currentQuestionIndex: 0, answers: [], isCompleted: false, result: null }),
+  startQuiz: () =>
+    set({
+      startTime: Date.now(),
+      currentQuestionIndex: 0,
+      answers: [],
+      isCompleted: false,
+      result: null,
+    }),
 
   answerQuestion: (answer) => {
     const existing = get().answers.findIndex((a) => a.questionId === answer.questionId);
@@ -34,14 +41,18 @@ export const useQuizStore = create<QuizState>((set, get) => ({
     }));
   },
 
-  nextQuestion: () =>
-    set((state) => ({ currentQuestionIndex: state.currentQuestionIndex + 1 })),
+  nextQuestion: () => set((state) => ({ currentQuestionIndex: state.currentQuestionIndex + 1 })),
 
   setResult: (result) => set({ result, isCompleted: true }),
 
   resetQuiz: () =>
-    set({ currentQuestionIndex: 0, answers: [], result: null, startTime: null, isCompleted: false }),
+    set({
+      currentQuestionIndex: 0,
+      answers: [],
+      result: null,
+      startTime: null,
+      isCompleted: false,
+    }),
 
-  getAnswerForQuestion: (questionId) =>
-    get().answers.find((a) => a.questionId === questionId),
+  getAnswerForQuestion: (questionId) => get().answers.find((a) => a.questionId === questionId),
 }));

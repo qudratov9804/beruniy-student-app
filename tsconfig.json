@@ -3,7 +3,9 @@
   "compilerOptions": {
     "strict": true,
     "noUncheckedIndexedAccess": true,
+    "ignoreDeprecations": "6.0",
     "baseUrl": ".",
+    "types": ["jest"],
     "paths": {
       "@/*": ["./*"],
       "@/components/*": ["./components/*"],
@@ -15,10 +17,5 @@
       "@/utils/*": ["./utils/*"]
     }
   },
-  "include": [
-    "**/*.ts",
-    "**/*.tsx",
-    ".expo/types/**/*.d.ts",
-    "expo-env.d.ts"
-  ]
+  "include": ["**/*.ts", "**/*.tsx", ".expo/types/**/*.d.ts", "expo-env.d.ts"]
 }

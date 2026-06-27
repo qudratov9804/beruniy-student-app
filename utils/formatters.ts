@@ -57,5 +57,5 @@ export const truncateText = (text: string, maxLength: number): string => {
 
 export const formatPrice = (price: number): string => {
   if (price === 0) return 'Bepul';
-  return new Intl.NumberFormat('uz-UZ').format(price) + ' so\'m';
+  return new Intl.NumberFormat('uz-UZ').format(price) + " so'm";
 };

@@ -87,11 +87,7 @@ export default function LessonScreen() {
 
       <View className="px-5 pb-6 pt-3 border-t border-slate-100">
         {lesson.type === 'quiz' ? (
-          <Button
-            fullWidth
-            size="lg"
-            onPress={() => router.push(`/quiz/${lesson.id}`)}
-          >
+          <Button fullWidth size="lg" onPress={() => router.push(`/quiz/${lesson.id}`)}>
             Testni boshlash
           </Button>
         ) : (

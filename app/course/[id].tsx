@@ -1,13 +1,17 @@
 import React from 'react';
-import {
-  View, Text, ScrollView, TouchableOpacity, FlatList,
-} from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Image } from 'expo-image';
 import {
-  ChevronLeft, Star, Users, Clock, BookOpen,
-  Lock, Play, CheckCircle,
+  ChevronLeft,
+  Star,
+  Users,
+  Clock,
+  BookOpen,
+  Lock,
+  Play,
+  CheckCircle,
 } from 'lucide-react-native';
 import { useCourse, useCourseSections, useEnrollCourse } from '@/hooks/useCourses';
 import { Button, Badge, ProgressBar, XpBadge, Skeleton } from '@/components/ui';
@@ -15,10 +19,14 @@ import { formatDuration, formatPrice } from '@/utils';
 import type { Lesson } from '@/types';
 
 const levelLabels: Record<string, string> = {
-  beginner: 'Boshlang\'ich', intermediate: 'O\'rta', advanced: 'Yuqori',
+  beginner: "Boshlang'ich",
+  intermediate: "O'rta",
+  advanced: 'Yuqori',
 };
 const levelVariants: Record<string, 'success' | 'warning' | 'danger'> = {
-  beginner: 'success', intermediate: 'warning', advanced: 'danger',
+  beginner: 'success',
+  intermediate: 'warning',
+  advanced: 'danger',
 };
 
 export default function CourseDetailScreen() {
@@ -67,8 +75,14 @@ export default function CourseDetailScreen() {
         <View className="px-5 py-5">
           {/* Badges */}
           <View className="flex-row gap-2 mb-3">
-            <Badge variant={levelVariants[course.level]} size="sm">{levelLabels[course.level]}</Badge>
-            {course.isFree && <Badge variant="success" size="sm">Bepul</Badge>}
+            <Badge variant={levelVariants[course.level]} size="sm">
+              {levelLabels[course.level]}
+            </Badge>
+            {course.isFree && (
+              <Badge variant="success" size="sm">
+                Bepul
+              </Badge>
+            )}
           </View>
 
           <Text className="text-xl font-sans-bold text-slate-800 mb-2">{course.title}</Text>
@@ -77,9 +91,18 @@ export default function CourseDetailScreen() {
           {/* Stats row */}
           <View className="flex-row flex-wrap gap-4 py-3 border-t border-b border-slate-100 mb-4">
             {[
-              { icon: <Star size={14} color="#F59E0B" fill="#F59E0B" />, value: course.rating.toFixed(1) },
-              { icon: <Users size={14} color="#94A3B8" />, value: `${course.studentsCount} o'quvchi` },
-              { icon: <BookOpen size={14} color="#94A3B8" />, value: `${course.lessonsCount} dars` },
+              {
+                icon: <Star size={14} color="#F59E0B" fill="#F59E0B" />,
+                value: course.rating.toFixed(1),
+              },
+              {
+                icon: <Users size={14} color="#94A3B8" />,
+                value: `${course.studentsCount} o'quvchi`,
+              },
+              {
+                icon: <BookOpen size={14} color="#94A3B8" />,
+                value: `${course.lessonsCount} dars`,
+              },
               { icon: <Clock size={14} color="#94A3B8" />, value: formatDuration(course.duration) },
             ].map(({ icon, value }, i) => (
               <View key={i} className="flex-row items-center gap-1">
@@ -92,7 +115,9 @@ export default function CourseDetailScreen() {
           {/* Instructor */}
           <View className="flex-row items-center gap-3 mb-5">
             <View className="w-10 h-10 bg-primary-100 rounded-full items-center justify-center">
-              <Text className="text-primary-600 font-sans-bold">{course.instructor.firstName[0]}</Text>
+              <Text className="text-primary-600 font-sans-bold">
+                {course.instructor.firstName[0]}
+              </Text>
             </View>
             <View>
               <Text className="text-sm font-sans-semibold text-slate-700">
@@ -106,7 +131,9 @@ export default function CourseDetailScreen() {
           {course.isEnrolled && course.progress && (
             <View className="bg-primary-50 rounded-2xl p-4 mb-5">
               <View className="flex-row justify-between mb-2">
-                <Text className="text-sm font-sans-semibold text-primary-700">Siz o'qimoqdasiz</Text>
+                <Text className="text-sm font-sans-semibold text-primary-700">
+                  Siz o'qimoqdasiz
+                </Text>
                 <Text className="text-sm text-primary-600">{course.progress.percentage}%</Text>
               </View>
               <ProgressBar progress={course.progress.percentage} height={8} />
@@ -156,7 +183,11 @@ export default function CourseDetailScreen() {
                 {section.lessons.map((lesson: Lesson) => (
                   <TouchableOpacity
                     key={lesson.id}
-                    onPress={() => course.isEnrolled && !lesson.isFree ? undefined : router.push(`/lesson/${lesson.id}`)}
+                    onPress={() =>
+                      course.isEnrolled && !lesson.isFree
+                        ? undefined
+                        : router.push(`/lesson/${lesson.id}`)
+                    }
                     className="flex-row items-center py-3 border-b border-slate-100"
                   >
                     <View className="w-8 h-8 rounded-full bg-slate-100 items-center justify-center mr-3">
@@ -169,10 +200,14 @@ export default function CourseDetailScreen() {
                       )}
                     </View>
                     <View className="flex-1">
-                      <Text className={`text-sm font-sans-medium ${!course.isEnrolled && !lesson.isFree ? 'text-slate-400' : 'text-slate-700'}`}>
+                      <Text
+                        className={`text-sm font-sans-medium ${!course.isEnrolled && !lesson.isFree ? 'text-slate-400' : 'text-slate-700'}`}
+                      >
                         {lesson.title}
                       </Text>
-                      <Text className="text-xs text-slate-400">{formatDuration(lesson.duration)}</Text>
+                      <Text className="text-xs text-slate-400">
+                        {formatDuration(lesson.duration)}
+                      </Text>
                     </View>
                     <XpBadge xp={lesson.xpReward} size="sm" />
                   </TouchableOpacity>

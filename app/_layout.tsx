@@ -25,7 +25,7 @@ export default function RootLayout() {
 
   useEffect(() => {
     initialize();
-  }, []);
+  }, [initialize]);
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
@@ -39,10 +39,7 @@ export default function RootLayout() {
               name="course/[id]"
               options={{ presentation: 'card', animation: 'slide_from_right' }}
             />
-            <Stack.Screen
-              name="lesson/[id]"
-              options={{ presentation: 'fullScreenModal' }}
-            />
+            <Stack.Screen name="lesson/[id]" options={{ presentation: 'fullScreenModal' }} />
             <Stack.Screen
               name="quiz/[id]"
               options={{ presentation: 'fullScreenModal', animation: 'slide_from_bottom' }}

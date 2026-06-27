@@ -19,8 +19,8 @@ const levelColors: Record<string, string> = {
 };
 
 const levelLabels: Record<string, string> = {
-  beginner: 'Boshlang\'ich',
-  intermediate: 'O\'rta',
+  beginner: "Boshlang'ich",
+  intermediate: "O'rta",
   advanced: 'Yuqori',
 };
 
@@ -62,7 +62,10 @@ export const CourseCard: React.FC<CourseCardProps> = ({ course, variant = 'full'
             contentFit="cover"
           />
           <View className="p-4">
-            <Badge variant={levelColors[course.level] as 'success' | 'warning' | 'danger'} size="sm">
+            <Badge
+              variant={levelColors[course.level] as 'success' | 'warning' | 'danger'}
+              size="sm"
+            >
               {levelLabels[course.level]}
             </Badge>
             <Text className="text-base font-sans-bold text-slate-800 mt-2 mb-1" numberOfLines={2}>
@@ -72,9 +75,7 @@ export const CourseCard: React.FC<CourseCardProps> = ({ course, variant = 'full'
               <Text className="text-xs text-slate-500">
                 {course.progress.completedLessons}/{course.progress.totalLessons} dars
               </Text>
-              <Text className="text-xs text-slate-400 ml-auto">
-                {course.progress.percentage}%
-              </Text>
+              <Text className="text-xs text-slate-400 ml-auto">{course.progress.percentage}%</Text>
             </View>
             <ProgressBar progress={course.progress.percentage} height={6} />
           </View>
@@ -93,10 +94,17 @@ export const CourseCard: React.FC<CourseCardProps> = ({ course, variant = 'full'
         />
         <View className="p-4">
           <View className="flex-row items-center gap-2 mb-2">
-            <Badge variant={levelColors[course.level] as 'success' | 'warning' | 'danger'} size="sm">
+            <Badge
+              variant={levelColors[course.level] as 'success' | 'warning' | 'danger'}
+              size="sm"
+            >
               {levelLabels[course.level]}
             </Badge>
-            {course.isFree && <Badge variant="success" size="sm">Bepul</Badge>}
+            {course.isFree && (
+              <Badge variant="success" size="sm">
+                Bepul
+              </Badge>
+            )}
           </View>
           <Text className="text-base font-sans-bold text-slate-800 mb-1" numberOfLines={2}>
             {course.title}

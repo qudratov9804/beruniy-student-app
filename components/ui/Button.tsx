@@ -21,8 +21,14 @@ interface ButtonProps extends TouchableOpacityProps {
 }
 
 const variantStyles: Record<Variant, { container: string; text: string }> = {
-  primary: { container: 'bg-primary-600 active:bg-primary-700 border-primary-700', text: 'text-white' },
-  secondary: { container: 'bg-primary-100 active:bg-primary-200 border-primary-200', text: 'text-primary-700' },
+  primary: {
+    container: 'bg-primary-600 active:bg-primary-700 border-primary-700',
+    text: 'text-white',
+  },
+  secondary: {
+    container: 'bg-primary-100 active:bg-primary-200 border-primary-200',
+    text: 'text-primary-700',
+  },
   outline: { container: 'bg-transparent border-2 border-primary-600', text: 'text-primary-600' },
   ghost: { container: 'bg-transparent border-transparent', text: 'text-primary-600' },
   danger: { container: 'bg-red-500 active:bg-red-600 border-red-600', text: 'text-white' },
@@ -61,7 +67,11 @@ export const Button: React.FC<ButtonProps> = ({
       {loading ? (
         <ActivityIndicator
           size="small"
-          color={variant === 'outline' || variant === 'secondary' || variant === 'ghost' ? '#2563EB' : '#fff'}
+          color={
+            variant === 'outline' || variant === 'secondary' || variant === 'ghost'
+              ? '#2563EB'
+              : '#fff'
+          }
         />
       ) : (
         <>

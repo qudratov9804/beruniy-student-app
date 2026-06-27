@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text } from 'react-native';
 import { Trophy, Star, CheckCircle, XCircle, Clock } from 'lucide-react-native';
-import { Card, Button, XpBadge } from '@/components/ui';
+import { Card, Button } from '@/components/ui';
 import { formatDuration } from '@/utils';
 import type { QuizResult } from '@/types';
 
@@ -11,11 +11,7 @@ interface QuizResultCardProps {
   onRetry?: () => void;
 }
 
-export const QuizResultCard: React.FC<QuizResultCardProps> = ({
-  result,
-  onContinue,
-  onRetry,
-}) => {
+export const QuizResultCard: React.FC<QuizResultCardProps> = ({ result, onContinue, onRetry }) => {
   const accuracy = Math.round((result.correctAnswers / result.totalQuestions) * 100);
 
   return (
@@ -36,7 +32,7 @@ export const QuizResultCard: React.FC<QuizResultCardProps> = ({
         <Text className="text-base text-slate-500 text-center">
           {result.passed
             ? 'Siz testni muvaffaqiyatli topshirdingiz!'
-            : 'Yana bir marta ko\'rib chiqing.'}
+            : "Yana bir marta ko'rib chiqing."}
         </Text>
       </View>
 

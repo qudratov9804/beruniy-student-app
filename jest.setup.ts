@@ -39,7 +39,7 @@ jest.mock('react-native-reanimated', () => {
 // NativeAnimatedHelper path changed in newer RN versions
 try {
   // Animated timing mock for test environment
-jest.useFakeTimers();
+  jest.useFakeTimers();
 } catch {
   // module may not exist in this RN version
 }

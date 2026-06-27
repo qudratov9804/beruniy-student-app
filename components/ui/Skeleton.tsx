@@ -1,8 +1,8 @@
 import React, { useEffect, useRef } from 'react';
-import { Animated, View, type ViewProps } from 'react-native';
+import { Animated, View, type ViewProps, type DimensionValue } from 'react-native';
 
 interface SkeletonProps extends ViewProps {
-  width?: number | string;
+  width?: DimensionValue;
   height?: number;
   borderRadius?: number;
 }
@@ -25,7 +25,7 @@ export const Skeleton: React.FC<SkeletonProps> = ({
     );
     animation.start();
     return () => animation.stop();
-  }, []);
+  }, [opacity]);
 
   return (
     <Animated.View

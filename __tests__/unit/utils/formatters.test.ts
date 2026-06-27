@@ -66,7 +66,7 @@ describe('formatPrice', () => {
     expect(formatPrice(0)).toBe('Bepul');
   });
   it('formats non-zero price', () => {
-    expect(formatPrice(50000)).toContain('so\'m');
+    expect(formatPrice(50000)).toContain("so'm");
   });
 });
 

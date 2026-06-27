@@ -31,7 +31,7 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({
     } else {
       animatedWidth.setValue(clampedProgress);
     }
-  }, [clampedProgress, animated]);
+  }, [clampedProgress, animated, animatedWidth]);
 
   return (
     <View>
@@ -40,10 +40,7 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({
           {Math.round(clampedProgress)}%
         </Text>
       )}
-      <View
-        className="w-full overflow-hidden rounded-full"
-        style={{ height, backgroundColor }}
-      >
+      <View className="w-full overflow-hidden rounded-full" style={{ height, backgroundColor }}>
         <Animated.View
           style={{
             height,

@@ -19,15 +19,24 @@ export default function ForgotPasswordScreen() {
   });
 
   const handleSubmit = () => {
-    if (!email.trim()) { setEmailError('Email kiritish shart'); return; }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { setEmailError('Email noto\'g\'ri'); return; }
+    if (!email.trim()) {
+      setEmailError('Email kiritish shart');
+      return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setEmailError("Email noto'g'ri");
+      return;
+    }
     setEmailError('');
     mutation.mutate();
   };
 
   return (
     <SafeAreaView className="flex-1 bg-white">
-      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} className="flex-1">
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        className="flex-1"
+      >
         <View className="px-6 pt-6 flex-1">
           <TouchableOpacity onPress={() => router.back()} className="mb-6 self-start p-2 -ml-2">
             <ChevronLeft size={28} color="#0F172A" />

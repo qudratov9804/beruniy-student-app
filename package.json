@@ -30,6 +30,7 @@
     "zustand": "^5.0.14"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@react-native/jest-preset": "^0.86.0",
     "@testing-library/jest-native": "^5.4.3",
     "@testing-library/react-native": "^14.0.1",
@@ -39,7 +40,7 @@
     "@typescript-eslint/parser": "^8.62.0",
     "babel-plugin-module-resolver": "^5.0.3",
     "babel-preset-expo": "^56.0.15",
-    "eslint": "^10.5.0",
+    "eslint": "^9.39.4",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^7.1.1",
@@ -60,8 +61,8 @@
     "test:watch": "jest",
     "test:coverage": "jest --coverage --watchAll=false",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint . --ext .ts,.tsx --max-warnings 0",
-    "lint:fix": "eslint . --ext .ts,.tsx --fix",
+    "lint": "eslint . --max-warnings 0",
+    "lint:fix": "eslint . --fix",
     "format": "prettier --write \"**/*.{ts,tsx,json,md}\"",
     "format:check": "prettier --check \"**/*.{ts,tsx,json}\""
   },

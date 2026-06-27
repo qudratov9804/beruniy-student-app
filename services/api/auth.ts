@@ -31,21 +31,32 @@ export const authService = {
   },
 
   forgotPassword: async (data: ForgotPasswordRequest) => {
-    const res = await apiClient.post<ApiResponse<{ message: string }>>('/auth/forgot-password', data);
+    const res = await apiClient.post<ApiResponse<{ message: string }>>(
+      '/auth/forgot-password',
+      data
+    );
     return res.data.data;
   },
 
   resetPassword: async (data: ResetPasswordRequest) => {
-    const res = await apiClient.post<ApiResponse<{ message: string }>>('/auth/reset-password', data);
+    const res = await apiClient.post<ApiResponse<{ message: string }>>(
+      '/auth/reset-password',
+      data
+    );
     return res.data.data;
   },
 
   changePassword: async (data: ChangePasswordRequest) => {
-    const res = await apiClient.post<ApiResponse<{ message: string }>>('/auth/change-password', data);
+    const res = await apiClient.post<ApiResponse<{ message: string }>>(
+      '/auth/change-password',
+      data
+    );
     return res.data.data;
   },
 
-  updateProfile: async (data: Partial<Pick<User, 'firstName' | 'lastName' | 'phone' | 'avatar'>>) => {
+  updateProfile: async (
+    data: Partial<Pick<User, 'firstName' | 'lastName' | 'phone' | 'avatar'>>
+  ) => {
     const res = await apiClient.patch<ApiResponse<User>>('/auth/me', data);
     return res.data.data;
   },

@@ -3,18 +3,25 @@ import { View, Text, ScrollView, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useQuery, useMutation } from '@tanstack/react-query';
-import { quizService, lessonsService } from '@/services/api';
+import { quizService } from '@/services/api';
 import { useQuizStore } from '@/stores';
 import { QuizOption, QuizProgressHeader, QuizResultCard } from '@/components/quiz';
 import { Button, Skeleton } from '@/components/ui';
-import type { QuizAnswer } from '@/types';
 
 export default function QuizScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const {
-    currentQuestionIndex, answers, result, isCompleted,
-    startQuiz, answerQuestion, nextQuestion, setResult, resetQuiz, getAnswerForQuestion,
+    currentQuestionIndex,
+    answers,
+    result,
+    isCompleted,
+    startQuiz,
+    answerQuestion,
+    nextQuestion,
+    setResult,
+    resetQuiz,
+    getAnswerForQuestion,
   } = useQuizStore();
 
   const { data: quiz, isLoading } = useQuery({
@@ -24,23 +31,34 @@ export default function QuizScreen() {
   });
 
   const submitMutation = useMutation({
-    mutationFn: () => quizService.submit({
-      quizId: id,
-      answers,
-      timeTaken: Math.floor((Date.now() - (useQuizStore.getState().startTime ?? Date.now())) / 1000),
-    }),
+    mutationFn: () =>
+      quizService.submit({
+        quizId: id,
+        answers,
+        timeTaken: Math.floor(
+          (Date.now() - (useQuizStore.getState().startTime ?? Date.now())) / 1000
+        ),
+      }),
     onSuccess: (data) => setResult(data),
   });
 
   React.useEffect(() => {
     if (quiz) startQuiz();
     return () => resetQuiz();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [quiz?.id]);
 
   const handleClose = () => {
     Alert.alert('Testni tark etish', 'Hozir chiqsangiz, progress saqlanmaydi.', [
       { text: 'Qolish', style: 'cancel' },
-      { text: 'Chiqish', style: 'destructive', onPress: () => { resetQuiz(); router.back(); } },
+      {
+        text: 'Chiqish',
+        style: 'destructive',
+        onPress: () => {
+          resetQuiz();
+          router.back();
+        },
+      },
     ]);
   };
 
@@ -50,7 +68,9 @@ export default function QuizScreen() {
         <View className="px-5 pt-4">
           <Skeleton height={12} borderRadius={6} className="mb-6" />
           <Skeleton height={80} borderRadius={12} className="mb-8" />
-          {[1, 2, 3, 4].map((i) => <Skeleton key={i} height={56} borderRadius={12} className="mb-3" />)}
+          {[1, 2, 3, 4].map((i) => (
+            <Skeleton key={i} height={56} borderRadius={12} className="mb-3" />
+          ))}
         </View>
       </SafeAreaView>
     );
@@ -61,8 +81,14 @@ export default function QuizScreen() {
       <SafeAreaView className="flex-1 bg-white">
         <QuizResultCard
           result={result}
-          onContinue={() => { resetQuiz(); router.back(); }}
-          onRetry={() => { resetQuiz(); startQuiz(); }}
+          onContinue={() => {
+            resetQuiz();
+            router.back();
+          }}
+          onRetry={() => {
+            resetQuiz();
+            startQuiz();
+          }}
         />
       </SafeAreaView>
     );

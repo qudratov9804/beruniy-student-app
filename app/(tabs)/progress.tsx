@@ -1,21 +1,20 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, FlatList } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
-import { Trophy, Flame, Zap, Target } from 'lucide-react-native';
+import { Flame, Zap } from 'lucide-react-native';
 import { useUserStats, useLeaderboard, useAchievements } from '@/hooks/useProgress';
 import { useAuth } from '@/hooks/useAuth';
-import { ProgressBar, StreakBadge, XpBadge, Card, Skeleton } from '@/components/ui';
+import { ProgressBar, StreakBadge, XpBadge, Skeleton } from '@/components/ui';
 import { XP_PER_LEVEL } from '@/constants/config';
 import { getLevelProgress } from '@/utils';
-import type { LeaderboardEntry } from '@/types';
 
 type LeaderboardTab = 'weekly' | 'monthly' | 'all-time';
 
 export default function ProgressScreen() {
   const { user } = useAuth();
   const [lbTab, setLbTab] = useState<LeaderboardTab>('weekly');
-  const { data: stats, isLoading } = useUserStats();
+  const { data: stats } = useUserStats();
   const { data: leaderboard, isLoading: loadingLb } = useLeaderboard(lbTab);
   const { data: achievements } = useAchievements();
   const levelProgress = getLevelProgress(user?.xp ?? 0, XP_PER_LEVEL);
@@ -70,8 +69,18 @@ export default function ProgressScreen() {
         <View className="px-5 mt-5">
           <View className="flex-row gap-3 mb-3">
             {[
-              { label: 'Streak', value: `${stats?.currentStreak ?? 0} kun`, icon: <Flame size={20} color="#F97316" />, bg: 'bg-orange-50' },
-              { label: 'Jami XP', value: `${stats?.totalXp ?? 0}`, icon: <Zap size={20} color="#9333EA" />, bg: 'bg-purple-50' },
+              {
+                label: 'Streak',
+                value: `${stats?.currentStreak ?? 0} kun`,
+                icon: <Flame size={20} color="#F97316" />,
+                bg: 'bg-orange-50',
+              },
+              {
+                label: 'Jami XP',
+                value: `${stats?.totalXp ?? 0}`,
+                icon: <Zap size={20} color="#9333EA" />,
+                bg: 'bg-purple-50',
+              },
             ].map(({ label, value, icon, bg }) => (
               <View key={label} className={`flex-1 ${bg} rounded-3xl p-4`}>
                 <View className="mb-2">{icon}</View>
@@ -82,11 +91,14 @@ export default function ProgressScreen() {
           </View>
           <View className="flex-row gap-3">
             {[
-              { label: 'Kurslar', value: stats?.completedCourses ?? 0, sub: 'tugatilgan', icon: '📚' },
-              { label: 'Darslar', value: stats?.completedLessons ?? 0, sub: 'tugatilgan', icon: '✅' },
-              { label: 'Testlar', value: stats?.completedQuizzes ?? 0, sub: 'topshirilgan', icon: '🧠' },
-            ].map(({ label, value, sub, icon }) => (
-              <View key={label} className="flex-1 bg-white rounded-3xl p-3 shadow-sm shadow-slate-100 items-center">
+              { label: 'Kurslar', value: stats?.completedCourses ?? 0, icon: '📚' },
+              { label: 'Darslar', value: stats?.completedLessons ?? 0, icon: '✅' },
+              { label: 'Testlar', value: stats?.completedQuizzes ?? 0, icon: '🧠' },
+            ].map(({ label, value, icon }) => (
+              <View
+                key={label}
+                className="flex-1 bg-white rounded-3xl p-3 shadow-sm shadow-slate-100 items-center"
+              >
                 <Text className="text-xl mb-1">{icon}</Text>
                 <Text className="text-lg font-sans-bold text-slate-800">{value}</Text>
                 <Text className="text-xs text-slate-400 text-center">{label}</Text>
@@ -108,7 +120,10 @@ export default function ProgressScreen() {
                   <Text className={`text-2xl mb-1 ${!ach.isUnlocked ? 'opacity-30' : ''}`}>
                     {ach.icon}
                   </Text>
-                  <Text className={`text-xs text-center font-sans-semibold ${ach.isUnlocked ? 'text-slate-700' : 'text-slate-400'}`} numberOfLines={2}>
+                  <Text
+                    className={`text-xs text-center font-sans-semibold ${ach.isUnlocked ? 'text-slate-700' : 'text-slate-400'}`}
+                    numberOfLines={2}
+                  >
                     {ach.title}
                   </Text>
                 </View>
@@ -127,7 +142,9 @@ export default function ProgressScreen() {
                 onPress={() => setLbTab(value)}
                 className={`flex-1 py-2 rounded-xl items-center ${lbTab === value ? 'bg-white shadow-sm' : ''}`}
               >
-                <Text className={`text-xs font-sans-semibold ${lbTab === value ? 'text-slate-800' : 'text-slate-500'}`}>
+                <Text
+                  className={`text-xs font-sans-semibold ${lbTab === value ? 'text-slate-800' : 'text-slate-500'}`}
+                >
                   {label}
                 </Text>
               </TouchableOpacity>
@@ -155,7 +172,11 @@ export default function ProgressScreen() {
                 <Text className="text-lg w-10 text-center">{getRankBadge(entry.rank)}</Text>
                 <View className="w-10 h-10 rounded-full bg-slate-200 overflow-hidden mx-3">
                   {entry.avatar ? (
-                    <Image source={entry.avatar} style={{ width: 40, height: 40 }} contentFit="cover" />
+                    <Image
+                      source={entry.avatar}
+                      style={{ width: 40, height: 40 }}
+                      contentFit="cover"
+                    />
                   ) : (
                     <View className="w-full h-full bg-primary-100 items-center justify-center">
                       <Text className="text-primary-600 font-sans-bold text-base">
@@ -165,7 +186,9 @@ export default function ProgressScreen() {
                   )}
                 </View>
                 <View className="flex-1">
-                  <Text className={`font-sans-semibold text-sm ${entry.isCurrentUser ? 'text-primary-700' : 'text-slate-700'}`}>
+                  <Text
+                    className={`font-sans-semibold text-sm ${entry.isCurrentUser ? 'text-primary-700' : 'text-slate-700'}`}
+                  >
                     {entry.firstName} {entry.lastName}
                     {entry.isCurrentUser && ' (Siz)'}
                   </Text>

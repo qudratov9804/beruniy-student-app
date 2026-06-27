@@ -23,7 +23,7 @@ export default function LoginScreen() {
   const validate = (): boolean => {
     const newErrors: typeof errors = {};
     if (!email.trim()) newErrors.email = 'Email kiritish shart';
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) newErrors.email = 'Email noto\'g\'ri';
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) newErrors.email = "Email noto'g'ri";
     if (!password) newErrors.password = 'Parol kiritish shart';
     else if (password.length < 6) newErrors.password = 'Parol kamida 6 ta belgi';
     setErrors(newErrors);
@@ -52,9 +52,7 @@ export default function LoginScreen() {
               <View className="w-20 h-20 bg-primary-600 rounded-3xl items-center justify-center mb-4">
                 <Text className="text-4xl">🎓</Text>
               </View>
-              <Text className="text-2xl font-sans-bold text-slate-800 mb-2">
-                Xush kelibsiz!
-              </Text>
+              <Text className="text-2xl font-sans-bold text-slate-800 mb-2">Xush kelibsiz!</Text>
               <Text className="text-base text-slate-500 text-center">
                 Beruniy Talim platformasiga kiring
               </Text>
@@ -95,9 +93,7 @@ export default function LoginScreen() {
 
             {loginError && (
               <View className="bg-red-50 border border-red-200 rounded-2xl p-4 mb-4">
-                <Text className="text-red-600 text-sm text-center">
-                  Email yoki parol noto'g'ri
-                </Text>
+                <Text className="text-red-600 text-sm text-center">Email yoki parol noto'g'ri</Text>
               </View>
             )}
 
@@ -108,9 +104,7 @@ export default function LoginScreen() {
             <View className="flex-row items-center justify-center mt-6">
               <Text className="text-slate-500 text-base">Hisob yo'qmi? </Text>
               <TouchableOpacity onPress={() => router.push('/(auth)/register')}>
-                <Text className="text-primary-600 text-base font-sans-bold">
-                  Ro'yxatdan o'ting
-                </Text>
+                <Text className="text-primary-600 text-base font-sans-bold">Ro'yxatdan o'ting</Text>
               </TouchableOpacity>
             </View>
           </View>

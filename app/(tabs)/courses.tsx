@@ -1,14 +1,7 @@
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  FlatList,
-  ScrollView,
-  TextInput,
-  TouchableOpacity,
-} from 'react-native';
+import { View, Text, FlatList, ScrollView, TextInput, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Search, SlidersHorizontal } from 'lucide-react-native';
+import { Search } from 'lucide-react-native';
 import { useCourses, useCategories } from '@/hooks/useCourses';
 import { CourseCard, CategoryChip } from '@/components/course';
 import { CourseCardSkeleton } from '@/components/ui';
@@ -27,12 +20,12 @@ export default function CoursesScreen() {
     limit: 20,
   };
 
-  const { data, isLoading, refetch } = useCourses(filters);
+  const { data, isLoading } = useCourses(filters);
   const { data: categories } = useCategories();
 
   const levels: { label: string; value: CourseLevel }[] = [
-    { label: 'Boshlang\'ich', value: 'beginner' },
-    { label: 'O\'rta', value: 'intermediate' },
+    { label: "Boshlang'ich", value: 'beginner' },
+    { label: "O'rta", value: 'intermediate' },
     { label: 'Yuqori', value: 'advanced' },
   ];
 
@@ -55,12 +48,18 @@ export default function CoursesScreen() {
 
       {/* Filters */}
       <View className="bg-white border-b border-slate-100 pb-3">
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 12, gap: 8 }}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 12, gap: 8 }}
+        >
           <TouchableOpacity
             onPress={() => setSelectedCategory(null)}
             className={`px-4 py-2 rounded-2xl border mr-1 ${!selectedCategory ? 'bg-primary-600 border-primary-600' : 'bg-white border-slate-200'}`}
           >
-            <Text className={`text-sm font-sans-semibold ${!selectedCategory ? 'text-white' : 'text-slate-600'}`}>
+            <Text
+              className={`text-sm font-sans-semibold ${!selectedCategory ? 'text-white' : 'text-slate-600'}`}
+            >
               Barchasi
             </Text>
           </TouchableOpacity>
@@ -74,14 +73,20 @@ export default function CoursesScreen() {
           ))}
         </ScrollView>
 
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 8, gap: 8 }}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 8, gap: 8 }}
+        >
           {levels.map(({ label, value }) => (
             <TouchableOpacity
               key={value}
               onPress={() => setSelectedLevel(selectedLevel === value ? null : value)}
               className={`px-3 py-1.5 rounded-xl border mr-2 ${selectedLevel === value ? 'bg-slate-800 border-slate-800' : 'bg-white border-slate-200'}`}
             >
-              <Text className={`text-xs font-sans-semibold ${selectedLevel === value ? 'text-white' : 'text-slate-600'}`}>
+              <Text
+                className={`text-xs font-sans-semibold ${selectedLevel === value ? 'text-white' : 'text-slate-600'}`}
+              >
                 {label}
               </Text>
             </TouchableOpacity>
@@ -92,7 +97,9 @@ export default function CoursesScreen() {
       {/* Course List */}
       {isLoading ? (
         <View className="px-5 pt-4">
-          {[1, 2, 3].map((i) => <CourseCardSkeleton key={i} />)}
+          {[1, 2, 3].map((i) => (
+            <CourseCardSkeleton key={i} />
+          ))}
         </View>
       ) : (
         <FlatList

@@ -22,7 +22,9 @@ const badgeStyles: Record<BadgeVariant, { container: string; text: string }> = {
 export const Badge: React.FC<BadgeProps> = ({ children, variant = 'primary', size = 'md' }) => {
   const { container, text } = badgeStyles[variant];
   return (
-    <View className={`rounded-full self-start ${container} ${size === 'sm' ? 'px-2 py-0.5' : 'px-3 py-1'}`}>
+    <View
+      className={`rounded-full self-start ${container} ${size === 'sm' ? 'px-2 py-0.5' : 'px-3 py-1'}`}
+    >
       <Text className={`font-sans-semibold ${text} ${size === 'sm' ? 'text-xs' : 'text-xs'}`}>
         {children}
       </Text>

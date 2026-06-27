@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+import { View, TouchableOpacity } from 'react-native';
 import { X, Heart } from 'lucide-react-native';
 import { ProgressBar } from '@/components/ui';
 

@@ -33,9 +33,7 @@ export class ErrorBoundary extends Component<Props, State> {
           <Text className="text-sm text-slate-500 text-center mb-6">
             Nimadir noto'g'ri ketdi. Sahifani yangilang.
           </Text>
-          <Button onPress={() => this.setState({ hasError: false })}>
-            Qayta urinish
-          </Button>
+          <Button onPress={() => this.setState({ hasError: false })}>Qayta urinish</Button>
         </View>
       );
     }
