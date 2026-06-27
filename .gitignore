@@ -39,3 +39,19 @@ yarn-error.*
 # generated native folders
 /ios
 /android
+
+# Testing
+coverage/
+.jest/
+
+# Environment
+.env
+.env.local
+.env.production
+
+# EAS
+google-service-account-key.json
+
+# Editor
+.vscode/
+.idea/
