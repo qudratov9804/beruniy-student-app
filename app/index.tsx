@@ -3,7 +3,7 @@ import { useAuthStore } from '@/stores';
 import { View, ActivityIndicator } from 'react-native';
 
 export default function Index() {
-  const { isAuthenticated, isLoading } = useAuthStore();
+  const { isAuthenticated, isLoading, hasPin } = useAuthStore();
 
   if (isLoading) {
     return (
@@ -13,5 +13,7 @@ export default function Index() {
     );
   }
 
-  return <Redirect href={isAuthenticated ? '/(tabs)' : '/(auth)/login'} />;
+  if (!isAuthenticated) return <Redirect href="/(auth)/login" />;
+  if (hasPin) return <Redirect href="/(auth)/pin-login" />;
+  return <Redirect href="/(tabs)" />;
 }

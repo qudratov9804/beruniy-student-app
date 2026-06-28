@@ -39,7 +39,7 @@ export const useAuth = () => {
     onSuccess: async (data) => {
       await setAuth(data.user, data.token);
       queryClient.setQueryData(QUERY_KEYS.AUTH.ME, data.user);
-      router.replace('/(tabs)');
+      router.replace('/(auth)/pin-setup');
     },
   });
 

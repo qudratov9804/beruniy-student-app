@@ -1,4 +1,5 @@
 import { Tabs } from 'expo-router';
+import { Platform } from 'react-native';
 import { Home, BookOpen, BarChart2, User } from 'lucide-react-native';
 import { Colors } from '@/constants';
 
@@ -13,8 +14,8 @@ export default function TabsLayout() {
           backgroundColor: '#FFFFFF',
           borderTopColor: '#F1F5F9',
           borderTopWidth: 1,
-          height: 64,
-          paddingBottom: 8,
+          height: Platform.OS === 'web' ? 60 : 80,
+          paddingBottom: Platform.OS === 'web' ? 8 : 16,
           paddingTop: 8,
           elevation: 0,
           shadowOpacity: 0,
@@ -22,6 +23,9 @@ export default function TabsLayout() {
         tabBarLabelStyle: {
           fontSize: 11,
           fontWeight: '600',
+          marginTop: 2,
+        },
+        tabBarIconStyle: {
           marginTop: 2,
         },
       }}

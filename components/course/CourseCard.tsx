@@ -47,7 +47,7 @@ export const CourseCard: React.FC<CourseCardProps> = ({
             <Text className="text-sm font-sans-bold text-slate-800 mb-1" numberOfLines={2}>
               {course.title}
             </Text>
-            <Text className="text-xs text-slate-400">{course.duration_hours.toFixed(1)}h</Text>
+            <Text className="text-xs text-slate-400">{Number(course.duration_hours).toFixed(1)}h</Text>
           </View>
         </Card>
       </TouchableOpacity>
@@ -115,7 +115,7 @@ export const CourseCard: React.FC<CourseCardProps> = ({
             <View className="flex-row items-center gap-1">
               <Star size={14} color="#F59E0B" fill="#F59E0B" />
               <Text className="text-xs font-sans-semibold text-slate-700">
-                {course.rating.toFixed(1)}
+                {Number(course.rating).toFixed(1)}
               </Text>
             </View>
             <View className="flex-row items-center gap-1">
@@ -128,7 +128,7 @@ export const CourseCard: React.FC<CourseCardProps> = ({
             </View>
             <View className="flex-row items-center gap-1">
               <Clock size={14} color="#94A3B8" />
-              <Text className="text-xs text-slate-500">{course.duration_hours.toFixed(1)}h</Text>
+              <Text className="text-xs text-slate-500">{Number(course.duration_hours).toFixed(1)}h</Text>
             </View>
           </View>
           <View className="flex-row items-center justify-between mt-3 pt-3 border-t border-slate-100">
