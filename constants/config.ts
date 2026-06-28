@@ -4,6 +4,8 @@ export const STORAGE_KEYS = {
   ACCESS_TOKEN: 'access_token',
   USER: 'user_data',
   ONBOARDED: 'has_onboarded',
+  PIN: 'app_pin',
+  BIOMETRIC_ENABLED: 'biometric_enabled',
 } as const;
 
 export const QUERY_KEYS = {

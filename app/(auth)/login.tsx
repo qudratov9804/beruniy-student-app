@@ -7,6 +7,7 @@ import {
   Platform,
   TouchableOpacity,
 } from 'react-native';
+import { Image } from 'expo-image';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Phone, Lock } from 'lucide-react-native';
@@ -48,9 +49,11 @@ export default function LoginScreen() {
           <View className="flex-1 px-6 pt-12 pb-8">
             {/* Header */}
             <View className="items-center mb-10">
-              <View className="w-20 h-20 bg-primary-600 rounded-3xl items-center justify-center mb-4">
-                <Text className="text-4xl">🎓</Text>
-              </View>
+              <Image
+                source={{ uri: 'https://beruniy-talim.uz/_next/image?url=%2Flogo-400.png&w=750&q=75' }}
+                style={{ width: 160, height: 80, marginBottom: 16 }}
+                contentFit="contain"
+              />
               <Text className="text-2xl font-sans-bold text-slate-800 mb-2">Xush kelibsiz!</Text>
               <Text className="text-base text-slate-500 text-center">
                 Beruniy Talim platformasiga kiring

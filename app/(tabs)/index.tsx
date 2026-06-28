@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, ScrollView, FlatList, TouchableOpacity, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { Bell, ChevronRight } from 'lucide-react-native';
+import { Bell, ChevronRight, BookOpen, GraduationCap } from 'lucide-react-native';
 import { useAuth } from '@/hooks/useAuth';
 import { useEnrolledCourses } from '@/hooks/useCourses';
 import { CourseCardSkeleton } from '@/components/ui';
@@ -36,7 +36,7 @@ export default function HomeScreen() {
             <Text className="text-xs text-slate-400 font-sans-medium">Xush kelibsiz 👋</Text>
             <Text className="text-xl font-sans-bold text-slate-800">{user?.name ?? 'Talaba'}</Text>
           </View>
-          <TouchableOpacity className="w-10 h-10 items-center justify-center">
+          <TouchableOpacity onPress={() => router.push('/notifications')} className="w-10 h-10 items-center justify-center">
             <Bell size={24} color="#475569" />
           </TouchableOpacity>
         </View>
@@ -117,19 +117,23 @@ export default function HomeScreen() {
                 {
                   label: 'Faol kurslar',
                   value: enrollments.filter((e) => e.status === 'active').length,
-                  emoji: '📚',
+                  icon: <BookOpen size={22} color="#6366F1" />,
+                  bg: 'bg-primary-50',
                 },
                 {
-                  label: 'Tugatilgan kurslar',
+                  label: 'Tugatilgan',
                   value: enrollments.filter((e) => e.status === 'completed').length,
-                  emoji: '🎓',
+                  icon: <GraduationCap size={22} color="#10B981" />,
+                  bg: 'bg-emerald-50',
                 },
-              ].map(({ label, value, emoji }) => (
+              ].map(({ label, value, icon, bg }) => (
                 <View
                   key={label}
                   className="flex-1 min-w-[140px] bg-white rounded-3xl p-4 shadow-sm shadow-slate-100"
                 >
-                  <Text className="text-2xl mb-2">{emoji}</Text>
+                  <View className={`w-10 h-10 rounded-2xl ${bg} items-center justify-center mb-2`}>
+                    {icon}
+                  </View>
                   <Text className="text-xl font-sans-bold text-slate-800">{value}</Text>
                   <Text className="text-xs text-slate-500 mt-1">{label}</Text>
                 </View>

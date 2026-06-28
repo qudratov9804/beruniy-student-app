@@ -6,6 +6,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ChevronLeft, CheckCircle, BookOpen, Video } from 'lucide-react-native';
 import { lessonsService } from '@/services/api';
 import { Button, Skeleton } from '@/components/ui';
+import { HtmlText } from '@/components/common/HtmlText';
 import { QUERY_KEYS } from '@/constants/config';
 
 export default function LessonScreen() {
@@ -81,7 +82,7 @@ export default function LessonScreen() {
         <Text className="text-xl font-sans-bold text-slate-800 mb-3">{lesson.title}</Text>
 
         {lesson.content && (
-          <Text className="text-base text-slate-700 leading-7 mb-8">{lesson.content}</Text>
+          <HtmlText html={lesson.content} baseFontSize={15} color="#334155" />
         )}
 
         <View className="h-24" />

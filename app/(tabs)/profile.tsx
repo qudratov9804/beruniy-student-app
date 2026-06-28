@@ -9,11 +9,14 @@ import {
   LogOut,
   ChevronRight,
   Bell,
-  Shield,
-  HelpCircle,
+  Heart,
+  Settings,
+  Info,
+  Lock,
 } from 'lucide-react-native';
 import { useAuth } from '@/hooks/useAuth';
 import { Card } from '@/components/ui';
+import { useRouter } from 'expo-router';
 
 interface MenuItemProps {
   icon: React.ReactNode;
@@ -44,6 +47,7 @@ const MenuItem: React.FC<MenuItemProps> = ({ icon, label, onPress, danger }) => 
 
 export default function ProfileScreen() {
   const { user, logout, isLoggingOut } = useAuth();
+  const router = useRouter();
 
   const handleLogout = () => {
     Alert.alert('Chiqish', 'Hisobdan chiqishni xohlaysizmi?', [
@@ -82,40 +86,42 @@ export default function ProfileScreen() {
 
         {/* Info Cards */}
         <View className="flex-row mx-5 mt-4 gap-3">
-          {[
-            { label: 'Status', value: user?.is_active ? 'Faol' : 'Nofaol', icon: '✅' },
-            {
-              label: 'Parol',
-              value: user?.has_password ? "O'rnatilgan" : "O'rnatilmagan",
-              icon: '🔑',
-            },
-          ].map(({ label, value, icon }) => (
-            <Card key={label} variant="default" padding="sm" className="flex-1 items-center">
-              <Text className="text-xl mb-1">{icon}</Text>
-              <Text className="text-sm font-sans-bold text-slate-800">{value}</Text>
-              <Text className="text-xs text-slate-500">{label}</Text>
-            </Card>
-          ))}
+          <Card variant="default" padding="sm" className="flex-1 items-center">
+            <View className="w-8 h-8 bg-green-100 rounded-xl items-center justify-center mb-1">
+              <User size={16} color="#22C55E" />
+            </View>
+            <Text className="text-sm font-sans-bold text-slate-800">{user?.is_active ? 'Faol' : 'Nofaol'}</Text>
+            <Text className="text-xs text-slate-500">Status</Text>
+          </Card>
+          <Card variant="default" padding="sm" className="flex-1 items-center">
+            <View className="w-8 h-8 bg-primary-100 rounded-xl items-center justify-center mb-1">
+              <Lock size={16} color="#6366F1" />
+            </View>
+            <Text className="text-sm font-sans-bold text-slate-800">
+              {user?.has_password ? "O'rnatilgan" : "Yo'q"}
+            </Text>
+            <Text className="text-xs text-slate-500">Parol</Text>
+          </Card>
         </View>
 
         {/* Menu */}
         <Card variant="default" padding="md" className="mx-5 mt-4">
           <MenuItem
-            icon={<User size={20} color="#2563EB" />}
-            label="Profilni tahrirlash"
-            onPress={() => {}}
+            icon={<BookOpen size={20} color="#22C55E" />}
+            label="Mening kurslarim"
+            onPress={() => router.push('/(tabs)/courses')}
           />
           <View className="h-px bg-slate-100 ml-14" />
           <MenuItem
-            icon={<BookOpen size={20} color="#22C55E" />}
-            label="Mening kurslarim"
-            onPress={() => {}}
+            icon={<Heart size={20} color="#EF4444" />}
+            label="Saqlanganlar"
+            onPress={() => router.push('/wishlist')}
           />
           <View className="h-px bg-slate-100 ml-14" />
           <MenuItem
             icon={<Trophy size={20} color="#F59E0B" />}
             label="Sertifikatlarim"
-            onPress={() => {}}
+            onPress={() => router.push('/(tabs)/progress')}
           />
         </Card>
 
@@ -123,19 +129,19 @@ export default function ProfileScreen() {
           <MenuItem
             icon={<Bell size={20} color="#6366F1" />}
             label="Bildirishnomalar"
-            onPress={() => {}}
+            onPress={() => router.push('/notifications')}
           />
           <View className="h-px bg-slate-100 ml-14" />
           <MenuItem
-            icon={<Shield size={20} color="#64748B" />}
-            label="Maxfiylik"
-            onPress={() => {}}
+            icon={<Settings size={20} color="#64748B" />}
+            label="Sozlamalar"
+            onPress={() => router.push('/settings')}
           />
           <View className="h-px bg-slate-100 ml-14" />
           <MenuItem
-            icon={<HelpCircle size={20} color="#64748B" />}
-            label="Yordam"
-            onPress={() => {}}
+            icon={<Info size={20} color="#3B82F6" />}
+            label="Biz haqimizda"
+            onPress={() => router.push('/about')}
           />
         </Card>
 
