@@ -15,6 +15,7 @@ import {
 } from 'lucide-react-native';
 import { useCourse, useEnrollCourse, useEnrollmentDetail } from '@/hooks/useCourses';
 import { Button, Badge, ProgressBar, Skeleton } from '@/components/ui';
+import { HtmlText } from '@/components/common/HtmlText';
 import { formatPrice } from '@/utils';
 import type { SectionLesson } from '@/types';
 
@@ -93,7 +94,7 @@ export default function CourseDetailScreen() {
 
           <Text className="text-xl font-sans-bold text-slate-800 mb-2">{course.title}</Text>
           {course.short_description && (
-            <Text className="text-sm text-slate-500 mb-4 leading-5">{course.short_description}</Text>
+            <HtmlText html={course.short_description} baseFontSize={14} color="#64748B" />
           )}
 
           {/* Stats row */}
@@ -101,7 +102,7 @@ export default function CourseDetailScreen() {
             {[
               {
                 icon: <Star size={14} color="#F59E0B" fill="#F59E0B" />,
-                value: course.rating.toFixed(1),
+                value: Number(course.rating).toFixed(1),
               },
               {
                 icon: <Users size={14} color="#94A3B8" />,
@@ -113,7 +114,7 @@ export default function CourseDetailScreen() {
               },
               {
                 icon: <Clock size={14} color="#94A3B8" />,
-                value: `${course.duration_hours.toFixed(1)}h`,
+                value: `${Number(course.duration_hours).toFixed(1)}h`,
               },
             ].map(({ icon, value }, i) => (
               <View key={i} className="flex-row items-center gap-1">

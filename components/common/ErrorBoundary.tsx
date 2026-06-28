@@ -1,6 +1,7 @@
 import React, { Component, type ReactNode, type ErrorInfo } from 'react';
 import { View, Text } from 'react-native';
 import { Button } from '@/components/ui';
+import { ErrorIllustration } from './illustrations';
 
 interface Props {
   children: ReactNode;
@@ -28,10 +29,10 @@ export class ErrorBoundary extends Component<Props, State> {
       if (this.props.fallback) return this.props.fallback;
       return (
         <View className="flex-1 items-center justify-center px-6">
-          <Text className="text-4xl mb-4">😕</Text>
-          <Text className="text-xl font-sans-bold text-slate-800 mb-2">Xatolik yuz berdi</Text>
+          <ErrorIllustration size={160} />
+          <Text className="text-xl font-sans-bold text-slate-800 mt-4 mb-2">Xatolik yuz berdi</Text>
           <Text className="text-sm text-slate-500 text-center mb-6">
-            Nimadir noto'g'ri ketdi. Sahifani yangilang.
+            Nimadir noto&apos;g&apos;ri ketdi. Sahifani yangilang.
           </Text>
           <Button onPress={() => this.setState({ hasError: false })}>Qayta urinish</Button>
         </View>

@@ -1,13 +1,15 @@
 import React, { useEffect } from 'react';
 import { Stack } from 'expo-router';
+import { Appearance } from 'react-native';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
+import { useColorScheme } from 'nativewind';
 import '../global.css';
-import { useAuthStore } from '@/stores';
+import { useAuthStore, useThemeStore } from '@/stores';
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
@@ -26,6 +28,17 @@ const queryClient = new QueryClient({
 
 export default function RootLayout() {
   const { initialize } = useAuthStore();
+  const { mode } = useThemeStore();
+  const { setColorScheme } = useColorScheme();
+
+  useEffect(() => {
+    if (mode === 'system') {
+      const sys = Appearance.getColorScheme() ?? 'light';
+      setColorScheme(sys);
+    } else {
+      setColorScheme(mode);
+    }
+  }, [mode, setColorScheme]);
 
   const [fontsLoaded, fontError] = useFonts({
     'Inter-Regular': require('../assets/fonts/Inter-Regular.ttf'),
@@ -52,8 +65,13 @@ export default function RootLayout() {
         <QueryClientProvider client={queryClient}>
           <StatusBar style="auto" />
           <Stack screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="index" />
             <Stack.Screen name="(auth)" />
             <Stack.Screen name="(tabs)" />
+            <Stack.Screen name="notifications" options={{ presentation: 'card', animation: 'slide_from_right' }} />
+            <Stack.Screen name="wishlist" options={{ presentation: 'card', animation: 'slide_from_right' }} />
+            <Stack.Screen name="settings" options={{ presentation: 'card', animation: 'slide_from_right' }} />
+            <Stack.Screen name="about" options={{ presentation: 'card', animation: 'slide_from_right' }} />
             <Stack.Screen
               name="course/[id]"
               options={{ presentation: 'card', animation: 'slide_from_right' }}

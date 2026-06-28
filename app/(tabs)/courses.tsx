@@ -5,6 +5,7 @@ import { Search } from 'lucide-react-native';
 import { useCourses, useCategories } from '@/hooks/useCourses';
 import { CourseCard, CategoryChip } from '@/components/course';
 import { CourseCardSkeleton } from '@/components/ui';
+import { EmptyCoursesIllustration, SearchEmptyIllustration } from '@/components/common/illustrations';
 import type { Category, CoursesFilter, CourseLevel } from '@/types';
 
 export default function CoursesScreen() {
@@ -106,10 +107,18 @@ export default function CoursesScreen() {
           contentContainerStyle={{ padding: 20 }}
           showsVerticalScrollIndicator={false}
           ListEmptyComponent={
-            <View className="items-center py-12">
-              <Text className="text-4xl mb-3">📚</Text>
-              <Text className="text-base font-sans-semibold text-slate-600">Kurs topilmadi</Text>
-              <Text className="text-sm text-slate-400 mt-1">Boshqa kalit so'z kiriting</Text>
+            <View className="items-center py-8">
+              {search.trim() ? (
+                <SearchEmptyIllustration size={140} />
+              ) : (
+                <EmptyCoursesIllustration size={140} />
+              )}
+              <Text className="text-base font-sans-semibold text-slate-600 mt-2">
+                {search.trim() ? 'Natija topilmadi' : 'Kurslar yo\'q'}
+              </Text>
+              <Text className="text-sm text-slate-400 mt-1">
+                {search.trim() ? 'Boshqa kalit so\'z kiriting' : 'Hozircha kurslar mavjud emas'}
+              </Text>
             </View>
           }
           renderItem={({ item }) => <CourseCard course={item} />}
