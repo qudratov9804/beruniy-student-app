@@ -56,7 +56,7 @@ export default function WishlistScreen() {
       ) : (
         <FlatList
           data={items}
-          keyExtractor={(item) => String(item.id)}
+          keyExtractor={(item) => String(item.course.id)}
           contentContainerStyle={{ padding: 16 }}
           ItemSeparatorComponent={() => <View className="h-3" />}
           renderItem={({ item }) => (
@@ -77,7 +77,7 @@ export default function WishlistScreen() {
                   <Text className="text-sm font-sans-bold text-primary-600">
                     {formatPrice(item.course?.effective_price ?? 0)}
                   </Text>
-                  <TouchableOpacity onPress={() => toggleMutation.mutate(item.course_id)} className="p-1">
+                  <TouchableOpacity onPress={() => toggleMutation.mutate(item.course.id)} className="p-1">
                     <Trash2 size={16} color="#EF4444" />
                   </TouchableOpacity>
                 </View>

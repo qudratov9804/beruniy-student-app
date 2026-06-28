@@ -3,7 +3,7 @@ import { View, Text, ScrollView, TouchableOpacity, Linking } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Image } from 'expo-image';
-import { ChevronLeft, Globe, Phone, Mail, MapPin, Star } from 'lucide-react-native';
+import { ChevronLeft, Globe, Phone, Mail, MapPin } from 'lucide-react-native';
 
 const CONTACTS = [
   { icon: <Globe size={18} color="#6366F1" />, label: 'Veb-sayt', value: 'beruniy-talim.uz', bg: 'bg-primary-100' },

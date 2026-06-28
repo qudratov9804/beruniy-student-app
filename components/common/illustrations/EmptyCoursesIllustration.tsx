@@ -1,5 +1,5 @@
 import React from 'react';
-import Svg, { Rect, Circle, Path, G, Ellipse } from 'react-native-svg';
+import Svg, { Rect, Circle, Path } from 'react-native-svg';
 
 export const EmptyCoursesIllustration = ({ size = 180 }: { size?: number }) => (
   <Svg width={size} height={size} viewBox="0 0 180 180" fill="none">

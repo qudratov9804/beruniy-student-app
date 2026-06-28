@@ -1,5 +1,5 @@
 import React from 'react';
-import Svg, { Circle, Path, Rect, Text as SvgText, G } from 'react-native-svg';
+import Svg, { Circle, Path, Rect, Text as SvgText } from 'react-native-svg';
 
 export const NotFoundIllustration = ({ size = 180 }: { size?: number }) => (
   <Svg width={size} height={size} viewBox="0 0 180 180" fill="none">

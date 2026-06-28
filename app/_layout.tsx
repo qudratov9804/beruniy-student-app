@@ -33,8 +33,8 @@ export default function RootLayout() {
 
   useEffect(() => {
     if (mode === 'system') {
-      const sys = Appearance.getColorScheme() ?? 'light';
-      setColorScheme(sys);
+      const raw = Appearance.getColorScheme();
+      setColorScheme(raw === 'dark' ? 'dark' : 'light');
     } else {
       setColorScheme(mode);
     }

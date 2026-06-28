@@ -1,8 +1,8 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, Switch } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { ChevronLeft, Sun, Moon, Smartphone, Shield, Lock, Bell, Info } from 'lucide-react-native';
+import { ChevronLeft, Sun, Moon, Smartphone, Lock, Bell, Info } from 'lucide-react-native';
 import { useColorScheme } from 'nativewind';
 import { useThemeStore } from '@/stores';
 import { useAuthStore } from '@/stores';

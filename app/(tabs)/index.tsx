@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, ScrollView, FlatList, TouchableOpacity, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { Bell, ChevronRight, BookOpen, GraduationCap, TrendingUp } from 'lucide-react-native';
+import { Bell, ChevronRight, BookOpen, GraduationCap } from 'lucide-react-native';
 import { useAuth } from '@/hooks/useAuth';
 import { useEnrolledCourses } from '@/hooks/useCourses';
 import { CourseCardSkeleton } from '@/components/ui';

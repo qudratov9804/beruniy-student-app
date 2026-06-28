@@ -1,5 +1,5 @@
 import React from 'react';
-import Svg, { Circle, Path, Rect, G, Ellipse } from 'react-native-svg';
+import Svg, { Circle, Path, Rect } from 'react-native-svg';
 
 export const ErrorIllustration = ({ size = 180 }: { size?: number }) => (
   <Svg width={size} height={size} viewBox="0 0 180 180" fill="none">

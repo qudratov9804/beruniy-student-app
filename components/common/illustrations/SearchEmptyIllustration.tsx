@@ -1,5 +1,5 @@
 import React from 'react';
-import Svg, { Circle, Path, G, Rect, Line } from 'react-native-svg';
+import Svg, { Circle, Path, Line } from 'react-native-svg';
 
 export const SearchEmptyIllustration = ({ size = 180 }: { size?: number }) => (
   <Svg width={size} height={size} viewBox="0 0 180 180" fill="none">
