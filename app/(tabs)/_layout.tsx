@@ -2,7 +2,6 @@ import { Tabs, useRouter } from 'expo-router';
 import { useEffect } from 'react';
 import { Platform } from 'react-native';
 import { Home, BookOpen, BarChart2, Bot } from 'lucide-react-native';
-import { Colors } from '@/constants';
 import { useAuthStore } from '@/stores';
 
 export default function TabsLayout() {

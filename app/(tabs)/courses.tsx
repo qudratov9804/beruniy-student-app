@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { View, Text, FlatList, ScrollView, TextInput, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Search } from 'lucide-react-native';
@@ -15,10 +15,12 @@ export default function CoursesScreen() {
   const [search, setSearch] = useState(q ?? '');
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
   const [selectedLevel, setSelectedLevel] = useState<CourseLevel | null>(null);
+  const [prevQ, setPrevQ] = useState(q);
 
-  useEffect(() => {
+  if (q !== prevQ) {
+    setPrevQ(q);
     if (q) setSearch(q);
-  }, [q]);
+  }
 
   const filters: CoursesFilter = {
     search: search.trim() || undefined,

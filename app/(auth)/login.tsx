@@ -31,9 +31,13 @@ export default function LoginScreen() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     if (!validate()) return;
-    loginWithPassword({ phone: phone.trim(), password });
+    try {
+      await loginWithPassword({ phone: phone.trim(), password });
+    } catch {
+      // loginError from the mutation state renders the inline message below
+    }
   };
 
   return (
