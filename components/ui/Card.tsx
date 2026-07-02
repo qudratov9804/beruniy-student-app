@@ -7,10 +7,10 @@ interface CardProps extends ViewProps {
 }
 
 const variantStyles = {
-  default: 'bg-white rounded-3xl shadow-sm shadow-slate-200',
-  elevated: 'bg-white rounded-3xl shadow-md shadow-slate-300',
-  outlined: 'bg-white rounded-3xl border border-slate-200',
-  filled: 'bg-slate-50 rounded-3xl',
+  default: 'bg-white/10 rounded-3xl border border-white/15',
+  elevated: 'bg-white/12 rounded-3xl border border-white/20',
+  outlined: 'bg-white/8 rounded-3xl border border-white/20',
+  filled: 'bg-white/8 rounded-3xl',
 };
 
 const paddingStyles = {

@@ -1,3 +1,41 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* ===== WEB MOBILE OPTIMIZATION ===== */
+
+html {
+  background: #0f172a;
+  height: 100%;
+}
+
+body {
+  background: #0f172a;
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  /* iOS Safari zoom prevention */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  /* Remove tap highlight */
+  -webkit-tap-highlight-color: transparent;
+}
+
+#root {
+  width: 100%;
+}
+
+/* Input zoom prevention on iOS Safari (16px minimum) */
+input, textarea, select {
+  font-size: 16px;
+}
+
+/* Hide scrollbars globally on web */
+* {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+*::-webkit-scrollbar {
+  display: none;
+}

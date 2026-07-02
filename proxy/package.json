@@ -1,0 +1,11 @@
+{
+  "name": "beruniy-proxy",
+  "version": "1.0.0",
+  "description": "CORS proxy + OpenAI chat for beruniy-talim.uz",
+  "scripts": {
+    "start": "node proxy.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

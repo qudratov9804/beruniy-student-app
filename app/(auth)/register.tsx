@@ -14,6 +14,8 @@ import { useRouter } from 'expo-router';
 import { User, ChevronLeft, GraduationCap, BookOpen } from 'lucide-react-native';
 import { Button, Input } from '@/components/ui';
 import { useAuth } from '@/hooks';
+import { useAuthStore } from '@/stores';
+import { ScreenBackground } from '@/components/common';
 
 type Step = 'phone' | 'otp' | 'profile';
 const OTP_LENGTH = 6;
@@ -23,9 +25,10 @@ export default function RegisterScreen() {
   const router = useRouter();
   const { sendOtp, verifyOtp, registerComplete, isSendingOtp, isVerifyingOtp, isRegisteringComplete } =
     useAuth();
+  const { setToken } = useAuthStore();
 
   const [step, setStep] = useState<Step>('phone');
-  const [phoneDigits, setPhoneDigits] = useState(''); // faqat 9 ta raqam
+  const [phoneDigits, setPhoneDigits] = useState('');
   const [digits, setDigits] = useState<string[]>(Array(OTP_LENGTH).fill(''));
   const [name, setName] = useState('');
   const [role, setRole] = useState<'student' | 'instructor'>('student');
@@ -53,7 +56,6 @@ export default function RegisterScreen() {
 
   useEffect(() => () => { if (timerRef.current) clearInterval(timerRef.current); }, []);
 
-  // SMS auto-fill: yashirin input to'ldirilganda
   const handleHiddenOtpChange = (value: string) => {
     const clean = value.replace(/[^0-9]/g, '').slice(0, OTP_LENGTH);
     if (clean.length > 0) {
@@ -74,7 +76,6 @@ export default function RegisterScreen() {
   };
 
   const formatPhoneDisplay = (digits: string) => {
-    // XX XXX XX XX
     const d = digits.padEnd(9, '');
     return `${d.slice(0, 2)} ${d.slice(2, 5)} ${d.slice(5, 7)} ${d.slice(7, 9)}`.trim();
   };
@@ -121,6 +122,7 @@ export default function RegisterScreen() {
         setRegistrationToken(res.registration_token);
         setStep('profile');
       } else if (res.token) {
+        await setToken(res.token);
         router.replace('/(tabs)');
       } else {
         setError("Noto'g'ri kod");
@@ -156,187 +158,192 @@ export default function RegisterScreen() {
   const formatTime = (s: number) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
-      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} className="flex-1">
-        <ScrollView contentContainerStyle={{ flexGrow: 1 }} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
-          <View className="px-6 pt-6 pb-8">
-            <TouchableOpacity
-              onPress={() => (step === 'phone' ? router.back() : setStep(step === 'otp' ? 'phone' : 'otp'))}
-              className="mb-6 self-start p-2 -ml-2"
-            >
-              <ChevronLeft size={28} color="#0F172A" />
-            </TouchableOpacity>
-
-            <View className="flex-row items-center mb-8 gap-2">
-              {(['phone', 'otp', 'profile'] as Step[]).map((s, i) => (
-                <View key={s} className={`h-1.5 flex-1 rounded-full ${
-                  step === s || (['otp', 'profile'].includes(step) && i === 0) || (step === 'profile' && i === 1)
-                    ? 'bg-primary-600' : 'bg-slate-200'
-                }`} />
-              ))}
-            </View>
-
-            {/* PHONE STEP */}
-            {step === 'phone' && (
-              <>
-                <Image
-                  source={{ uri: 'https://beruniy-talim.uz/_next/image?url=%2Flogo-400.png&w=750&q=75' }}
-                  style={{ width: 160, height: 80, marginBottom: 16 }}
-                  contentFit="contain"
-                />
-                <Text className="text-2xl font-sans-bold text-slate-800 mb-1">Ro&apos;yxatdan o&apos;ting</Text>
-                <Text className="text-base text-slate-500 mb-8">Telefon raqamingizni kiriting</Text>
-
-                <View className="mb-4">
-                  <Text className="mb-2 text-sm font-sans-semibold text-slate-700">Telefon raqam</Text>
-                  <View className={`flex-row items-center border rounded-2xl bg-slate-50 px-4 ${error ? 'border-red-400' : 'border-slate-200'}`}>
-                    <View className="mr-2 pr-2 border-r border-slate-200 py-3">
-                      <Text className="text-base font-sans-semibold text-slate-800">{PREFIX}</Text>
-                    </View>
-                    <TextInput
-                      className="flex-1 h-12 text-slate-900 text-base"
-                      placeholder="XX XXX XX XX"
-                      placeholderTextColor="#94A3B8"
-                      value={formatPhoneDisplay(phoneDigits)}
-                      onChangeText={handlePhoneChange}
-                      keyboardType="number-pad"
-                      maxLength={12}
-                      autoComplete="tel"
-                      textContentType="telephoneNumber"
-                    />
-                  </View>
-                  {error ? <Text className="mt-1 text-xs text-red-500">{error}</Text> : null}
-                </View>
-
-                <Button fullWidth size="lg" onPress={handleSendOtp} loading={isSendingOtp}
-                  disabled={phoneDigits.length !== 9}>
-                  SMS kod olish
-                </Button>
-              </>
-            )}
-
-            {/* OTP STEP */}
-            {step === 'otp' && (
-              <>
-                <Text className="text-2xl font-sans-bold text-slate-800 mb-1">Kodni kiriting</Text>
-                <Text className="text-base text-slate-500 mb-8">
-                  {PREFIX} {formatPhoneDisplay(phoneDigits)} raqamiga yuborilgan kodni kiriting
-                </Text>
-
-                {/* Yashirin SMS auto-fill input */}
-                <TextInput
-                  ref={hiddenOtpRef}
-                  value={otp}
-                  onChangeText={handleHiddenOtpChange}
-                  keyboardType="number-pad"
-                  maxLength={OTP_LENGTH}
-                  textContentType="oneTimeCode"
-                  autoComplete={Platform.OS === 'android' ? 'sms-otp' : 'one-time-code'}
-                  style={{ position: 'absolute', opacity: 0, width: 1, height: 1 }}
-                />
-
-                {/* Ko'rinadigan yacheykalar */}
-                <View className="flex-row justify-between mb-6">
-                  {digits.map((digit, i) => (
-                    <TouchableOpacity key={i} onPress={() => { hiddenOtpRef.current?.focus(); cellRefs.current[i]?.focus(); }}>
-                      <TextInput
-                        ref={(r) => { cellRefs.current[i] = r; }}
-                        value={digit}
-                        onChangeText={(v) => handleCellChange(v, i)}
-                        onKeyPress={(e) => handleCellKeyPress(e, i)}
-                        keyboardType="number-pad"
-                        maxLength={2}
-                        style={{
-                          width: 44,
-                          height: 56,
-                          borderWidth: 2,
-                          borderColor: digit ? '#6366F1' : '#E2E8F0',
-                          borderRadius: 12,
-                          textAlign: 'center',
-                          fontSize: 22,
-                          fontWeight: '700',
-                          color: '#0F172A',
-                          backgroundColor: digit ? '#F5F3FF' : '#F8FAFC',
-                        }}
-                      />
-                    </TouchableOpacity>
-                  ))}
-                </View>
-
-                {error ? (
-                  <View className="bg-red-50 border border-red-200 rounded-2xl p-3 mb-4">
-                    <Text className="text-red-600 text-sm text-center">{error}</Text>
-                  </View>
-                ) : null}
-
-                <Button fullWidth size="lg" onPress={() => handleVerifyOtp()} loading={isVerifyingOtp} disabled={otp.length < OTP_LENGTH}>
-                  Tasdiqlash
-                </Button>
-
-                <View className="items-center mt-5">
-                  {countdown > 0 ? (
-                    <Text className="text-slate-500 text-sm">
-                      Qayta yuborish: <Text className="text-primary-600 font-sans-semibold">{formatTime(countdown)}</Text>
-                    </Text>
-                  ) : (
-                    <TouchableOpacity onPress={handleResend} disabled={isSendingOtp}>
-                      <Text className="text-primary-600 text-sm font-sans-medium">Kodni qayta yuborish</Text>
-                    </TouchableOpacity>
-                  )}
-                </View>
-              </>
-            )}
-
-            {/* PROFILE STEP */}
-            {step === 'profile' && (
-              <>
-                <Text className="text-2xl font-sans-bold text-slate-800 mb-1">Profilingiz</Text>
-                <Text className="text-base text-slate-500 mb-8">Ismingizni kiriting va rolingizni tanlang</Text>
-                <Input
-                  label="To'liq ism"
-                  placeholder="Ismingizni kiriting"
-                  value={name}
-                  onChangeText={(v) => { setName(v); setError(''); }}
-                  leftIcon={<User size={20} color="#94A3B8" />}
-                  error={error || undefined}
-                />
-                <Text className="text-sm font-sans-semibold text-slate-700 mb-3">Rol tanlang</Text>
-                <View className="flex-row gap-3 mb-6">
-                  {(['student', 'instructor'] as const).map((r) => (
-                    <TouchableOpacity
-                      key={r}
-                      onPress={() => setRole(r)}
-                      className={`flex-1 border-2 rounded-2xl p-4 items-center ${role === r ? 'border-primary-500 bg-primary-50' : 'border-slate-200'}`}
-                    >
-                      {r === 'student'
-                        ? <GraduationCap size={28} color={role === r ? '#6366F1' : '#94A3B8'} />
-                        : <BookOpen size={28} color={role === r ? '#6366F1' : '#94A3B8'} />}
-                      <Text className={`mt-2 text-sm font-sans-semibold ${role === r ? 'text-primary-600' : 'text-slate-500'}`}>
-                        {r === 'student' ? 'Talaba' : "O'qituvchi"}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-                {error ? (
-                  <View className="bg-red-50 border border-red-200 rounded-2xl p-4 mb-4">
-                    <Text className="text-red-600 text-sm text-center">{error}</Text>
-                  </View>
-                ) : null}
-                <Button fullWidth size="lg" onPress={handleComplete} loading={isRegisteringComplete}>
-                  Yakunlash
-                </Button>
-              </>
-            )}
-
-            <View className="flex-row items-center justify-center mt-6">
-              <Text className="text-slate-500 text-base">Hisobingiz bormi? </Text>
-              <TouchableOpacity onPress={() => router.push('/(auth)/login')}>
-                <Text className="text-primary-600 text-base font-sans-bold">Kirish</Text>
+    <ScreenBackground>
+      <SafeAreaView className="flex-1 bg-transparent">
+        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} className="flex-1">
+          <ScrollView contentContainerStyle={{ flexGrow: 1 }} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+            <View className="px-6 pt-6 pb-8">
+              <TouchableOpacity
+                onPress={() => (step === 'phone' ? router.back() : setStep(step === 'otp' ? 'phone' : 'otp'))}
+                className="mb-6 self-start p-2 -ml-2"
+              >
+                <ChevronLeft size={28} color="rgba(255,255,255,0.9)" />
               </TouchableOpacity>
+
+              {/* Step indicator */}
+              <View className="flex-row items-center mb-8 gap-2">
+                {(['phone', 'otp', 'profile'] as Step[]).map((s, i) => (
+                  <View key={s} className={`h-1.5 flex-1 rounded-full ${
+                    step === s || (['otp', 'profile'].includes(step) && i === 0) || (step === 'profile' && i === 1)
+                      ? 'bg-blue-400' : 'bg-white/20'
+                  }`} />
+                ))}
+              </View>
+
+              {/* Glass card wrapper */}
+              <View className="bg-white/10 rounded-3xl p-6 border border-white/20">
+
+                {/* PHONE STEP */}
+                {step === 'phone' && (
+                  <>
+                    <Image
+                      source={{ uri: 'https://beruniy-talim.uz/_next/image?url=%2Flogo-400.png&w=750&q=75' }}
+                      style={{ width: 120, height: 60, marginBottom: 16 }}
+                      contentFit="contain"
+                    />
+                    <Text className="text-2xl font-sans-bold text-white mb-1">Ro&apos;yxatdan o&apos;ting</Text>
+                    <Text className="text-base text-white/70 mb-8">Telefon raqamingizni kiriting</Text>
+
+                    <View className="mb-4">
+                      <Text className="mb-2 text-sm font-sans-semibold text-white/80">Telefon raqam</Text>
+                      <View className={`flex-row items-center border rounded-2xl bg-white/85 px-4 ${error ? 'border-red-400' : 'border-white/40'}`}>
+                        <View className="mr-2 pr-2 border-r border-slate-300 py-3">
+                          <Text className="text-base font-sans-semibold text-slate-800">{PREFIX}</Text>
+                        </View>
+                        <TextInput
+                          className="flex-1 h-12 text-slate-900 text-base"
+                          placeholder="XX XXX XX XX"
+                          placeholderTextColor="#94A3B8"
+                          value={formatPhoneDisplay(phoneDigits)}
+                          onChangeText={handlePhoneChange}
+                          keyboardType="number-pad"
+                          maxLength={12}
+                          autoComplete="tel"
+                          textContentType="telephoneNumber"
+                        />
+                      </View>
+                      {error ? <Text className="mt-1 text-xs text-red-400">{error}</Text> : null}
+                    </View>
+
+                    <Button fullWidth size="lg" onPress={handleSendOtp} loading={isSendingOtp}
+                      disabled={phoneDigits.length !== 9}>
+                      SMS kod olish
+                    </Button>
+                  </>
+                )}
+
+                {/* OTP STEP */}
+                {step === 'otp' && (
+                  <>
+                    <Text className="text-2xl font-sans-bold text-white mb-1">Kodni kiriting</Text>
+                    <Text className="text-base text-white/70 mb-8">
+                      {PREFIX} {formatPhoneDisplay(phoneDigits)} raqamiga yuborilgan kodni kiriting
+                    </Text>
+
+                    <TextInput
+                      ref={hiddenOtpRef}
+                      value={otp}
+                      onChangeText={handleHiddenOtpChange}
+                      keyboardType="number-pad"
+                      maxLength={OTP_LENGTH}
+                      textContentType="oneTimeCode"
+                      autoComplete={Platform.OS === 'android' ? 'sms-otp' : 'one-time-code'}
+                      style={{ position: 'absolute', opacity: 0, width: 1, height: 1 }}
+                    />
+
+                    <View className="flex-row justify-between mb-6">
+                      {digits.map((digit, i) => (
+                        <TouchableOpacity key={i} onPress={() => { hiddenOtpRef.current?.focus(); cellRefs.current[i]?.focus(); }}>
+                          <TextInput
+                            ref={(r) => { cellRefs.current[i] = r; }}
+                            value={digit}
+                            onChangeText={(v) => handleCellChange(v, i)}
+                            onKeyPress={(e) => handleCellKeyPress(e, i)}
+                            keyboardType="number-pad"
+                            maxLength={2}
+                            style={{
+                              width: 44,
+                              height: 56,
+                              borderWidth: 2,
+                              borderColor: digit ? '#60a5fa' : 'rgba(255,255,255,0.25)',
+                              borderRadius: 12,
+                              textAlign: 'center',
+                              fontSize: 22,
+                              fontWeight: '700',
+                              color: '#ffffff',
+                              backgroundColor: digit ? 'rgba(96,165,250,0.20)' : 'rgba(255,255,255,0.10)',
+                            }}
+                          />
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+
+                    {error ? (
+                      <View className="bg-red-500/20 border border-red-400/40 rounded-2xl p-3 mb-4">
+                        <Text className="text-red-300 text-sm text-center">{error}</Text>
+                      </View>
+                    ) : null}
+
+                    <Button fullWidth size="lg" onPress={() => handleVerifyOtp()} loading={isVerifyingOtp} disabled={otp.length < OTP_LENGTH}>
+                      Tasdiqlash
+                    </Button>
+
+                    <View className="items-center mt-5">
+                      {countdown > 0 ? (
+                        <Text className="text-white/60 text-sm">
+                          Qayta yuborish: <Text className="text-blue-300 font-sans-semibold">{formatTime(countdown)}</Text>
+                        </Text>
+                      ) : (
+                        <TouchableOpacity onPress={handleResend} disabled={isSendingOtp}>
+                          <Text className="text-blue-300 text-sm font-sans-medium">Kodni qayta yuborish</Text>
+                        </TouchableOpacity>
+                      )}
+                    </View>
+                  </>
+                )}
+
+                {/* PROFILE STEP */}
+                {step === 'profile' && (
+                  <>
+                    <Text className="text-2xl font-sans-bold text-white mb-1">Profilingiz</Text>
+                    <Text className="text-base text-white/70 mb-8">Ismingizni kiriting va rolingizni tanlang</Text>
+                    <Input
+                      label="To'liq ism"
+                      placeholder="Ismingizni kiriting"
+                      value={name}
+                      onChangeText={(v) => { setName(v); setError(''); }}
+                      leftIcon={<User size={20} color="#94A3B8" />}
+                      error={error || undefined}
+                    />
+                    <Text className="text-sm font-sans-semibold text-white/80 mb-3">Rol tanlang</Text>
+                    <View className="flex-row gap-3 mb-6">
+                      {(['student', 'instructor'] as const).map((r) => (
+                        <TouchableOpacity
+                          key={r}
+                          onPress={() => setRole(r)}
+                          className={`flex-1 border-2 rounded-2xl p-4 items-center ${role === r ? 'border-blue-400 bg-blue-500/20' : 'border-white/20 bg-white/5'}`}
+                        >
+                          {r === 'student'
+                            ? <GraduationCap size={28} color={role === r ? '#60a5fa' : 'rgba(255,255,255,0.50)'} />
+                            : <BookOpen size={28} color={role === r ? '#60a5fa' : 'rgba(255,255,255,0.50)'} />}
+                          <Text className={`mt-2 text-sm font-sans-semibold ${role === r ? 'text-blue-300' : 'text-white/60'}`}>
+                            {r === 'student' ? 'Talaba' : "O'qituvchi"}
+                          </Text>
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+                    {error ? (
+                      <View className="bg-red-500/20 border border-red-400/40 rounded-2xl p-4 mb-4">
+                        <Text className="text-red-300 text-sm text-center">{error}</Text>
+                      </View>
+                    ) : null}
+                    <Button fullWidth size="lg" onPress={handleComplete} loading={isRegisteringComplete}>
+                      Yakunlash
+                    </Button>
+                  </>
+                )}
+              </View>
+
+              <View className="flex-row items-center justify-center mt-6">
+                <Text className="text-white/70 text-base">Hisobingiz bormi? </Text>
+                <TouchableOpacity onPress={() => router.push('/(auth)/login')}>
+                  <Text className="text-blue-300 text-base font-sans-bold">Kirish</Text>
+                </TouchableOpacity>
+              </View>
             </View>
-          </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+          </ScrollView>
+        </KeyboardAvoidingView>
+      </SafeAreaView>
+    </ScreenBackground>
   );
 }

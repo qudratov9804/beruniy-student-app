@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { Stack } from 'expo-router';
-import { Appearance } from 'react-native';
+import { Appearance, Platform, View, StyleSheet } from 'react-native';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -59,11 +59,11 @@ export default function RootLayout() {
 
   if (!fontsLoaded && !fontError) return null;
 
-  return (
+  const app = (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
         <QueryClientProvider client={queryClient}>
-          <StatusBar style="auto" />
+          <StatusBar style="light" />
           <Stack screenOptions={{ headerShown: false }}>
             <Stack.Screen name="index" />
             <Stack.Screen name="(auth)" />
@@ -72,6 +72,7 @@ export default function RootLayout() {
             <Stack.Screen name="wishlist" options={{ presentation: 'card', animation: 'slide_from_right' }} />
             <Stack.Screen name="settings" options={{ presentation: 'card', animation: 'slide_from_right' }} />
             <Stack.Screen name="about" options={{ presentation: 'card', animation: 'slide_from_right' }} />
+            <Stack.Screen name="edit-profile" options={{ presentation: 'card', animation: 'slide_from_right' }} />
             <Stack.Screen
               name="course/[id]"
               options={{ presentation: 'card', animation: 'slide_from_right' }}
@@ -86,4 +87,30 @@ export default function RootLayout() {
       </SafeAreaProvider>
     </GestureHandlerRootView>
   );
+
+  if (Platform.OS === 'web') {
+    return (
+      <View style={styles.webOuter}>
+        <View style={styles.webInner}>{app}</View>
+      </View>
+    );
+  }
+
+  return app;
 }
+
+const styles = StyleSheet.create({
+  webOuter: {
+    flex: 1,
+    backgroundColor: '#0f172a',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  webInner: {
+    flex: 1,
+    width: '100%',
+    maxWidth: 430,
+    overflow: 'hidden',
+    position: 'relative',
+  },
+});

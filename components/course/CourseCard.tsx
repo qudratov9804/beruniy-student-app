@@ -44,10 +44,10 @@ export const CourseCard: React.FC<CourseCardProps> = ({
             contentFit="cover"
           />
           <View className="p-3">
-            <Text className="text-sm font-sans-bold text-slate-800 mb-1" numberOfLines={2}>
+            <Text className="text-sm font-sans-bold text-white mb-1" numberOfLines={2}>
               {course.title}
             </Text>
-            <Text className="text-xs text-slate-400">{Number(course.duration_hours).toFixed(1)}h</Text>
+            <Text className="text-xs text-white/50">{Number(course.duration_hours).toFixed(1)}h</Text>
           </View>
         </Card>
       </TouchableOpacity>
@@ -70,10 +70,10 @@ export const CourseCard: React.FC<CourseCardProps> = ({
             >
               {levelLabels[course.level]}
             </Badge>
-            <Text className="text-base font-sans-bold text-slate-800 mt-2 mb-1" numberOfLines={2}>
+            <Text className="text-base font-sans-bold text-white mt-2 mb-1" numberOfLines={2}>
               {course.title}
             </Text>
-            <Text className="text-xs text-slate-500 mb-2">{progressPercent}% tugatildi</Text>
+            <Text className="text-xs text-white/60 mb-2">{progressPercent}% tugatildi</Text>
             <ProgressBar progress={progressPercent} height={6} />
           </View>
         </Card>
@@ -103,36 +103,36 @@ export const CourseCard: React.FC<CourseCardProps> = ({
               </Badge>
             )}
           </View>
-          <Text className="text-base font-sans-bold text-slate-800 mb-1" numberOfLines={2}>
+          <Text className="text-base font-sans-bold text-white mb-1" numberOfLines={2}>
             {course.title}
           </Text>
           {course.short_description && (
-            <Text className="text-sm text-slate-500 mb-3" numberOfLines={2}>
+            <Text className="text-sm text-white/60 mb-3" numberOfLines={2}>
               {course.short_description}
             </Text>
           )}
           <View className="flex-row items-center gap-4">
             <View className="flex-row items-center gap-1">
               <Star size={14} color="#F59E0B" fill="#F59E0B" />
-              <Text className="text-xs font-sans-semibold text-slate-700">
+              <Text className="text-xs font-sans-semibold text-white/80">
                 {Number(course.rating).toFixed(1)}
               </Text>
             </View>
             <View className="flex-row items-center gap-1">
-              <Users size={14} color="#94A3B8" />
-              <Text className="text-xs text-slate-500">{course.enrolled_count}</Text>
+              <Users size={14} color="rgba(255,255,255,0.50)" />
+              <Text className="text-xs text-white/50">{course.enrolled_count}</Text>
             </View>
             <View className="flex-row items-center gap-1">
-              <BookOpen size={14} color="#94A3B8" />
-              <Text className="text-xs text-slate-500">{course.lessons_count} dars</Text>
+              <BookOpen size={14} color="rgba(255,255,255,0.50)" />
+              <Text className="text-xs text-white/50">{course.lessons_count} dars</Text>
             </View>
             <View className="flex-row items-center gap-1">
-              <Clock size={14} color="#94A3B8" />
-              <Text className="text-xs text-slate-500">{Number(course.duration_hours).toFixed(1)}h</Text>
+              <Clock size={14} color="rgba(255,255,255,0.50)" />
+              <Text className="text-xs text-white/50">{Number(course.duration_hours).toFixed(1)}h</Text>
             </View>
           </View>
-          <View className="flex-row items-center justify-between mt-3 pt-3 border-t border-slate-100">
-            <Text className="text-base font-sans-bold text-primary-600">
+          <View className="flex-row items-center justify-between mt-3 pt-3 border-t border-white/10">
+            <Text className="text-base font-sans-bold text-blue-300">
               {formatPrice(course.effective_price)}
             </Text>
           </View>

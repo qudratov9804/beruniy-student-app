@@ -5,6 +5,7 @@ import { useRouter } from 'expo-router';
 import { Phone, ChevronLeft, CheckCircle } from 'lucide-react-native';
 import { Button, Input } from '@/components/ui';
 import { useAuth } from '@/hooks/useAuth';
+import { ScreenBackground } from '@/components/common';
 
 export default function ForgotPasswordScreen() {
   const router = useRouter();
@@ -33,53 +34,55 @@ export default function ForgotPasswordScreen() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        className="flex-1"
-      >
-        <View className="px-6 pt-6 flex-1">
-          <TouchableOpacity onPress={() => router.back()} className="mb-6 self-start p-2 -ml-2">
-            <ChevronLeft size={28} color="#0F172A" />
-          </TouchableOpacity>
+    <ScreenBackground>
+      <SafeAreaView className="flex-1 bg-transparent">
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          className="flex-1"
+        >
+          <View className="px-6 pt-6 flex-1">
+            <TouchableOpacity onPress={() => router.back()} className="mb-6 self-start p-2 -ml-2">
+              <ChevronLeft size={28} color="rgba(255,255,255,0.9)" />
+            </TouchableOpacity>
 
-          {sent ? (
-            <View className="flex-1 items-center justify-center">
-              <View className="w-20 h-20 bg-green-100 rounded-full items-center justify-center mb-4">
-                <CheckCircle size={40} color="#22C55E" />
+            {sent ? (
+              <View className="flex-1 items-center justify-center">
+                <View className="w-20 h-20 bg-green-500/20 rounded-full items-center justify-center mb-4 border border-green-400/30">
+                  <CheckCircle size={40} color="#34d399" />
+                </View>
+                <Text className="text-xl font-sans-bold text-white mb-2 text-center">
+                  SMS yuborildi!
+                </Text>
+                <Text className="text-base text-white/70 text-center mb-8">
+                  {phone} raqamiga tasdiqlash kodi yuborildi.
+                </Text>
+                <Button fullWidth onPress={() => router.back()}>
+                  Ortga qaytish
+                </Button>
               </View>
-              <Text className="text-xl font-sans-bold text-slate-800 mb-2 text-center">
-                SMS yuborildi!
-              </Text>
-              <Text className="text-base text-slate-500 text-center mb-8">
-                {phone} raqamiga tasdiqlash kodi yuborildi.
-              </Text>
-              <Button fullWidth onPress={() => router.back()}>
-                Ortga qaytish
-              </Button>
-            </View>
-          ) : (
-            <>
-              <Text className="text-2xl font-sans-bold text-slate-800 mb-2">Parolni tiklash</Text>
-              <Text className="text-base text-slate-500 mb-8">
-                Telefon raqamingizni kiriting, SMS kod yuboramiz.
-              </Text>
-              <Input
-                label="Telefon raqam"
-                placeholder="+998901234567"
-                value={phone}
-                onChangeText={setPhone}
-                keyboardType="phone-pad"
-                error={phoneError}
-                leftIcon={<Phone size={20} color="#94A3B8" />}
-              />
-              <Button fullWidth size="lg" onPress={handleSubmit} loading={isSendingOtp}>
-                SMS yuborish
-              </Button>
-            </>
-          )}
-        </View>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+            ) : (
+              <View className="bg-white/10 rounded-3xl p-6 border border-white/20">
+                <Text className="text-2xl font-sans-bold text-white mb-2">Parolni tiklash</Text>
+                <Text className="text-base text-white/70 mb-8">
+                  Telefon raqamingizni kiriting, SMS kod yuboramiz.
+                </Text>
+                <Input
+                  label="Telefon raqam"
+                  placeholder="+998901234567"
+                  value={phone}
+                  onChangeText={setPhone}
+                  keyboardType="phone-pad"
+                  error={phoneError}
+                  leftIcon={<Phone size={20} color="#94A3B8" />}
+                />
+                <Button fullWidth size="lg" onPress={handleSubmit} loading={isSendingOtp}>
+                  SMS yuborish
+                </Button>
+              </View>
+            )}
+          </View>
+        </KeyboardAvoidingView>
+      </SafeAreaView>
+    </ScreenBackground>
   );
 }

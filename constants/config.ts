@@ -1,4 +1,11 @@
-export const API_BASE_URL = 'https://api.beruniy-talim.uz/api/v1';
+import { Platform } from 'react-native';
+
+const PROXY_URL = process.env.EXPO_PUBLIC_PROXY_URL || 'http://localhost:3001';
+
+export const API_BASE_URL =
+  Platform.OS === 'web'
+    ? `${PROXY_URL}/api/v1`
+    : 'https://api.beruniy-talim.uz/api/v1';
 
 export const STORAGE_KEYS = {
   ACCESS_TOKEN: 'access_token',

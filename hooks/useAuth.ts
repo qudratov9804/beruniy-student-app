@@ -9,6 +9,7 @@ import type {
   RegisterCompleteRequest,
   PasswordLoginRequest,
   UpdateProfileRequest,
+  SetPasswordRequest,
   ChangePasswordRequest,
 } from '@/types';
 
@@ -65,12 +66,12 @@ export const useAuth = () => {
     },
   });
 
+  const setPasswordMutation = useMutation({
+    mutationFn: (data: SetPasswordRequest) => authService.setPassword(data),
+  });
+
   const changePasswordMutation = useMutation({
     mutationFn: (data: ChangePasswordRequest) => authService.changePassword(data),
-    onSuccess: async () => {
-      await clearAuth();
-      router.replace('/(auth)/login');
-    },
   });
 
   const meQuery = useQuery({
@@ -106,6 +107,8 @@ export const useAuth = () => {
     updateProfile: updateProfileMutation.mutateAsync,
     isUpdatingProfile: updateProfileMutation.isPending,
 
+    setPassword: setPasswordMutation.mutateAsync,
+    isSettingPassword: setPasswordMutation.isPending,
     changePassword: changePasswordMutation.mutateAsync,
     isChangingPassword: changePasswordMutation.isPending,
   };

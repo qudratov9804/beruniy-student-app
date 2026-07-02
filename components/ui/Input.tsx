@@ -25,10 +25,10 @@ export const Input: React.FC<InputProps> = ({
 
   return (
     <View className="mb-4">
-      {label && <Text className="mb-2 text-sm font-sans-semibold text-slate-700">{label}</Text>}
+      {label && <Text className="mb-2 text-sm font-sans-semibold text-white/80">{label}</Text>}
       <View
-        className={`flex-row items-center border rounded-2xl bg-slate-50 px-4 ${
-          hasError ? 'border-red-400' : 'border-slate-200'
+        className={`flex-row items-center border rounded-2xl bg-white/85 px-4 ${
+          hasError ? 'border-red-400' : 'border-white/40'
         } ${props.editable === false ? 'opacity-60' : ''}`}
       >
         {leftIcon && <View className="mr-3">{leftIcon}</View>}
@@ -51,8 +51,8 @@ export const Input: React.FC<InputProps> = ({
           rightIcon && <View className="ml-2">{rightIcon}</View>
         )}
       </View>
-      {hasError && <Text className="mt-1 text-xs text-red-500">{error}</Text>}
-      {hint && !hasError && <Text className="mt-1 text-xs text-slate-400">{hint}</Text>}
+      {hasError && <Text className="mt-1 text-xs text-red-400">{error}</Text>}
+      {hint && !hasError && <Text className="mt-1 text-xs text-white/50">{hint}</Text>}
     </View>
   );
 };

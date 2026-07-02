@@ -3,6 +3,7 @@ const https = require('https');
 
 const TARGET_HOST = 'api.beruniy-talim.uz';
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY || '';
+const PORT = process.env.PORT || 3001;
 
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
@@ -76,7 +77,7 @@ http.createServer((req, res) => {
       if (!OPENAI_API_KEY) {
         res.writeHead(200, { ...CORS_HEADERS, 'Content-Type': 'application/json' });
         res.end(JSON.stringify({
-          reply: "AI yordamchi sozlanmagan. Ishga tushirish uchun: OPENAI_API_KEY=sk-... node proxy.js",
+          reply: "AI yordamchi sozlanmagan. OPENAI_API_KEY environment variable sozlang.",
         }));
         return;
       }
@@ -120,8 +121,8 @@ http.createServer((req, res) => {
   });
 
   req.pipe(proxy);
-}).listen(3001, () => {
-  console.log('Proxy ishga tushdi: http://localhost:3001');
+}).listen(PORT, () => {
+  console.log(`Proxy ishga tushdi: http://localhost:${PORT}`);
   if (!OPENAI_API_KEY) {
     console.log('ESLATMA: OPENAI_API_KEY sozlanmagan. AI chat ishlamaydi.');
   } else {

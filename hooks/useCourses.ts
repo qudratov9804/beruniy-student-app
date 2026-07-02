@@ -39,13 +39,22 @@ export const useCategories = () => {
   });
 };
 
-export const useEnrollCourse = () => {
+export const useEnrollCourse = (callbacks?: {
+  onSuccess?: () => void;
+  onError?: (err: unknown) => void;
+}) => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (courseId: number) => enrollmentsService.enroll(courseId),
-    onSuccess: (_, courseId) => {
+    mutationFn: ({ courseId }: { courseId: number; slug: string }) =>
+      enrollmentsService.enroll(courseId),
+    onSuccess: (_, { courseId, slug }) => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ENROLLMENTS.ALL });
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ENROLLMENTS.DETAIL(courseId) });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.COURSES.DETAIL(slug) });
+      callbacks?.onSuccess?.();
+    },
+    onError: (err) => {
+      callbacks?.onError?.(err);
     },
   });
 };

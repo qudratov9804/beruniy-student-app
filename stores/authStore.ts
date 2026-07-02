@@ -39,6 +39,7 @@ interface AuthState {
   isBiometricEnabled: boolean;
   setUser: (user: User) => void;
   setAuth: (user: User, token: string) => Promise<void>;
+  setToken: (token: string) => Promise<void>;
   clearAuth: () => Promise<void>;
   initialize: () => Promise<void>;
   setupPin: (pin: string) => Promise<void>;
@@ -61,6 +62,11 @@ export const useAuthStore = create<AuthState>((set) => ({
   setAuth: async (user, token) => {
     await storage.set(STORAGE_KEYS.ACCESS_TOKEN, token);
     set({ user, token, isAuthenticated: true });
+  },
+
+  setToken: async (token: string) => {
+    await storage.set(STORAGE_KEYS.ACCESS_TOKEN, token);
+    set({ token, isAuthenticated: true });
   },
 
   clearAuth: async () => {
