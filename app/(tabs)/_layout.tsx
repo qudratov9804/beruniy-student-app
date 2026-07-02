@@ -5,14 +5,16 @@ import { Home, BookOpen, BarChart2, Bot } from 'lucide-react-native';
 import { useAuthStore } from '@/stores';
 
 export default function TabsLayout() {
-  const { isAuthenticated } = useAuthStore();
+  const { isAuthenticated, isLoading } = useAuthStore();
   const router = useRouter();
 
   useEffect(() => {
-    if (!isAuthenticated) {
+    if (!isLoading && !isAuthenticated) {
       router.replace('/(auth)/login');
     }
-  }, [isAuthenticated, router]);
+  }, [isAuthenticated, isLoading, router]);
+
+  if (isLoading) return null;
 
   return (
     <Tabs

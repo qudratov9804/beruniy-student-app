@@ -28,6 +28,16 @@ export default function EditProfileScreen() {
   const [bio, setBio] = useState(user?.bio ?? '');
   const [headline, setHeadline] = useState(user?.headline ?? '');
   const [website, setWebsite] = useState(user?.website ?? '');
+  const [loadedUserId, setLoadedUserId] = useState(user?.id);
+
+  if (user && user.id !== loadedUserId) {
+    setLoadedUserId(user.id);
+    setName(user.name ?? '');
+    setEmail(user.email ?? '');
+    setBio(user.bio ?? '');
+    setHeadline(user.headline ?? '');
+    setWebsite(user.website ?? '');
+  }
 
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
