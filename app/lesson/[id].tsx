@@ -51,6 +51,7 @@ export default function LessonScreen() {
   const {
     data: stream,
     isLoading: streamLoading,
+    isFetching: streamIsFetching,
     isError: streamIsError,
     error: streamError,
     refetch: refetchStream,
@@ -62,18 +63,25 @@ export default function LessonScreen() {
     retry: noRetryOnAuthError,
   });
 
-  // The signed stream URL can expire well before the query's staleTime elapses,
-  // leaving a cached-but-dead URL in place with no visible error.
-  const isStreamExpired = !!stream && new Date(stream.expires_at).getTime() <= Date.now();
   const [videoPlaybackError, setVideoPlaybackError] = useState(false);
 
+  // The signed stream URL can expire well before the query's staleTime elapses,
+  // leaving a cached-but-dead URL in place with no visible error. `streamIsFetching`
+  // (rather than extra state) covers the render-side "still loading" case while
+  // this refetch is in flight.
   useEffect(() => {
-    if (isStreamExpired) refetchStream();
-  }, [isStreamExpired, refetchStream]);
+    const expired = !!stream && new Date(stream.expires_at).getTime() <= Date.now();
+    if (expired) refetchStream();
+  }, [stream, refetchStream]);
 
-  useEffect(() => {
+  // Reset the playback error whenever a new stream URL arrives, computed during
+  // render (React's documented pattern for adjusting state on a prop change)
+  // rather than in an effect, which would cause an extra render/commit cycle.
+  const [prevStreamUrl, setPrevStreamUrl] = useState(stream?.stream_url);
+  if (stream?.stream_url !== prevStreamUrl) {
+    setPrevStreamUrl(stream?.stream_url);
     setVideoPlaybackError(false);
-  }, [stream?.stream_url]);
+  }
 
   const completeMutation = useMutation({
     mutationFn: (watchSeconds: number) =>
@@ -158,7 +166,7 @@ export default function LessonScreen() {
                     </Text>
                   </TouchableOpacity>
                 </View>
-              ) : streamLoading || !stream || isStreamExpired ? (
+              ) : streamLoading || streamIsFetching || !stream ? (
                 <View className="bg-slate-900 rounded-3xl h-56 items-center justify-center">
                   <ActivityIndicator size="large" color="#ffffff" />
                 </View>
