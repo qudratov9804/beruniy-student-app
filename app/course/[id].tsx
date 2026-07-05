@@ -167,7 +167,7 @@ export default function CourseDetailScreen() {
   // Lessons unlock in order: a lesson is playable once the previous one is completed.
   // The course-detail sections endpoint doesn't return per-lesson completion, so we
   // derive the unlock boundary from the enrollment's `next_lesson` pointer instead.
-  const allLessons = (course.sections ?? []).flatMap((section) => section.lessons);
+  const allLessons = (course.sections ?? []).flatMap((section) => section.lessons ?? []);
   const nextLessonId = enrollmentDetail?.next_lesson?.id;
   const nextLessonIndex =
     nextLessonId != null ? allLessons.findIndex((lesson) => lesson.id === nextLessonId) : -1;
@@ -207,7 +207,7 @@ export default function CourseDetailScreen() {
   const handleContinue = () => {
     const nextLesson = enrollmentDetail?.next_lesson;
     if (nextLesson) {
-      router.push(`/lesson/${nextLesson.id}?courseId=${course.id}`);
+      router.push(`/lesson/${nextLesson.id}?courseId=${course.id}&courseSlug=${id}`);
     }
   };
 
@@ -377,7 +377,7 @@ export default function CourseDetailScreen() {
               {course.sections.map((section) => (
                 <View key={section.id} style={styles.sectionBlock}>
                   <Text style={styles.sectionTitle}>{section.title}</Text>
-                  {section.lessons.map((lesson: SectionLesson) => {
+                  {(section.lessons ?? []).map((lesson: SectionLesson) => {
                     const isUnlocked = isEnrolled
                       ? unlockedLessonIds.has(lesson.id) || lesson.is_preview
                       : lesson.is_preview;
@@ -386,7 +386,7 @@ export default function CourseDetailScreen() {
                         key={lesson.id}
                         onPress={() => {
                           if (!isUnlocked) return;
-                          router.push(`/lesson/${lesson.id}?courseId=${course.id}`);
+                          router.push(`/lesson/${lesson.id}?courseId=${course.id}&courseSlug=${id}`);
                         }}
                         style={styles.lessonRow}
                         activeOpacity={0.7}

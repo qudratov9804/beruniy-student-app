@@ -30,8 +30,10 @@ export default function PaymentStatusScreen() {
   }, [paymentUrl]);
 
   useEffect(() => {
-    if (payment?.status === 'completed' && !invalidatedOnce.current) {
-      invalidatedOnce.current = true;
+    if (payment?.status !== 'completed' || invalidatedOnce.current) return;
+    invalidatedOnce.current = true;
+
+    const invalidateEnrollmentState = () => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ENROLLMENTS.ALL });
       if (courseSlug) {
         queryClient.invalidateQueries({ queryKey: QUERY_KEYS.COURSES.DETAIL(courseSlug) });
@@ -39,7 +41,15 @@ export default function PaymentStatusScreen() {
       if (courseId) {
         queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ENROLLMENTS.DETAIL(Number(courseId)) });
       }
-    }
+    };
+
+    // The payment gateway confirms completion before the backend's enrollment
+    // record is necessarily created (webhook lag), so a single invalidation
+    // right away can still read "not enrolled". Retry for a few seconds.
+    invalidateEnrollmentState();
+    const retryDelaysMs = [1500, 4000, 8000];
+    const timers = retryDelaysMs.map((delay) => setTimeout(invalidateEnrollmentState, delay));
+    return () => timers.forEach(clearTimeout);
   }, [payment?.status, courseSlug, courseId, queryClient]);
 
   const handleReopen = () => {
