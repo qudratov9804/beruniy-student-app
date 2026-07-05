@@ -4,7 +4,7 @@ import { useRouter } from 'expo-router';
 import { Image } from 'expo-image';
 import { Star, Clock, Users, BookOpen } from 'lucide-react-native';
 import { Card, Badge, ProgressBar } from '@/components/ui';
-import { formatPrice } from '@/utils';
+import { formatPrice, stripHtml } from '@/utils';
 import type { Course } from '@/types';
 
 interface CourseCardProps {
@@ -108,7 +108,7 @@ export const CourseCard: React.FC<CourseCardProps> = ({
           </Text>
           {course.short_description && (
             <Text className="text-sm text-white/60 mb-3" numberOfLines={2}>
-              {course.short_description}
+              {stripHtml(course.short_description)}
             </Text>
           )}
           <View className="flex-row items-center gap-4">

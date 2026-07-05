@@ -29,9 +29,19 @@ export interface SaveProgressResponse {
   course_progress: number;
 }
 
+export interface StreamCookies {
+  'CloudFront-Policy': string;
+  'CloudFront-Signature': string;
+  'CloudFront-Key-Pair-Id': string;
+  Domain: string;
+  Expires: number;
+}
+
 export interface StreamResponse {
-  url: string;
+  stream_url: string;
+  format: string;
   expires_at: string;
+  cookies: StreamCookies | [];
 }
 
 // Quiz

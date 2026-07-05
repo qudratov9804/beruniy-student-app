@@ -55,7 +55,32 @@ export const truncateText = (text: string, maxLength: number): string => {
   return text.substring(0, maxLength).trim() + '…';
 };
 
+export const stripHtml = (html: string): string =>
+  html
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+
 export const formatPrice = (price: number): string => {
   if (price === 0) return 'Bepul';
   return new Intl.NumberFormat('uz-UZ').format(price) + " so'm";
+};
+
+export const paymentProviderLabels: Record<'payme' | 'click', string> = {
+  payme: 'Payme',
+  click: 'Click',
+};
+
+export const paymentStatusLabels: Record<'pending' | 'completed' | 'failed' | 'cancelled', string> = {
+  pending: 'Kutilmoqda',
+  completed: 'Muvaffaqiyatli',
+  failed: 'Muvaffaqiyatsiz',
+  cancelled: 'Bekor qilindi',
+};
+
+export const subscriptionTypeLabels: Record<'lifetime' | 'monthly' | 'yearly', string> = {
+  lifetime: 'Umrbod',
+  monthly: 'Oylik',
+  yearly: 'Yillik',
 };

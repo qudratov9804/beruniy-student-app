@@ -3,27 +3,43 @@
     "name": "Beruniy Talim",
     "slug": "beruniy-student-app",
     "scheme": "beruniy",
-    "version": "0.0.1",
+    "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "automatic",
+    "userInterfaceStyle": "dark",
     "newArchEnabled": true,
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#0F62FE"
+      "backgroundColor": "#0F172A"
     },
     "ios": {
-      "supportsTablet": true,
-      "bundleIdentifier": "uz.beruniy.student"
+      "supportsTablet": false,
+      "bundleIdentifier": "uz.beruniy.student",
+      "infoPlist": {
+        "NSFaceIDUsageDescription": "Tizimga kirish uchun Face ID ishlatiladi",
+        "NSCameraUsageDescription": "Profil rasmini yuklash uchun kamera kerak"
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/android-icon-foreground.png",
-        "backgroundImage": "./assets/android-icon-background.png"
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
       },
       "package": "uz.beruniy.student",
-      "predictiveBackGestureEnabled": false
+      "versionCode": 1,
+      "compileSdkVersion": 36,
+      "targetSdkVersion": 36,
+      "minSdkVersion": 24,
+      "predictiveBackGestureEnabled": false,
+      "permissions": [
+        "android.permission.INTERNET",
+        "android.permission.USE_BIOMETRIC",
+        "android.permission.USE_FINGERPRINT",
+        "android.permission.CAMERA",
+        "android.permission.VIBRATE"
+      ]
     },
     "web": {
       "bundler": "metro",
@@ -33,14 +49,23 @@
     "plugins": [
       "expo-router",
       "expo-font",
+      "expo-system-ui",
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#0F62FE",
+          "backgroundColor": "#0F172A",
           "image": "./assets/splash-icon.png",
           "imageWidth": 200
         }
-      ]
+      ],
+      [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "Tizimga kirish uchun Face ID ishlatiladi"
+        }
+      ],
+      "expo-secure-store",
+      "expo-video"
     ],
     "updates": {
       "enabled": false

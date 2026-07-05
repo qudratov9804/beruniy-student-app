@@ -1,12 +1,28 @@
 import React from 'react';
-import { View, Text, ScrollView, Alert } from 'react-native';
+import { View, Text, ScrollView, Alert, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useQuery, useMutation } from '@tanstack/react-query';
+import { ChevronLeft } from 'lucide-react-native';
 import { quizService } from '@/services/api';
 import { useQuizStore } from '@/stores';
 import { QuizOption, QuizProgressHeader, QuizResultCard } from '@/components/quiz';
 import { Button, Skeleton } from '@/components/ui';
+import { EmptyState } from '@/components/common/EmptyState';
+
+const getErrorMessage = (err: unknown): string => {
+  const e = err as { response?: { status?: number; data?: { message?: string } } };
+  if (e?.response?.status === 403) {
+    return "Bu testni ko'rish uchun kursga yozilgan bo'lishingiz kerak.";
+  }
+  return e?.response?.data?.message ?? 'Testni yuklashda xatolik yuz berdi.';
+};
+
+const noRetryOnAuthError = (failureCount: number, err: unknown) => {
+  const status = (err as { response?: { status?: number } })?.response?.status;
+  if (status === 401 || status === 403 || status === 404) return false;
+  return failureCount < 2;
+};
 
 export default function QuizScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -26,10 +42,17 @@ export default function QuizScreen() {
     getAnswerForQuestion,
   } = useQuizStore();
 
-  const { data: quiz, isLoading } = useQuery({
+  const {
+    data: quiz,
+    isLoading,
+    isError,
+    error,
+    refetch,
+  } = useQuery({
     queryKey: ['quiz', lessonId],
     queryFn: () => quizService.getQuiz(lessonId),
     enabled: !!lessonId,
+    retry: noRetryOnAuthError,
   });
 
   const submitMutation = useMutation({
@@ -57,6 +80,24 @@ export default function QuizScreen() {
     ]);
   };
 
+  if (isError) {
+    return (
+      <SafeAreaView className="flex-1 bg-white">
+        <View className="flex-row items-center px-5 py-4">
+          <TouchableOpacity onPress={() => router.back()} className="p-2 -ml-2">
+            <ChevronLeft size={28} color="#0F172A" />
+          </TouchableOpacity>
+        </View>
+        <EmptyState
+          emoji="😕"
+          title={getErrorMessage(error)}
+          actionLabel="Qayta urinish"
+          onAction={() => refetch()}
+        />
+      </SafeAreaView>
+    );
+  }
+
   if (isLoading || !quiz) {
     return (
       <SafeAreaView className="flex-1 bg-white">
@@ -67,6 +108,19 @@ export default function QuizScreen() {
             <Skeleton key={i} height={56} borderRadius={12} className="mb-3" />
           ))}
         </View>
+      </SafeAreaView>
+    );
+  }
+
+  if (quiz.questions.length === 0) {
+    return (
+      <SafeAreaView className="flex-1 bg-white">
+        <View className="flex-row items-center px-5 py-4">
+          <TouchableOpacity onPress={() => router.back()} className="p-2 -ml-2">
+            <ChevronLeft size={28} color="#0F172A" />
+          </TouchableOpacity>
+        </View>
+        <EmptyState emoji="📝" title="Bu testda hozircha savollar mavjud emas." />
       </SafeAreaView>
     );
   }

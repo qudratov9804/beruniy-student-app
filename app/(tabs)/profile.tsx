@@ -14,6 +14,7 @@ import {
   Info,
   Lock,
   Edit2,
+  Wallet,
 } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '@/hooks/useAuth';
@@ -138,6 +139,12 @@ export default function ProfileScreen() {
               icon={<Trophy size={20} color="#fbbf24" />}
               label="Sertifikatlarim"
               onPress={() => router.push('/(tabs)/progress')}
+            />
+            <View className="h-px bg-white/10 ml-14" />
+            <MenuItem
+              icon={<Wallet size={20} color="#60a5fa" />}
+              label="To'lovlar tarixi"
+              onPress={() => router.push('/payments')}
             />
           </View>
 

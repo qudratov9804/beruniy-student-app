@@ -126,6 +126,32 @@ export interface CoursesFilter {
   page?: number;
 }
 
+export type PaymentProvider = 'payme' | 'click';
+export type PaymentStatus = 'pending' | 'completed' | 'failed' | 'cancelled';
+export type SubscriptionType = 'lifetime' | 'monthly' | 'yearly';
+
+export interface Payment {
+  transaction_id: string;
+  provider: PaymentProvider;
+  amount: number;
+  original_amount: number;
+  discount: number;
+  currency: string;
+  status: PaymentStatus;
+  subscription_type: SubscriptionType;
+  payment_url: string;
+  expires_at: string;
+  paid_at: string | null;
+}
+
+export interface InitiatePaymentPayload {
+  course_id?: number;
+  learning_path_id?: number;
+  provider: PaymentProvider;
+  coupon_code?: string;
+  subscription_type?: SubscriptionType;
+}
+
 export interface HomeFeed {
   featured: Course[];
   trending: Course[];

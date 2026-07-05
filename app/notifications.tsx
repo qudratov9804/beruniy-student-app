@@ -3,28 +3,32 @@ import { View, Text, FlatList, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { ChevronLeft, Bell, CheckCheck, Trash2 } from 'lucide-react-native';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { notificationsService } from '@/services/api';
 import { QUERY_KEYS } from '@/constants/config';
+import { useNotifications, useMarkNotificationRead } from '@/hooks/useProgress';
 import { Skeleton } from '@/components/ui';
 
 export default function NotificationsScreen() {
   const router = useRouter();
   const queryClient = useQueryClient();
 
-  const { data, isLoading } = useQuery({
-    queryKey: QUERY_KEYS.NOTIFICATIONS.ALL,
-    queryFn: () => notificationsService.getAll(),
-  });
+  const { data, isLoading } = useNotifications();
+  const markReadMutation = useMarkNotificationRead();
+
+  const invalidateAll = () => {
+    queryClient.invalidateQueries({ queryKey: QUERY_KEYS.NOTIFICATIONS.ALL });
+    queryClient.invalidateQueries({ queryKey: QUERY_KEYS.NOTIFICATIONS.UNREAD_COUNT });
+  };
 
   const markAllMutation = useMutation({
     mutationFn: () => notificationsService.markAllRead(),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: QUERY_KEYS.NOTIFICATIONS.ALL }),
+    onSuccess: invalidateAll,
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) => notificationsService.delete(id),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: QUERY_KEYS.NOTIFICATIONS.ALL }),
+    onSuccess: invalidateAll,
   });
 
   const notifications = data?.data ?? [];
@@ -60,7 +64,13 @@ export default function NotificationsScreen() {
           contentContainerStyle={{ padding: 16 }}
           ItemSeparatorComponent={() => <View className="h-2" />}
           renderItem={({ item }) => (
-            <View className={`bg-white dark:bg-slate-800 rounded-2xl p-4 flex-row items-start gap-3 ${!item.read_at ? 'border-l-4 border-primary-500' : ''}`}>
+            <TouchableOpacity
+              activeOpacity={0.8}
+              onPress={() => {
+                if (!item.read_at) markReadMutation.mutate(String(item.id));
+              }}
+              className={`bg-white dark:bg-slate-800 rounded-2xl p-4 flex-row items-start gap-3 ${!item.read_at ? 'border-l-4 border-primary-500' : ''}`}
+            >
               <View className={`w-10 h-10 rounded-full items-center justify-center flex-shrink-0 ${!item.read_at ? 'bg-primary-100' : 'bg-slate-100'}`}>
                 <Bell size={18} color={!item.read_at ? '#6366F1' : '#94A3B8'} />
               </View>
@@ -72,7 +82,7 @@ export default function NotificationsScreen() {
               <TouchableOpacity onPress={() => deleteMutation.mutate(String(item.id))} className="p-1">
                 <Trash2 size={16} color="#CBD5E1" />
               </TouchableOpacity>
-            </View>
+            </TouchableOpacity>
           )}
         />
       )}

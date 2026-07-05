@@ -3,13 +3,20 @@ import { notificationsService, certificatesService, wishlistService } from '@/se
 import { QUERY_KEYS } from '@/constants/config';
 import { useAuthStore } from '@/stores';
 
+// Backend exposes no websocket/push channel for notifications (REST-only per API docs),
+// so "realtime" here means short-interval polling that also refires on refocus.
+const NOTIFICATIONS_POLL_MS = 25000;
+const UNREAD_COUNT_POLL_MS = 15000;
+
 export const useNotifications = () => {
   const { isAuthenticated } = useAuthStore();
   return useQuery({
     queryKey: QUERY_KEYS.NOTIFICATIONS.ALL,
     queryFn: () => notificationsService.getAll(),
     enabled: isAuthenticated,
-    staleTime: 1000 * 60 * 1,
+    staleTime: 1000 * 20,
+    refetchInterval: isAuthenticated ? NOTIFICATIONS_POLL_MS : false,
+    refetchOnWindowFocus: true,
   });
 };
 
@@ -19,7 +26,9 @@ export const useUnreadCount = () => {
     queryKey: QUERY_KEYS.NOTIFICATIONS.UNREAD_COUNT,
     queryFn: () => notificationsService.getUnreadCount(),
     enabled: isAuthenticated,
-    staleTime: 1000 * 60 * 1,
+    staleTime: 1000 * 10,
+    refetchInterval: isAuthenticated ? UNREAD_COUNT_POLL_MS : false,
+    refetchOnWindowFocus: true,
   });
 };
 

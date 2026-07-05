@@ -1,13 +1,29 @@
-import React from 'react';
-import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { ChevronLeft, CheckCircle, BookOpen, Video } from 'lucide-react-native';
+import { ChevronLeft, CheckCircle, BookOpen, Clock, AlertTriangle } from 'lucide-react-native';
 import { lessonsService } from '@/services/api';
 import { Button, Skeleton } from '@/components/ui';
+import { VideoPlayer } from '@/components/lesson';
 import { HtmlText } from '@/components/common/HtmlText';
+import { EmptyState } from '@/components/common/EmptyState';
 import { QUERY_KEYS } from '@/constants/config';
+
+const getErrorMessage = (err: unknown): string => {
+  const e = err as { response?: { status?: number; data?: { message?: string } } };
+  if (e?.response?.status === 403) {
+    return "Bu darsni ko'rish uchun kursga yozilgan bo'lishingiz kerak.";
+  }
+  return e?.response?.data?.message ?? 'Darsni yuklashda xatolik yuz berdi.';
+};
+
+const noRetryOnAuthError = (failureCount: number, err: unknown) => {
+  const status = (err as { response?: { status?: number } })?.response?.status;
+  if (status === 401 || status === 403 || status === 404) return false;
+  return failureCount < 2;
+};
 
 export default function LessonScreen() {
   const { id, courseId } = useLocalSearchParams<{ id: string; courseId: string }>();
@@ -17,21 +33,75 @@ export default function LessonScreen() {
   const lessonId = Number(id);
   const cId = Number(courseId);
 
-  const { data: lesson, isLoading } = useQuery({
+  const {
+    data: lesson,
+    isLoading,
+    isError,
+    error,
+    refetch,
+  } = useQuery({
     queryKey: QUERY_KEYS.LESSONS.DETAIL(cId, lessonId),
     queryFn: () => lessonsService.getById(cId, lessonId),
     enabled: !!lessonId && !!cId,
+    retry: noRetryOnAuthError,
   });
 
+  const isVideoReady = lesson?.type === 'video' && lesson.video_status === 'ready';
+
+  const {
+    data: stream,
+    isLoading: streamLoading,
+    isError: streamIsError,
+    error: streamError,
+    refetch: refetchStream,
+  } = useQuery({
+    queryKey: QUERY_KEYS.LESSONS.STREAM(cId, lessonId),
+    queryFn: () => lessonsService.getStreamUrl(cId, lessonId),
+    enabled: isVideoReady,
+    staleTime: 1000 * 60 * 60 * 3,
+    retry: noRetryOnAuthError,
+  });
+
+  // The signed stream URL can expire well before the query's staleTime elapses,
+  // leaving a cached-but-dead URL in place with no visible error.
+  const isStreamExpired = !!stream && new Date(stream.expires_at).getTime() <= Date.now();
+  const [videoPlaybackError, setVideoPlaybackError] = useState(false);
+
+  useEffect(() => {
+    if (isStreamExpired) refetchStream();
+  }, [isStreamExpired, refetchStream]);
+
+  useEffect(() => {
+    setVideoPlaybackError(false);
+  }, [stream?.stream_url]);
+
   const completeMutation = useMutation({
-    mutationFn: () =>
-      lessonsService.saveProgress(cId, lessonId, { watch_seconds: 0, is_completed: true }),
+    mutationFn: (watchSeconds: number) =>
+      lessonsService.saveProgress(cId, lessonId, { watch_seconds: watchSeconds, is_completed: true }),
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.LESSONS.DETAIL(cId, lessonId) });
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ENROLLMENTS.ALL });
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.COURSES.PROGRESS(cId) });
-      router.back();
     },
   });
+
+  if (isError) {
+    return (
+      <SafeAreaView className="flex-1 bg-white">
+        <View className="flex-row items-center px-5 py-4">
+          <TouchableOpacity onPress={() => router.back()} className="p-2 -ml-2">
+            <ChevronLeft size={28} color="#0F172A" />
+          </TouchableOpacity>
+        </View>
+        <EmptyState
+          emoji="😕"
+          title={getErrorMessage(error)}
+          actionLabel="Qayta urinish"
+          onAction={() => refetch()}
+        />
+      </SafeAreaView>
+    );
+  }
 
   if (isLoading || !lesson) {
     return (
@@ -67,9 +137,61 @@ export default function LessonScreen() {
 
       <ScrollView className="flex-1 px-5" showsVerticalScrollIndicator={false}>
         {lesson.type === 'video' ? (
-          <View className="mt-4 bg-slate-900 rounded-3xl h-56 items-center justify-center mb-6">
-            <Video size={48} color="#FFFFFF" />
-            <Text className="text-white mt-2 text-sm">Video pleer</Text>
+          <View className="mt-4 mb-6">
+            {lesson.video_status === 'ready' ? (
+              streamIsError || videoPlaybackError ? (
+                <View className="bg-slate-900 rounded-3xl h-56 items-center justify-center gap-3 px-6">
+                  <AlertTriangle size={36} color="#f87171" />
+                  <Text className="text-white text-sm text-center">
+                    {videoPlaybackError
+                      ? 'Videoni ijro etishda xatolik yuz berdi.'
+                      : getErrorMessage(streamError)}
+                  </Text>
+                  <TouchableOpacity
+                    onPress={() => {
+                      setVideoPlaybackError(false);
+                      refetchStream();
+                    }}
+                  >
+                    <Text className="text-primary-300 text-sm font-sans-semibold">
+                      Qayta urinish
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              ) : streamLoading || !stream || isStreamExpired ? (
+                <View className="bg-slate-900 rounded-3xl h-56 items-center justify-center">
+                  <ActivityIndicator size="large" color="#ffffff" />
+                </View>
+              ) : (
+                <VideoPlayer
+                  url={stream.stream_url}
+                  cookies={stream.cookies}
+                  onEnd={() => {
+                    if (!isCompleted) completeMutation.mutate(lesson.duration_seconds);
+                  }}
+                  onError={() => setVideoPlaybackError(true)}
+                />
+              )
+            ) : lesson.video_status === 'processing' ? (
+              <View className="bg-slate-900 rounded-3xl h-56 items-center justify-center gap-3 px-6">
+                <ActivityIndicator size="large" color="#60A5FA" />
+                <Text className="text-white text-sm text-center">
+                  Video hozircha tayyorlanmoqda. Birozdan so'ng qayta urinib ko'ring.
+                </Text>
+              </View>
+            ) : lesson.video_status === 'failed' ? (
+              <View className="bg-slate-900 rounded-3xl h-56 items-center justify-center gap-3 px-6">
+                <AlertTriangle size={36} color="#f87171" />
+                <Text className="text-white text-sm text-center">
+                  Videoni yuklashda xatolik yuz berdi.
+                </Text>
+              </View>
+            ) : (
+              <View className="bg-slate-900 rounded-3xl h-56 items-center justify-center gap-3 px-6">
+                <Clock size={36} color="rgba(255,255,255,0.5)" />
+                <Text className="text-white/70 text-sm text-center">Video hali mavjud emas.</Text>
+              </View>
+            )}
           </View>
         ) : (
           <View className="mt-4 mb-6">
@@ -97,7 +219,10 @@ export default function LessonScreen() {
           <Button
             fullWidth
             size="lg"
-            onPress={() => completeMutation.mutate()}
+            onPress={async () => {
+              await completeMutation.mutateAsync(lesson.duration_seconds);
+              router.back();
+            }}
             loading={completeMutation.isPending}
             disabled={isCompleted}
             icon={isCompleted ? <CheckCircle size={20} color="#fff" /> : undefined}

@@ -1,11 +1,4 @@
-import { Platform } from 'react-native';
-
-const PROXY_URL = process.env.EXPO_PUBLIC_PROXY_URL || 'http://localhost:3001';
-
-export const API_BASE_URL =
-  Platform.OS === 'web'
-    ? `${PROXY_URL}/api/v1`
-    : 'https://api.beruniy-talim.uz/api/v1';
+export const API_BASE_URL = 'https://api.beruniy-talim.uz/api/v1';
 
 export const STORAGE_KEYS = {
   ACCESS_TOKEN: 'access_token',
@@ -38,6 +31,14 @@ export const QUERY_KEYS = {
   ENROLLMENTS: {
     ALL: ['enrollments'] as const,
     DETAIL: (courseId: number) => ['enrollments', courseId] as const,
+  },
+  PAYMENTS: {
+    ALL: ['payments'] as const,
+    STATUS: (transactionId: string) => ['payments', transactionId] as const,
+  },
+  REVIEWS: {
+    ALL: (courseId: number) => ['reviews', courseId] as const,
+    SUMMARY: (courseId: number) => ['reviews', courseId, 'summary'] as const,
   },
   LESSONS: {
     DETAIL: (courseId: number, id: number) => ['lessons', courseId, id] as const,

@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { coursesService, categoriesService, enrollmentsService } from '@/services/api';
 import { QUERY_KEYS } from '@/constants/config';
 import { useAuthStore } from '@/stores';
@@ -8,6 +8,19 @@ export const useCourses = (filters?: CoursesFilter) => {
   return useQuery({
     queryKey: [...QUERY_KEYS.COURSES.ALL, filters],
     queryFn: () => coursesService.getAll(filters),
+    staleTime: 1000 * 60 * 5,
+  });
+};
+
+export const useInfiniteCourses = (filters?: Omit<CoursesFilter, 'page'>) => {
+  return useInfiniteQuery({
+    queryKey: [...QUERY_KEYS.COURSES.ALL, 'infinite', filters],
+    queryFn: ({ pageParam }) => coursesService.getAll({ ...filters, page: pageParam }),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) =>
+      lastPage.meta.current_page < lastPage.meta.last_page
+        ? lastPage.meta.current_page + 1
+        : undefined,
     staleTime: 1000 * 60 * 5,
   });
 };

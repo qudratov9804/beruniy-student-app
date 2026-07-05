@@ -70,12 +70,17 @@ export default function RootLayout() {
             <Stack.Screen name="(tabs)" />
             <Stack.Screen name="notifications" options={{ presentation: 'card', animation: 'slide_from_right' }} />
             <Stack.Screen name="wishlist" options={{ presentation: 'card', animation: 'slide_from_right' }} />
+            <Stack.Screen name="payments" options={{ presentation: 'card', animation: 'slide_from_right' }} />
             <Stack.Screen name="settings" options={{ presentation: 'card', animation: 'slide_from_right' }} />
             <Stack.Screen name="about" options={{ presentation: 'card', animation: 'slide_from_right' }} />
             <Stack.Screen name="edit-profile" options={{ presentation: 'card', animation: 'slide_from_right' }} />
             <Stack.Screen
               name="course/[id]"
               options={{ presentation: 'card', animation: 'slide_from_right' }}
+            />
+            <Stack.Screen
+              name="payment/[transactionId]"
+              options={{ presentation: 'fullScreenModal', animation: 'slide_from_bottom' }}
             />
             <Stack.Screen name="lesson/[id]" options={{ presentation: 'fullScreenModal' }} />
             <Stack.Screen

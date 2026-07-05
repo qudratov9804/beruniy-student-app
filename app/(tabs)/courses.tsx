@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { View, Text, FlatList, ScrollView, TextInput, TouchableOpacity } from 'react-native';
+import { View, Text, FlatList, TextInput, TouchableOpacity, ActivityIndicator, Modal } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Search } from 'lucide-react-native';
+import { Search, ChevronDown, Check, X } from 'lucide-react-native';
 import { useLocalSearchParams } from 'expo-router';
-import { useCourses, useCategories } from '@/hooks/useCourses';
-import { CourseCard, CategoryChip } from '@/components/course';
+import { useInfiniteCourses, useCategories } from '@/hooks/useCourses';
+import { CourseCard } from '@/components/course';
 import { CourseCardSkeleton } from '@/components/ui';
 import { EmptyCoursesIllustration, SearchEmptyIllustration } from '@/components/common/illustrations';
 import { ScreenBackground, AppHeader } from '@/components/common';
@@ -15,6 +15,8 @@ export default function CoursesScreen() {
   const [search, setSearch] = useState(q ?? '');
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
   const [selectedLevel, setSelectedLevel] = useState<CourseLevel | null>(null);
+  const [categoryModalVisible, setCategoryModalVisible] = useState(false);
+  const [levelModalVisible, setLevelModalVisible] = useState(false);
   const [prevQ, setPrevQ] = useState(q);
 
   if (q !== prevQ) {
@@ -28,8 +30,16 @@ export default function CoursesScreen() {
     level: selectedLevel ?? undefined,
   };
 
-  const { data, isLoading } = useCourses(filters);
+  const {
+    data,
+    isLoading,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteCourses(filters);
   const { data: categories } = useCategories();
+
+  const courses = data?.pages.flatMap((page) => page.data) ?? [];
 
   const levels: { label: string; value: CourseLevel }[] = [
     { label: "Boshlang'ich", value: 'beginner' },
@@ -42,66 +52,42 @@ export default function CoursesScreen() {
       <SafeAreaView className="flex-1 bg-transparent">
         <AppHeader title="Kurslar" />
 
-        {/* Search */}
-        <View className="px-5 pb-3">
-          <View className="flex-row items-center bg-white/85 rounded-2xl px-4 h-12 border border-white/30">
-            <Search size={20} color="#94A3B8" />
+        {/* Search + filters — one combined row */}
+        <View className="flex-row items-center gap-2 px-5 pb-3 border-b border-white/10">
+          <View className="flex-1 flex-row items-center bg-white/85 rounded-2xl px-3 h-12 border border-white/30">
+            <Search size={18} color="#94A3B8" />
             <TextInput
-              className="flex-1 ml-3 text-base text-slate-800"
+              className="flex-1 ml-2 text-sm text-slate-800"
               placeholder="Kurs qidirish..."
               placeholderTextColor="#94A3B8"
               value={search}
               onChangeText={setSearch}
             />
           </View>
-        </View>
 
-        {/* Filters */}
-        <View className="border-b border-white/10 pb-3">
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 4, gap: 8 }}
+          <TouchableOpacity
+            onPress={() => setCategoryModalVisible(true)}
+            activeOpacity={0.8}
+            className="flex-row items-center gap-1 bg-white/10 border border-white/20 rounded-2xl px-2.5 h-12"
+            style={{ maxWidth: 118 }}
           >
-            <TouchableOpacity
-              onPress={() => setSelectedCategory(null)}
-              className={`px-4 py-2 rounded-2xl border mr-1 ${!selectedCategory ? 'bg-primary-600 border-primary-600' : 'bg-white/10 border-white/20'}`}
-            >
-              <Text
-                className={`text-sm font-sans-semibold ${!selectedCategory ? 'text-white' : 'text-white/80'}`}
-              >
-                Barchasi
-              </Text>
-            </TouchableOpacity>
-            {categories?.map((cat) => (
-              <CategoryChip
-                key={cat.id}
-                category={cat}
-                selected={selectedCategory?.id === cat.id}
-                onPress={(c) => setSelectedCategory(selectedCategory?.id === c.id ? null : c)}
-              />
-            ))}
-          </ScrollView>
+            <Text className="text-xs font-sans-semibold text-white flex-shrink" numberOfLines={1}>
+              {selectedCategory ? selectedCategory.name : 'Kategoriya'}
+            </Text>
+            <ChevronDown size={14} color="rgba(255,255,255,0.70)" />
+          </TouchableOpacity>
 
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 8, gap: 8 }}
+          <TouchableOpacity
+            onPress={() => setLevelModalVisible(true)}
+            activeOpacity={0.8}
+            className="flex-row items-center gap-1 bg-white/10 border border-white/20 rounded-2xl px-2.5 h-12"
+            style={{ maxWidth: 96 }}
           >
-            {levels.map(({ label, value }) => (
-              <TouchableOpacity
-                key={value}
-                onPress={() => setSelectedLevel(selectedLevel === value ? null : value)}
-                className={`px-3 py-1.5 rounded-xl border mr-2 ${selectedLevel === value ? 'bg-white border-white' : 'bg-white/10 border-white/20'}`}
-              >
-                <Text
-                  className={`text-xs font-sans-semibold ${selectedLevel === value ? 'text-slate-800' : 'text-white/80'}`}
-                >
-                  {label}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
+            <Text className="text-xs font-sans-semibold text-white flex-shrink" numberOfLines={1}>
+              {selectedLevel ? levels.find((l) => l.value === selectedLevel)?.label : 'Daraja'}
+            </Text>
+            <ChevronDown size={14} color="rgba(255,255,255,0.70)" />
+          </TouchableOpacity>
         </View>
 
         {/* Course List */}
@@ -113,10 +99,22 @@ export default function CoursesScreen() {
           </View>
         ) : (
           <FlatList
-            data={data?.data ?? []}
+            className="flex-1"
+            data={courses}
             keyExtractor={(item) => String(item.id)}
             contentContainerStyle={{ padding: 20 }}
             showsVerticalScrollIndicator={false}
+            onEndReachedThreshold={0.5}
+            onEndReached={() => {
+              if (hasNextPage && !isFetchingNextPage) fetchNextPage();
+            }}
+            ListFooterComponent={
+              isFetchingNextPage ? (
+                <View className="py-4">
+                  <ActivityIndicator size="small" color="#60a5fa" />
+                </View>
+              ) : null
+            }
             ListEmptyComponent={
               <View className="items-center py-8">
                 {search.trim() ? (
@@ -136,6 +134,130 @@ export default function CoursesScreen() {
           />
         )}
       </SafeAreaView>
+
+      {/* Category select modal */}
+      <Modal
+        visible={categoryModalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setCategoryModalVisible(false)}
+      >
+        <TouchableOpacity
+          activeOpacity={1}
+          onPress={() => setCategoryModalVisible(false)}
+          className="flex-1 bg-black/65 items-center justify-center px-5"
+        >
+          <TouchableOpacity
+            activeOpacity={1}
+            onPress={() => {}}
+            className="w-full rounded-3xl border border-white/15 bg-slate-900 p-5"
+            style={{ maxHeight: '70%' }}
+          >
+            <View className="flex-row items-center justify-between mb-4">
+              <Text className="text-lg font-sans-bold text-white">Kategoriya tanlang</Text>
+              <TouchableOpacity
+                onPress={() => setCategoryModalVisible(false)}
+                className="w-8 h-8 rounded-full bg-white/10 items-center justify-center"
+              >
+                <X size={16} color="rgba(255,255,255,0.75)" />
+              </TouchableOpacity>
+            </View>
+
+            <FlatList
+              data={categories ?? []}
+              keyExtractor={(item) => String(item.id)}
+              showsVerticalScrollIndicator={false}
+              ListHeaderComponent={
+                <TouchableOpacity
+                  onPress={() => {
+                    setSelectedCategory(null);
+                    setCategoryModalVisible(false);
+                  }}
+                  className="flex-row items-center justify-between py-3 border-b border-white/10"
+                >
+                  <Text className="text-sm font-sans-semibold text-white">Barcha kategoriyalar</Text>
+                  {!selectedCategory && <Check size={18} color="#60a5fa" />}
+                </TouchableOpacity>
+              }
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  onPress={() => {
+                    setSelectedCategory(item);
+                    setCategoryModalVisible(false);
+                  }}
+                  className="flex-row items-center justify-between py-3 border-b border-white/10"
+                >
+                  <Text className="text-sm font-sans-semibold text-white">
+                    {item.icon ? `${item.icon} ` : ''}{item.name}
+                  </Text>
+                  {selectedCategory?.id === item.id && <Check size={18} color="#60a5fa" />}
+                </TouchableOpacity>
+              )}
+            />
+          </TouchableOpacity>
+        </TouchableOpacity>
+      </Modal>
+
+      {/* Level select modal */}
+      <Modal
+        visible={levelModalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setLevelModalVisible(false)}
+      >
+        <TouchableOpacity
+          activeOpacity={1}
+          onPress={() => setLevelModalVisible(false)}
+          className="flex-1 bg-black/65 items-center justify-center px-5"
+        >
+          <TouchableOpacity
+            activeOpacity={1}
+            onPress={() => {}}
+            className="w-full rounded-3xl border border-white/15 bg-slate-900 p-5"
+            style={{ maxHeight: '70%' }}
+          >
+            <View className="flex-row items-center justify-between mb-4">
+              <Text className="text-lg font-sans-bold text-white">Darajani tanlang</Text>
+              <TouchableOpacity
+                onPress={() => setLevelModalVisible(false)}
+                className="w-8 h-8 rounded-full bg-white/10 items-center justify-center"
+              >
+                <X size={16} color="rgba(255,255,255,0.75)" />
+              </TouchableOpacity>
+            </View>
+
+            <FlatList
+              data={levels}
+              keyExtractor={(item) => item.value}
+              showsVerticalScrollIndicator={false}
+              ListHeaderComponent={
+                <TouchableOpacity
+                  onPress={() => {
+                    setSelectedLevel(null);
+                    setLevelModalVisible(false);
+                  }}
+                  className="flex-row items-center justify-between py-3 border-b border-white/10"
+                >
+                  <Text className="text-sm font-sans-semibold text-white">Barcha darajalar</Text>
+                  {!selectedLevel && <Check size={18} color="#60a5fa" />}
+                </TouchableOpacity>
+              }
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  onPress={() => {
+                    setSelectedLevel(item.value);
+                    setLevelModalVisible(false);
+                  }}
+                  className="flex-row items-center justify-between py-3 border-b border-white/10"
+                >
+                  <Text className="text-sm font-sans-semibold text-white">{item.label}</Text>
+                  {selectedLevel === item.value && <Check size={18} color="#60a5fa" />}
+                </TouchableOpacity>
+              )}
+            />
+          </TouchableOpacity>
+        </TouchableOpacity>
+      </Modal>
     </ScreenBackground>
   );
 }
