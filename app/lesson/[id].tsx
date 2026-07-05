@@ -3,13 +3,15 @@ import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator } from 'rea
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { ChevronLeft, CheckCircle, BookOpen, Clock, AlertTriangle } from 'lucide-react-native';
+import { ChevronLeft, CheckCircle, BookOpen, Clock, AlertTriangle, Menu } from 'lucide-react-native';
 import { lessonsService } from '@/services/api';
 import { Button, Skeleton } from '@/components/ui';
-import { VideoPlayer } from '@/components/lesson';
+import { VideoPlayer, CourseSidebar } from '@/components/lesson';
 import { HtmlText } from '@/components/common/HtmlText';
 import { EmptyState } from '@/components/common/EmptyState';
+import { useCourse, useEnrollmentDetail } from '@/hooks/useCourses';
 import { QUERY_KEYS } from '@/constants/config';
+import type { SectionLesson } from '@/types';
 
 const getErrorMessage = (err: unknown): string => {
   const e = err as { response?: { status?: number; data?: { message?: string } } };
@@ -26,12 +28,57 @@ const noRetryOnAuthError = (failureCount: number, err: unknown) => {
 };
 
 export default function LessonScreen() {
-  const { id, courseId } = useLocalSearchParams<{ id: string; courseId: string }>();
+  const { id, courseId, courseSlug } = useLocalSearchParams<{
+    id: string;
+    courseId: string;
+    courseSlug?: string;
+  }>();
   const router = useRouter();
   const queryClient = useQueryClient();
 
   const lessonId = Number(id);
   const cId = Number(courseId);
+
+  const [sidebarVisible, setSidebarVisible] = useState(false);
+  const { data: course } = useCourse(courseSlug ?? '');
+  const { data: enrollmentDetail } = useEnrollmentDetail(cId);
+
+  // Same lock/complete derivation as the course-detail screen: lessons unlock in
+  // order, boundary comes from the enrollment's `next_lesson` pointer.
+  const allLessons = (course?.sections ?? []).flatMap((section) => section.lessons ?? []);
+  const nextLessonId = enrollmentDetail?.next_lesson?.id;
+  const nextLessonIndex =
+    nextLessonId != null ? allLessons.findIndex((l) => l.id === nextLessonId) : -1;
+  const unlockedLessonIds = new Set<number>(
+    nextLessonIndex >= 0
+      ? allLessons.slice(0, nextLessonIndex + 1).map((l) => l.id)
+      : enrollmentDetail && !enrollmentDetail.next_lesson
+        ? allLessons.map((l) => l.id)
+        : []
+  );
+  const completedLessonIds = new Set<number>(
+    nextLessonIndex >= 0
+      ? allLessons.slice(0, nextLessonIndex).map((l) => l.id)
+      : enrollmentDetail && !enrollmentDetail.next_lesson
+        ? allLessons.map((l) => l.id)
+        : []
+  );
+
+  const handleSelectLesson = (selected: SectionLesson) => {
+    setSidebarVisible(false);
+    if (selected.id === lessonId) return;
+    router.replace(`/lesson/${selected.id}?courseId=${cId}&courseSlug=${courseSlug ?? ''}`);
+  };
+
+  const handleBack = () => {
+    if (router.canGoBack()) {
+      router.back();
+    } else if (courseSlug) {
+      router.replace(`/course/${courseSlug}`);
+    } else {
+      router.replace('/(tabs)/my-courses');
+    }
+  };
 
   const {
     data: lesson,
@@ -97,7 +144,7 @@ export default function LessonScreen() {
     return (
       <SafeAreaView className="flex-1 bg-white">
         <View className="flex-row items-center px-5 py-4">
-          <TouchableOpacity onPress={() => router.back()} className="p-2 -ml-2">
+          <TouchableOpacity onPress={handleBack} className="p-2 -ml-2">
             <ChevronLeft size={28} color="#0F172A" />
           </TouchableOpacity>
         </View>
@@ -130,7 +177,7 @@ export default function LessonScreen() {
   return (
     <SafeAreaView className="flex-1 bg-white">
       <View className="flex-row items-center px-5 py-4 border-b border-slate-100">
-        <TouchableOpacity onPress={() => router.back()} className="p-2 -ml-2 mr-3">
+        <TouchableOpacity onPress={handleBack} className="p-2 -ml-2 mr-3">
           <ChevronLeft size={28} color="#0F172A" />
         </TouchableOpacity>
         <View className="flex-1">
@@ -141,6 +188,11 @@ export default function LessonScreen() {
             {lesson.type === 'video' ? '🎬 Video' : '📖 Matn'} · {durationMin} min
           </Text>
         </View>
+        {course?.sections && course.sections.length > 0 && (
+          <TouchableOpacity onPress={() => setSidebarVisible(true)} className="p-2 -mr-2 ml-2">
+            <Menu size={22} color="#0F172A" />
+          </TouchableOpacity>
+        )}
       </View>
 
       <ScrollView className="flex-1 px-5" showsVerticalScrollIndicator={false}>
@@ -229,7 +281,7 @@ export default function LessonScreen() {
             size="lg"
             onPress={async () => {
               await completeMutation.mutateAsync(lesson.duration_seconds);
-              router.back();
+              handleBack();
             }}
             loading={completeMutation.isPending}
             disabled={isCompleted}
@@ -239,6 +291,20 @@ export default function LessonScreen() {
           </Button>
         )}
       </View>
+
+      {course?.sections && course.sections.length > 0 && (
+        <CourseSidebar
+          visible={sidebarVisible}
+          onClose={() => setSidebarVisible(false)}
+          courseTitle={course.title}
+          categoryName={course.category?.name}
+          sections={course.sections}
+          currentLessonId={lessonId}
+          unlockedLessonIds={unlockedLessonIds}
+          completedLessonIds={completedLessonIds}
+          onSelectLesson={handleSelectLesson}
+        />
+      )}
     </SafeAreaView>
   );
 }

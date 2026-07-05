@@ -50,7 +50,8 @@ export interface Section {
   order: number;
   lessons_count: number;
   duration_minutes: number;
-  lessons: SectionLesson[];
+  // Omitted by the API for sections with no lessons yet.
+  lessons?: SectionLesson[];
 }
 
 export interface SectionLesson {
