@@ -50,8 +50,16 @@ export interface Section {
   order: number;
   lessons_count: number;
   duration_minutes: number;
-  // Omitted by the API for sections with no lessons yet.
-  lessons?: SectionLesson[];
+  modules: Module[];
+}
+
+export interface Module {
+  id: number;
+  title: string;
+  order: number;
+  lessons_count: number;
+  duration_seconds: number;
+  lessons: SectionLesson[];
 }
 
 export interface SectionLesson {

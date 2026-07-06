@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
 import { View, Text, Modal, TouchableOpacity, ScrollView, Pressable } from 'react-native';
 import { X, ChevronDown, ChevronRight, Lock, Play, CheckCircle } from 'lucide-react-native';
-import type { Section, SectionLesson } from '@/types';
+import type { Module, SectionLesson } from '@/types';
 
 interface CourseSidebarProps {
   visible: boolean;
   onClose: () => void;
   courseTitle: string;
   categoryName?: string | null;
-  sections: Section[];
+  modules: Module[];
   currentLessonId: number;
   unlockedLessonIds: Set<number>;
   completedLessonIds: Set<number>;
@@ -20,18 +20,18 @@ export function CourseSidebar({
   onClose,
   courseTitle,
   categoryName,
-  sections,
+  modules,
   currentLessonId,
   unlockedLessonIds,
   completedLessonIds,
   onSelectLesson,
 }: CourseSidebarProps) {
-  const currentSection = sections.find((s) => (s.lessons ?? []).some((l) => l.id === currentLessonId));
+  const currentModule = modules.find((m) => m.lessons.some((l) => l.id === currentLessonId));
   const [expanded, setExpanded] = useState<Record<number, boolean>>(() =>
-    currentSection ? { [currentSection.id]: true } : {}
+    currentModule ? { [currentModule.id]: true } : {}
   );
 
-  const toggleSection = (id: number) => {
+  const toggleModule = (id: number) => {
     setExpanded((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
@@ -57,18 +57,24 @@ export function CourseSidebar({
           </View>
 
           <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
-            {sections.map((section) => {
-              const isOpen = !!expanded[section.id];
+            {modules.map((module, index) => {
+              const isOpen = !!expanded[module.id];
+              const isModuleCompleted = module.lessons.every(
+                (l) => l.is_completed || completedLessonIds.has(l.id)
+              );
               return (
-                <View key={section.id} className="border-b border-slate-100">
+                <View key={module.id} className="border-b border-slate-100">
                   <TouchableOpacity
-                    onPress={() => toggleSection(section.id)}
+                    onPress={() => toggleModule(module.id)}
                     className="flex-row items-center justify-between px-5 py-4"
                     activeOpacity={0.7}
                   >
-                    <Text className="flex-1 text-sm font-sans-semibold text-slate-700 pr-3" numberOfLines={2}>
-                      {section.title}
-                    </Text>
+                    <View className="flex-row items-center flex-1 pr-3 gap-2">
+                      {isModuleCompleted && <CheckCircle size={15} color="#22C55E" />}
+                      <Text className="flex-1 text-sm font-sans-semibold text-slate-700" numberOfLines={2}>
+                        {index + 1}-modul: {module.title}
+                      </Text>
+                    </View>
                     {isOpen ? (
                       <ChevronDown size={18} color="#64748B" />
                     ) : (
@@ -77,7 +83,7 @@ export function CourseSidebar({
                   </TouchableOpacity>
 
                   {isOpen &&
-                    (section.lessons ?? []).map((lesson) => {
+                    module.lessons.map((lesson) => {
                       const isCurrent = lesson.id === currentLessonId;
                       const isCompleted = lesson.is_completed || completedLessonIds.has(lesson.id);
                       const isUnlocked = unlockedLessonIds.has(lesson.id) || lesson.is_preview;

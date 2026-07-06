@@ -29,15 +29,15 @@ import {
   Send,
 } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useCourse, useEnrollCourse, useEnrollmentDetail } from '@/hooks/useCourses';
+import { useCourse, useCourseProgress, useEnrollCourse, useEnrollmentDetail } from '@/hooks/useCourses';
 import { useInitiatePayment } from '@/hooks/usePayments';
 import { useAskAI } from '@/hooks/useAI';
 import { useReviews, useReviewsSummary, useCreateReview } from '@/hooks/useReviews';
 import { Badge, ProgressBar, Skeleton } from '@/components/ui';
 import { HtmlText } from '@/components/common/HtmlText';
 import { ScreenBackground } from '@/components/common/ScreenBackground';
-import { formatPrice, formatDate, paymentProviderLabels } from '@/utils';
-import type { AISource, PaymentProvider, SectionLesson } from '@/types';
+import { formatPrice, formatDate, paymentProviderLabels, getAllModules, mergeLessonProgress, isModuleCompleted } from '@/utils';
+import type { AISource, PaymentProvider } from '@/types';
 
 const levelLabels: Record<string, string> = {
   beginner: "Boshlang'ich",
@@ -52,6 +52,7 @@ export default function CourseDetailScreen() {
   const { data: enrollmentDetail, refetch: refetchEnrollmentDetail } = useEnrollmentDetail(
     course?.id ?? 0
   );
+  const { data: courseProgress } = useCourseProgress(course?.id ?? 0);
 
   useFocusEffect(
     useCallback(() => {
@@ -164,27 +165,15 @@ export default function CourseDetailScreen() {
   const isEnrolled = !!enrollment || course.is_enrolled === true;
   const progressPercent = enrollment?.progress_percent ?? 0;
 
-  // Lessons unlock in order: a lesson is playable once the previous one is completed.
-  // The course-detail sections endpoint doesn't return per-lesson completion, so we
-  // derive the unlock boundary from the enrollment's `next_lesson` pointer instead.
-  const allLessons = (course.sections ?? []).flatMap((section) => section.lessons ?? []);
-  const nextLessonId = enrollmentDetail?.next_lesson?.id;
-  const nextLessonIndex =
-    nextLessonId != null ? allLessons.findIndex((lesson) => lesson.id === nextLessonId) : -1;
-  const unlockedLessonIds = new Set<number>(
-    nextLessonIndex >= 0
-      ? allLessons.slice(0, nextLessonIndex + 1).map((lesson) => lesson.id)
-      : enrollmentDetail && !enrollmentDetail.next_lesson
-        ? allLessons.map((lesson) => lesson.id) // no next lesson left => course fully completed
-        : []
-  );
-  const completedLessonIds = new Set<number>(
-    nextLessonIndex >= 0
-      ? allLessons.slice(0, nextLessonIndex).map((lesson) => lesson.id)
-      : enrollmentDetail && !enrollmentDetail.next_lesson
-        ? allLessons.map((lesson) => lesson.id)
-        : []
-  );
+  // Modules unlock in order: a module is playable once every lesson in the previous
+  // module is completed. The first module (or any module made up entirely of preview
+  // lessons) is always browsable, enrolled or not.
+  const modules = getAllModules(course);
+  const progressLessons = courseProgress?.sections?.flatMap((section) => section.lessons) ?? [];
+  const modulesWithProgress = modules.map((module) => ({
+    module,
+    lessons: mergeLessonProgress(module.lessons, progressLessons),
+  }));
 
   const handleEnroll = () => {
     setFeedback(null);
@@ -370,54 +359,53 @@ export default function CourseDetailScreen() {
             </View>
           </View>
 
-          {/* Sections */}
-          {course.sections && course.sections.length > 0 && (
+          {/* Modules */}
+          {modules.length > 0 && (
             <View style={styles.sections}>
               <Text style={styles.sectionsTitle}>Kurs dasturi</Text>
-              {course.sections.map((section) => (
-                <View key={section.id} style={styles.sectionBlock}>
-                  <Text style={styles.sectionTitle}>{section.title}</Text>
-                  {(section.lessons ?? []).map((lesson: SectionLesson) => {
-                    const isUnlocked = isEnrolled
-                      ? unlockedLessonIds.has(lesson.id) || lesson.is_preview
-                      : lesson.is_preview;
-                    return (
-                      <TouchableOpacity
-                        key={lesson.id}
-                        onPress={() => {
-                          if (!isUnlocked) return;
-                          router.push(`/lesson/${lesson.id}?courseId=${course.id}&courseSlug=${id}`);
-                        }}
-                        style={styles.lessonRow}
-                        activeOpacity={0.7}
-                      >
-                        <View style={styles.lessonIcon}>
-                          {lesson.is_completed || completedLessonIds.has(lesson.id) ? (
-                            <CheckCircle size={18} color="#34d399" />
-                          ) : !isUnlocked ? (
-                            <Lock size={16} color="rgba(255,255,255,0.30)" />
-                          ) : (
-                            <Play size={16} color="#60a5fa" />
-                          )}
-                        </View>
-                        <View style={styles.lessonInfo}>
-                          <Text style={[styles.lessonTitle, !isUnlocked && styles.lessonLocked]}>
-                            {lesson.title}
-                          </Text>
-                          <Text style={styles.lessonDuration}>
-                            {Math.round(lesson.duration_seconds / 60)} min
-                          </Text>
-                        </View>
-                        {lesson.is_preview && !isEnrolled && (
-                          <View style={styles.previewBadge}>
-                            <Text style={styles.previewBadgeText}>Bepul ko'rish</Text>
-                          </View>
-                        )}
-                      </TouchableOpacity>
-                    );
-                  })}
-                </View>
-              ))}
+              {modulesWithProgress.map(({ module, lessons }, index) => {
+                const previous = index > 0 ? modulesWithProgress[index - 1] : undefined;
+                const isPreviewModule = lessons.every((l) => l.is_preview);
+                const isUnlocked =
+                  index === 0 ||
+                  (!!previous && isModuleCompleted(previous.lessons)) ||
+                  (!isEnrolled && isPreviewModule);
+                const isCompleted = isModuleCompleted(lessons);
+                return (
+                  <TouchableOpacity
+                    key={module.id}
+                    onPress={() => {
+                      if (!isUnlocked) return;
+                      router.push(`/module/${module.id}?courseId=${course.id}&courseSlug=${id}`);
+                    }}
+                    style={styles.lessonRow}
+                    activeOpacity={0.7}
+                  >
+                    <View style={styles.lessonIcon}>
+                      {isCompleted ? (
+                        <CheckCircle size={18} color="#34d399" />
+                      ) : !isUnlocked ? (
+                        <Lock size={16} color="rgba(255,255,255,0.30)" />
+                      ) : (
+                        <Play size={16} color="#60a5fa" />
+                      )}
+                    </View>
+                    <View style={styles.lessonInfo}>
+                      <Text style={[styles.lessonTitle, !isUnlocked && styles.lessonLocked]}>
+                        {index + 1}-modul: {module.title}
+                      </Text>
+                      <Text style={styles.lessonDuration}>
+                        {Math.round(module.duration_seconds / 60)} min
+                      </Text>
+                    </View>
+                    {isPreviewModule && !isEnrolled && (
+                      <View style={styles.previewBadge}>
+                        <Text style={styles.previewBadgeText}>Bepul ko'rish</Text>
+                      </View>
+                    )}
+                  </TouchableOpacity>
+                );
+              })}
             </View>
           )}
 

@@ -10,6 +10,7 @@ import { VideoPlayer, CourseSidebar } from '@/components/lesson';
 import { HtmlText } from '@/components/common/HtmlText';
 import { EmptyState } from '@/components/common/EmptyState';
 import { useCourse, useEnrollmentDetail } from '@/hooks/useCourses';
+import { getAllModules } from '@/utils';
 import { QUERY_KEYS } from '@/constants/config';
 import type { SectionLesson } from '@/types';
 
@@ -45,7 +46,7 @@ export default function LessonScreen() {
 
   // Same lock/complete derivation as the course-detail screen: lessons unlock in
   // order, boundary comes from the enrollment's `next_lesson` pointer.
-  const allLessons = (course?.sections ?? []).flatMap((section) => section.lessons ?? []);
+  const allLessons = getAllModules(course ?? { sections: [] }).flatMap((m) => m.lessons ?? []);
   const nextLessonId = enrollmentDetail?.next_lesson?.id;
   const nextLessonIndex =
     nextLessonId != null ? allLessons.findIndex((l) => l.id === nextLessonId) : -1;
@@ -292,13 +293,13 @@ export default function LessonScreen() {
         )}
       </View>
 
-      {course?.sections && course.sections.length > 0 && (
+      {course && allLessons.length > 0 && (
         <CourseSidebar
           visible={sidebarVisible}
           onClose={() => setSidebarVisible(false)}
           courseTitle={course.title}
           categoryName={course.category?.name}
-          sections={course.sections}
+          modules={getAllModules(course)}
           currentLessonId={lessonId}
           unlockedLessonIds={unlockedLessonIds}
           completedLessonIds={completedLessonIds}
