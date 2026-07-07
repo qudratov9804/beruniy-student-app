@@ -1,14 +1,15 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, Text, ScrollView, Alert, TouchableOpacity, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ChevronLeft } from 'lucide-react-native';
 import { quizService } from '@/services/api';
 import { useQuizStore } from '@/stores';
 import { QuizOption, QuizProgressHeader, QuizResultCard, QuizAttemptHistory } from '@/components/quiz';
 import { Button, Skeleton } from '@/components/ui';
 import { EmptyState } from '@/components/common/EmptyState';
+import { QUERY_KEYS } from '@/constants/config';
 
 const getErrorMessage = (err: unknown): string => {
   const e = err as { response?: { status?: number; data?: { message?: string } } };
@@ -25,9 +26,11 @@ const noRetryOnAuthError = (failureCount: number, err: unknown) => {
 };
 
 export default function QuizScreen() {
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const { id, courseId: courseIdParam } = useLocalSearchParams<{ id: string; courseId?: string }>();
   const router = useRouter();
+  const queryClient = useQueryClient();
   const lessonId = Number(id);
+  const courseId = Number(courseIdParam);
 
   const {
     currentQuestionIndex,
@@ -49,15 +52,51 @@ export default function QuizScreen() {
     error,
     refetch,
   } = useQuery({
-    queryKey: ['quiz', lessonId],
+    queryKey: QUERY_KEYS.QUIZ.DETAIL(lessonId),
     queryFn: () => quizService.getQuiz(lessonId),
     enabled: !!lessonId,
     retry: noRetryOnAuthError,
   });
 
+  // Already passed and can't retake — nothing to answer, so jump straight to the
+  // last result instead of forcing the user to click through every question again
+  // only to hit a 422 at the end.
+  const lockedWithPastResult = !!quiz && !quiz.can_retake && quiz.attempts_count > 0;
+
+  const {
+    data: existingResult,
+    isError: existingResultIsError,
+  } = useQuery({
+    queryKey: QUERY_KEYS.QUIZ.RESULT(lessonId),
+    queryFn: () => quizService.getResult(lessonId),
+    enabled: lockedWithPastResult,
+    retry: noRetryOnAuthError,
+  });
+
+  useEffect(() => {
+    if (existingResult) setResult(existingResult);
+  }, [existingResult, setResult]);
+
+  // Invalidates everything that depends on this quiz's pass/fail state: the next
+  // lesson unlock (enrollment's `next_lesson`), course progress bar/checkmarks, and
+  // this quiz's own can_retake/attempts_count — mirrors what the lesson screen's
+  // video-complete mutation already does for video/article lessons.
+  const invalidateProgress = () => {
+    queryClient.invalidateQueries({ queryKey: QUERY_KEYS.QUIZ.HISTORY(lessonId) });
+    queryClient.invalidateQueries({ queryKey: QUERY_KEYS.QUIZ.DETAIL(lessonId) });
+    if (courseId) {
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ENROLLMENTS.DETAIL(courseId) });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.COURSES.PROGRESS(courseId) });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.LESSONS.DETAIL(courseId, lessonId) });
+    }
+  };
+
   const submitMutation = useMutation({
     mutationFn: () => quizService.submit(lessonId, answers),
-    onSuccess: (data) => setResult(data),
+    onSuccess: (data) => {
+      setResult(data);
+      invalidateProgress();
+    },
     onError: async (err: unknown) => {
       const e = err as { response?: { status?: number; data?: { message?: string } } };
       if (e?.response?.status === 422) {
@@ -65,6 +104,7 @@ export default function QuizScreen() {
         // user stuck on the last question.
         try {
           setResult(await quizService.getResult(lessonId));
+          invalidateProgress();
           return;
         } catch {
           // fall through to the generic alert below
@@ -74,11 +114,19 @@ export default function QuizScreen() {
     },
   });
 
-  React.useEffect(() => {
-    if (quiz) startQuiz();
+  useEffect(() => {
+    if (!quiz) return;
+    // Clear any stale result left in the store from a previously-viewed quiz before
+    // this one's own `existingResult` fetch resolves — otherwise navigating directly
+    // between two already-passed quizzes could flash the wrong one's result.
+    if (lockedWithPastResult) {
+      resetQuiz();
+    } else {
+      startQuiz();
+    }
     return () => resetQuiz();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [quiz?.questions_count]);
+  }, [quiz?.questions_count, lockedWithPastResult]);
 
   const handleClose = () => {
     Alert.alert('Testni tark etish', 'Hozir chiqsangiz, progress saqlanmaydi.', [
@@ -135,6 +183,18 @@ export default function QuizScreen() {
           </TouchableOpacity>
         </View>
         <EmptyState emoji="📝" title="Bu testda hozircha savollar mavjud emas." />
+      </SafeAreaView>
+    );
+  }
+
+  // Waiting on the eagerly-fetched past result — without this guard the question
+  // flow below would flash briefly before flipping over to the result screen.
+  if (lockedWithPastResult && !existingResultIsError && !(isCompleted && result)) {
+    return (
+      <SafeAreaView className="flex-1 bg-white">
+        <View className="px-5 pt-4">
+          <Skeleton height={200} borderRadius={16} />
+        </View>
       </SafeAreaView>
     );
   }
