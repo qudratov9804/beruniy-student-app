@@ -6,9 +6,7 @@ import { useRouter } from 'expo-router';
 import * as LocalAuthentication from 'expo-local-authentication';
 import { Fingerprint } from 'lucide-react-native';
 import { useAuthStore } from '@/stores';
-import { ScreenBackground } from '@/components/common';
-
-const DIGITS = ['1','2','3','4','5','6','7','8','9','','0','⌫'];
+import { ScreenBackground, PinKeypad } from '@/components/common';
 
 export default function PinLoginScreen() {
   const router = useRouter();
@@ -96,21 +94,8 @@ export default function PinLoginScreen() {
           </View>
 
           <View className="w-full">
-            <View className="flex-row flex-wrap justify-center gap-4 mb-4">
-              {DIGITS.map((d, i) => (
-                <TouchableOpacity
-                  key={i}
-                  onPress={() => handleDigit(d)}
-                  disabled={d === ''}
-                  className={`w-20 h-20 rounded-full items-center justify-center ${
-                    d === '' ? 'opacity-0' : 'bg-white/10 border border-white/15'
-                  }`}
-                >
-                  <Text className={`text-2xl font-sans-bold ${d === '⌫' ? 'text-white/60' : 'text-white'}`}>
-                    {d}
-                  </Text>
-                </TouchableOpacity>
-              ))}
+            <View className="mb-4">
+              <PinKeypad onPress={handleDigit} variant="dark" />
             </View>
 
             {isBiometricEnabled && (

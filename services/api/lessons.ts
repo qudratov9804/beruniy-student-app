@@ -8,8 +8,10 @@ import type {
   Quiz,
   QuizAnswers,
   QuizSubmitResult,
-  QuizAttempt,
-  TranscriptSegment,
+  QuizHistory,
+  Transcript,
+  Assignment,
+  AssignmentSubmission,
 } from '@/types';
 
 export const lessonsService = {
@@ -37,9 +39,14 @@ export const lessonsService = {
     return res.data.data;
   },
 
-  getTranscript: async (courseId: number, lessonId: number): Promise<TranscriptSegment[]> => {
-    const res = await apiClient.get<ApiResponse<TranscriptSegment[]>>(
-      `/courses/${courseId}/lessons/${lessonId}/transcript`
+  getTranscript: async (
+    courseId: number,
+    lessonId: number,
+    language?: 'uz' | 'ru' | 'en'
+  ): Promise<Transcript> => {
+    const res = await apiClient.get<ApiResponse<Transcript>>(
+      `/courses/${courseId}/lessons/${lessonId}/transcript`,
+      { params: language ? { language } : undefined }
     );
     return res.data.data;
   },
@@ -59,8 +66,8 @@ export const quizService = {
     return res.data.data;
   },
 
-  getHistory: async (lessonId: number): Promise<QuizAttempt[]> => {
-    const res = await apiClient.get<ApiResponse<QuizAttempt[]>>(
+  getHistory: async (lessonId: number): Promise<QuizHistory> => {
+    const res = await apiClient.get<ApiResponse<QuizHistory>>(
       `/lessons/${lessonId}/quiz/history`
     );
     return res.data.data;
@@ -69,6 +76,24 @@ export const quizService = {
   getResult: async (lessonId: number): Promise<QuizSubmitResult> => {
     const res = await apiClient.get<ApiResponse<QuizSubmitResult>>(
       `/lessons/${lessonId}/quiz/result`
+    );
+    return res.data.data;
+  },
+};
+
+export const assignmentService = {
+  getByLessonId: async (lessonId: number): Promise<Assignment> => {
+    const res = await apiClient.get<ApiResponse<Assignment>>(`/lessons/${lessonId}/assignment`);
+    return res.data.data;
+  },
+
+  submit: async (lessonId: number, content: string): Promise<AssignmentSubmission> => {
+    const formData = new FormData();
+    formData.append('content', content);
+    const res = await apiClient.post<ApiResponse<AssignmentSubmission>>(
+      `/lessons/${lessonId}/assignment/submit`,
+      formData,
+      { headers: { 'Content-Type': 'multipart/form-data' } }
     );
     return res.data.data;
   },

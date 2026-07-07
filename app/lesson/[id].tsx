@@ -1,18 +1,19 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { ChevronLeft, CheckCircle, BookOpen, Clock, AlertTriangle, Menu } from 'lucide-react-native';
+import { ChevronLeft, CheckCircle, Clock, AlertTriangle, Menu } from 'lucide-react-native';
 import { lessonsService } from '@/services/api';
 import { Button, Skeleton } from '@/components/ui';
-import { VideoPlayer, CourseSidebar } from '@/components/lesson';
+import { VideoPlayer, CourseSidebar, LessonTypeIcon, TranscriptPanel } from '@/components/lesson';
 import { HtmlText } from '@/components/common/HtmlText';
 import { EmptyState } from '@/components/common/EmptyState';
+import { AITutor } from '@/components/common/AITutor';
 import { useCourse, useEnrollmentDetail } from '@/hooks/useCourses';
-import { getAllModules } from '@/utils';
 import { QUERY_KEYS } from '@/constants/config';
-import type { SectionLesson } from '@/types';
+import { lessonTypeLabels } from '@/utils';
+import type { SectionLesson, VideoPlayerHandle } from '@/types';
 
 const getErrorMessage = (err: unknown): string => {
   const e = err as { response?: { status?: number; data?: { message?: string } } };
@@ -46,7 +47,7 @@ export default function LessonScreen() {
 
   // Same lock/complete derivation as the course-detail screen: lessons unlock in
   // order, boundary comes from the enrollment's `next_lesson` pointer.
-  const allLessons = getAllModules(course ?? { sections: [] }).flatMap((m) => m.lessons ?? []);
+  const allLessons = (course?.sections ?? []).flatMap((section) => section.lessons ?? []);
   const nextLessonId = enrollmentDetail?.next_lesson?.id;
   const nextLessonIndex =
     nextLessonId != null ? allLessons.findIndex((l) => l.id === nextLessonId) : -1;
@@ -112,6 +113,8 @@ export default function LessonScreen() {
   });
 
   const [videoPlaybackError, setVideoPlaybackError] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const videoPlayerRef = useRef<VideoPlayerHandle>(null);
 
   // The signed stream URL can expire well before the query's staleTime elapses,
   // leaving a cached-but-dead URL in place with no visible error. `streamIsFetching`
@@ -185,9 +188,12 @@ export default function LessonScreen() {
           <Text className="text-base font-sans-bold text-slate-800" numberOfLines={1}>
             {lesson.title}
           </Text>
-          <Text className="text-xs text-slate-400">
-            {lesson.type === 'video' ? '🎬 Video' : '📖 Matn'} · {durationMin} min
-          </Text>
+          <View className="flex-row items-center gap-1">
+            <LessonTypeIcon type={lesson.type} size={12} color="#94A3B8" />
+            <Text className="text-xs text-slate-400">
+              {lessonTypeLabels[lesson.type]} · {durationMin} min
+            </Text>
+          </View>
         </View>
         {course?.sections && course.sections.length > 0 && (
           <TouchableOpacity onPress={() => setSidebarVisible(true)} className="p-2 -mr-2 ml-2">
@@ -225,12 +231,14 @@ export default function LessonScreen() {
                 </View>
               ) : (
                 <VideoPlayer
+                  ref={videoPlayerRef}
                   url={stream.stream_url}
                   cookies={stream.cookies}
                   onEnd={() => {
                     if (!isCompleted) completeMutation.mutate(lesson.duration_seconds);
                   }}
                   onError={() => setVideoPlaybackError(true)}
+                  onTimeUpdate={setCurrentTime}
                 />
               )
             ) : lesson.video_status === 'processing' ? (
@@ -257,7 +265,7 @@ export default function LessonScreen() {
         ) : (
           <View className="mt-4 mb-6">
             <View className="w-full h-32 bg-primary-50 rounded-3xl items-center justify-center mb-4">
-              <BookOpen size={40} color="#2563EB" />
+              <LessonTypeIcon type={lesson.type} size={40} color="#2563EB" />
             </View>
           </View>
         )}
@@ -268,6 +276,19 @@ export default function LessonScreen() {
           <HtmlText html={lesson.content} baseFontSize={15} color="#334155" />
         )}
 
+        {lesson.type === 'video' && lesson.video_status === 'ready' && (
+          <TranscriptPanel
+            courseId={cId}
+            lessonId={lessonId}
+            currentTime={currentTime}
+            onSeek={(seconds) => videoPlayerRef.current?.seekTo(seconds)}
+          />
+        )}
+
+        <View className="mb-6">
+          <AITutor courseId={cId} courseSlug={courseSlug ?? ''} sections={course?.sections} variant="light" />
+        </View>
+
         <View className="h-24" />
       </ScrollView>
 
@@ -275,6 +296,14 @@ export default function LessonScreen() {
         {lesson.type === 'quiz' ? (
           <Button fullWidth size="lg" onPress={() => router.push(`/quiz/${lesson.id}?courseId=${courseId}`)}>
             Testni boshlash
+          </Button>
+        ) : lesson.type === 'assignment' ? (
+          <Button
+            fullWidth
+            size="lg"
+            onPress={() => router.push(`/assignment/${lesson.id}?courseId=${courseId}`)}
+          >
+            Topshiriqni ko'rish
           </Button>
         ) : (
           <Button
@@ -293,13 +322,13 @@ export default function LessonScreen() {
         )}
       </View>
 
-      {course && allLessons.length > 0 && (
+      {course?.sections && course.sections.length > 0 && (
         <CourseSidebar
           visible={sidebarVisible}
           onClose={() => setSidebarVisible(false)}
           courseTitle={course.title}
           categoryName={course.category?.name}
-          modules={getAllModules(course)}
+          sections={course.sections}
           currentLessonId={lessonId}
           unlockedLessonIds={unlockedLessonIds}
           completedLessonIds={completedLessonIds}

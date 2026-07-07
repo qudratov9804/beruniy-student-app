@@ -1,6 +1,7 @@
 import { Redirect } from 'expo-router';
 import { useAuthStore } from '@/stores';
-import { View, ActivityIndicator } from 'react-native';
+import { View } from 'react-native';
+import { LogoLoader } from '@/components/common';
 
 export default function Index() {
   const { isAuthenticated, isLoading, hasPin } = useAuthStore();
@@ -8,7 +9,7 @@ export default function Index() {
   if (isLoading) {
     return (
       <View className="flex-1 items-center justify-center bg-white">
-        <ActivityIndicator size="large" color="#2563EB" />
+        <LogoLoader size={110} />
       </View>
     );
   }

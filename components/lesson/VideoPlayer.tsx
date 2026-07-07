@@ -1,13 +1,14 @@
-import React, { useEffect } from 'react';
+import React, { forwardRef, useEffect, useImperativeHandle } from 'react';
 import { StyleSheet } from 'react-native';
 import { useVideoPlayer, VideoView } from 'expo-video';
-import type { StreamCookies } from '@/types';
+import type { StreamCookies, VideoPlayerHandle } from '@/types';
 
 interface VideoPlayerProps {
   url: string;
   cookies?: StreamCookies | [];
   onEnd?: () => void;
   onError?: () => void;
+  onTimeUpdate?: (seconds: number) => void;
 }
 
 // CloudFront authorizes HLS playback via signed cookies rather than a signed URL
@@ -20,28 +21,46 @@ const buildCookieHeader = (cookies?: StreamCookies | []): string | undefined => 
   return `CloudFront-Policy=${cookies['CloudFront-Policy']}; CloudFront-Signature=${cookies['CloudFront-Signature']}; CloudFront-Key-Pair-Id=${cookies['CloudFront-Key-Pair-Id']}`;
 };
 
-export const VideoPlayer: React.FC<VideoPlayerProps> = ({ url, cookies, onEnd, onError }) => {
-  const cookieHeader = buildCookieHeader(cookies);
-  const player = useVideoPlayer(
-    cookieHeader ? { uri: url, headers: { Cookie: cookieHeader } } : url,
-    (p) => {
-      p.play();
-    }
-  );
+export const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
+  ({ url, cookies, onEnd, onError, onTimeUpdate }, ref) => {
+    const cookieHeader = buildCookieHeader(cookies);
+    const player = useVideoPlayer(
+      cookieHeader ? { uri: url, headers: { Cookie: cookieHeader } } : url,
+      (p) => {
+        p.timeUpdateEventInterval = 1;
+        p.play();
+      }
+    );
 
-  useEffect(() => {
-    const endSub = player.addListener('playToEnd', () => onEnd?.());
-    const statusSub = player.addListener('statusChange', ({ status }) => {
-      if (status === 'error') onError?.();
-    });
-    return () => {
-      endSub.remove();
-      statusSub.remove();
-    };
-  }, [player, onEnd, onError]);
+    useImperativeHandle(
+      ref,
+      () => ({
+        seekTo: (seconds: number) => {
+          player.currentTime = seconds;
+        },
+      }),
+      [player]
+    );
 
-  return <VideoView style={styles.video} player={player} nativeControls />;
-};
+    useEffect(() => {
+      const endSub = player.addListener('playToEnd', () => onEnd?.());
+      const statusSub = player.addListener('statusChange', ({ status }) => {
+        if (status === 'error') onError?.();
+      });
+      const timeSub = player.addListener('timeUpdate', ({ currentTime }) => {
+        onTimeUpdate?.(currentTime);
+      });
+      return () => {
+        endSub.remove();
+        statusSub.remove();
+        timeSub.remove();
+      };
+    }, [player, onEnd, onError, onTimeUpdate]);
+
+    return <VideoView style={styles.video} player={player} nativeControls />;
+  }
+);
+VideoPlayer.displayName = 'VideoPlayer';
 
 const styles = StyleSheet.create({
   video: { width: '100%', height: 220, borderRadius: 24, backgroundColor: '#000' },

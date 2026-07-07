@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Platform, useWindowDimensions } from 'react-native';
 import RenderHtml from 'react-native-render-html';
 
@@ -23,17 +23,25 @@ export const HtmlText: React.FC<HtmlTextProps> = ({
 }) => {
   const { width } = useWindowDimensions();
 
-  const baseStyle = {
-    fontSize: baseFontSize,
-    color,
-    lineHeight: baseFontSize * 1.6,
-    fontFamily: Platform.OS === 'web' ? 'Inter-Regular, sans-serif' : 'Inter-Regular',
-  };
+  // react-native-render-html rebuilds its whole rendering engine whenever `source` or
+  // `baseStyle` change identity — without memoizing these, every parent re-render (even
+  // unrelated state changes) recreates them and triggers the "costly tree rerenders"
+  // warning from TRenderEngineProvider.
+  const source = useMemo(() => ({ html }), [html]);
+  const baseStyle = useMemo(
+    () => ({
+      fontSize: baseFontSize,
+      color,
+      lineHeight: baseFontSize * 1.6,
+      fontFamily: Platform.OS === 'web' ? 'Inter-Regular, sans-serif' : 'Inter-Regular',
+    }),
+    [baseFontSize, color]
+  );
 
   return (
     <RenderHtml
       contentWidth={width - 40}
-      source={{ html }}
+      source={source}
       baseStyle={baseStyle}
       tagsStyles={tagsStyles}
       enableExperimentalMarginCollapsing
