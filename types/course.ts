@@ -16,6 +16,11 @@ export interface CourseInstructor {
   headline: string | null;
 }
 
+export type CoursePrerequisite = {
+  type: 'course' | 'skill';
+  value: string;
+};
+
 export interface Course {
   id: number;
   title: string;
@@ -28,8 +33,10 @@ export interface Course {
   discount_price: number | null;
   effective_price: number;
   discount_percent: number | null;
+  discount_ends_at: string | null;
   is_free: boolean;
   has_certificate: boolean;
+  status?: 'draft' | 'pending' | 'published' | 'rejected';
   rating: number;
   reviews_count: number;
   enrolled_count: number;
@@ -37,8 +44,18 @@ export interface Course {
   lessons_count: number;
   instructor: CourseInstructor;
   category: Category | null;
+  // list endpoints only
+  badge?: string | null;
+  accent_color?: string | null;
+  icon?: string | null;
   created_at: string;
   // only present in detail response
+  description?: string;
+  preview_video?: string | null;
+  requirements?: string[];
+  what_you_learn?: string[];
+  includes?: string[];
+  prerequisites?: CoursePrerequisite[];
   is_enrolled?: boolean;
   is_in_wishlist?: boolean;
   sections?: Section[];
@@ -47,9 +64,10 @@ export interface Course {
 export interface Section {
   id: number;
   title: string;
+  description: string | null;
   order: number;
   lessons_count: number;
-  duration_minutes: number;
+  duration_seconds: number;
   // Omitted by the API for sections with no lessons yet.
   lessons?: SectionLesson[];
 }
@@ -62,6 +80,11 @@ export interface SectionLesson {
   is_preview: boolean;
   is_completed?: boolean;
   order: number;
+  // Groups lessons into a "Dars" (video+article+quiz+assignment). Null for legacy
+  // lessons created before modules existed — those render ungrouped.
+  module_id: number | null;
+  module_title: string | null;
+  module_order: number | null;
 }
 
 export interface Enrollment {

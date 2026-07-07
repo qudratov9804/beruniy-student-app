@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { View, Text, Modal, TouchableOpacity, ScrollView, Pressable } from 'react-native';
-import { X, ChevronDown, ChevronRight, Lock, Play, CheckCircle } from 'lucide-react-native';
+import { X, ChevronDown, ChevronRight, Lock, CheckCircle } from 'lucide-react-native';
 import type { Section, SectionLesson } from '@/types';
+import { groupLessonsByModule, LESSON_SLOT_ORDER } from '@/utils';
+import { LessonTypeIcon } from './LessonTypeIcon';
 
 interface CourseSidebarProps {
   visible: boolean;
@@ -26,13 +28,53 @@ export function CourseSidebar({
   completedLessonIds,
   onSelectLesson,
 }: CourseSidebarProps) {
-  const currentSection = sections.find((s) => (s.lessons ?? []).some((l) => l.id === currentLessonId));
+  const { modules, legacy } = groupLessonsByModule(sections.flatMap((s) => s.lessons ?? []));
+  const currentModule = modules.find((mod) =>
+    Object.values(mod.items).some((lesson) => lesson?.id === currentLessonId)
+  );
   const [expanded, setExpanded] = useState<Record<number, boolean>>(() =>
-    currentSection ? { [currentSection.id]: true } : {}
+    currentModule ? { [currentModule.id]: true } : {}
   );
 
-  const toggleSection = (id: number) => {
+  const toggleModule = (id: number) => {
     setExpanded((prev) => ({ ...prev, [id]: !prev[id] }));
+  };
+
+  const renderLessonRow = (lesson: SectionLesson) => {
+    const isCurrent = lesson.id === currentLessonId;
+    const isCompleted = lesson.is_completed || completedLessonIds.has(lesson.id);
+    const isUnlocked = unlockedLessonIds.has(lesson.id) || lesson.is_preview;
+    return (
+      <TouchableOpacity
+        key={lesson.id}
+        disabled={!isUnlocked}
+        onPress={() => onSelectLesson(lesson)}
+        className={`flex-row items-center gap-3 px-5 py-3 pl-8 ${isCurrent ? 'bg-primary-50' : ''}`}
+        activeOpacity={0.7}
+      >
+        <View className="w-7 h-7 rounded-full bg-slate-100 items-center justify-center">
+          {isCompleted ? (
+            <CheckCircle size={15} color="#22C55E" />
+          ) : !isUnlocked ? (
+            <Lock size={13} color="#94A3B8" />
+          ) : (
+            <LessonTypeIcon type={lesson.type} size={13} color="#2563EB" />
+          )}
+        </View>
+        <Text
+          className={`flex-1 text-sm ${
+            isCurrent
+              ? 'font-sans-semibold text-primary-600'
+              : isUnlocked
+                ? 'text-slate-600'
+                : 'text-slate-300'
+          }`}
+          numberOfLines={2}
+        >
+          {lesson.title}
+        </Text>
+      </TouchableOpacity>
+    );
   };
 
   return (
@@ -57,17 +99,17 @@ export function CourseSidebar({
           </View>
 
           <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
-            {sections.map((section) => {
-              const isOpen = !!expanded[section.id];
+            {modules.map((mod) => {
+              const isOpen = !!expanded[mod.id];
               return (
-                <View key={section.id} className="border-b border-slate-100">
+                <View key={mod.id} className="border-b border-slate-100">
                   <TouchableOpacity
-                    onPress={() => toggleSection(section.id)}
+                    onPress={() => toggleModule(mod.id)}
                     className="flex-row items-center justify-between px-5 py-4"
                     activeOpacity={0.7}
                   >
                     <Text className="flex-1 text-sm font-sans-semibold text-slate-700 pr-3" numberOfLines={2}>
-                      {section.title}
+                      {`Dars ${mod.title}`}
                     </Text>
                     {isOpen ? (
                       <ChevronDown size={18} color="#64748B" />
@@ -77,47 +119,14 @@ export function CourseSidebar({
                   </TouchableOpacity>
 
                   {isOpen &&
-                    (section.lessons ?? []).map((lesson) => {
-                      const isCurrent = lesson.id === currentLessonId;
-                      const isCompleted = lesson.is_completed || completedLessonIds.has(lesson.id);
-                      const isUnlocked = unlockedLessonIds.has(lesson.id) || lesson.is_preview;
-                      return (
-                        <TouchableOpacity
-                          key={lesson.id}
-                          disabled={!isUnlocked}
-                          onPress={() => onSelectLesson(lesson)}
-                          className={`flex-row items-center gap-3 px-5 py-3 pl-8 ${
-                            isCurrent ? 'bg-primary-50' : ''
-                          }`}
-                          activeOpacity={0.7}
-                        >
-                          <View className="w-7 h-7 rounded-full bg-slate-100 items-center justify-center">
-                            {isCompleted ? (
-                              <CheckCircle size={15} color="#22C55E" />
-                            ) : !isUnlocked ? (
-                              <Lock size={13} color="#94A3B8" />
-                            ) : (
-                              <Play size={13} color="#2563EB" />
-                            )}
-                          </View>
-                          <Text
-                            className={`flex-1 text-sm ${
-                              isCurrent
-                                ? 'font-sans-semibold text-primary-600'
-                                : isUnlocked
-                                  ? 'text-slate-600'
-                                  : 'text-slate-300'
-                            }`}
-                            numberOfLines={2}
-                          >
-                            {lesson.title}
-                          </Text>
-                        </TouchableOpacity>
-                      );
+                    LESSON_SLOT_ORDER.map((slotType) => {
+                      const lesson = mod.items[slotType];
+                      return lesson ? renderLessonRow(lesson) : null;
                     })}
                 </View>
               );
             })}
+            {legacy.map((lesson) => renderLessonRow(lesson))}
             <View className="h-10" />
           </ScrollView>
         </View>

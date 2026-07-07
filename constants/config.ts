@@ -43,11 +43,15 @@ export const QUERY_KEYS = {
   LESSONS: {
     DETAIL: (courseId: number, id: number) => ['lessons', courseId, id] as const,
     STREAM: (courseId: number, id: number) => ['lessons', courseId, id, 'stream'] as const,
+    TRANSCRIPT: (courseId: number, id: number) => ['lessons', courseId, id, 'transcript'] as const,
   },
   QUIZ: {
     DETAIL: (lessonId: number) => ['quiz', lessonId] as const,
     HISTORY: (lessonId: number) => ['quiz', lessonId, 'history'] as const,
     RESULT: (lessonId: number) => ['quiz', lessonId, 'result'] as const,
+  },
+  ASSIGNMENT: {
+    DETAIL: (lessonId: number) => ['assignment', lessonId] as const,
   },
   WISHLIST: {
     ALL: ['wishlist'] as const,

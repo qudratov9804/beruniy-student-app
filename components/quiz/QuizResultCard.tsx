@@ -51,7 +51,7 @@ export const QuizResultCard: React.FC<QuizResultCardProps> = ({ result, onContin
       <Button fullWidth onPress={onContinue} size="lg">
         Davom etish
       </Button>
-      {!result.passed && result.can_retake && onRetry && (
+      {result.can_retake && onRetry && (
         <Button fullWidth variant="outline" onPress={onRetry} size="lg" className="mt-3">
           Qaytadan urinish
         </Button>

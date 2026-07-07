@@ -4,8 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import * as LocalAuthentication from 'expo-local-authentication';
 import { useAuthStore } from '@/stores';
-
-const DIGITS = ['1','2','3','4','5','6','7','8','9','','0','⌫'];
+import { PinKeypad } from '@/components/common';
 
 export default function PinSetupScreen() {
   const router = useRouter();
@@ -104,21 +103,8 @@ export default function PinSetupScreen() {
         </View>
 
         <View className="w-full">
-          <View className="flex-row flex-wrap justify-center gap-4 mb-6">
-            {DIGITS.map((d, i) => (
-              <TouchableOpacity
-                key={i}
-                onPress={() => handleDigit(d)}
-                disabled={d === ''}
-                className={`w-20 h-20 rounded-full items-center justify-center ${
-                  d === '' ? 'opacity-0' : d === '⌫' ? 'bg-slate-100' : 'bg-slate-100 active:bg-slate-200'
-                }`}
-              >
-                <Text className={`text-2xl font-sans-bold ${d === '⌫' ? 'text-slate-600' : 'text-slate-800'}`}>
-                  {d}
-                </Text>
-              </TouchableOpacity>
-            ))}
+          <View className="mb-6">
+            <PinKeypad onPress={handleDigit} variant="light" />
           </View>
 
           <TouchableOpacity

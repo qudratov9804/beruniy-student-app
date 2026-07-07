@@ -1,12 +1,12 @@
 import React from 'react';
-import { View, Text, ScrollView, Alert, TouchableOpacity } from 'react-native';
+import { View, Text, ScrollView, Alert, TouchableOpacity, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { ChevronLeft } from 'lucide-react-native';
 import { quizService } from '@/services/api';
 import { useQuizStore } from '@/stores';
-import { QuizOption, QuizProgressHeader, QuizResultCard } from '@/components/quiz';
+import { QuizOption, QuizProgressHeader, QuizResultCard, QuizAttemptHistory } from '@/components/quiz';
 import { Button, Skeleton } from '@/components/ui';
 import { EmptyState } from '@/components/common/EmptyState';
 
@@ -58,6 +58,20 @@ export default function QuizScreen() {
   const submitMutation = useMutation({
     mutationFn: () => quizService.submit(lessonId, answers),
     onSuccess: (data) => setResult(data),
+    onError: async (err: unknown) => {
+      const e = err as { response?: { status?: number; data?: { message?: string } } };
+      if (e?.response?.status === 422) {
+        // Already passed a previous attempt — show that result instead of leaving the
+        // user stuck on the last question.
+        try {
+          setResult(await quizService.getResult(lessonId));
+          return;
+        } catch {
+          // fall through to the generic alert below
+        }
+      }
+      Alert.alert('Xatolik', e?.response?.data?.message ?? 'Javoblarni yuborishda xatolik yuz berdi.');
+    },
   });
 
   React.useEffect(() => {
@@ -128,17 +142,20 @@ export default function QuizScreen() {
   if (isCompleted && result) {
     return (
       <SafeAreaView className="flex-1 bg-white">
-        <QuizResultCard
-          result={result}
-          onContinue={() => {
-            resetQuiz();
-            router.back();
-          }}
-          onRetry={() => {
-            resetQuiz();
-            startQuiz();
-          }}
-        />
+        <ScrollView showsVerticalScrollIndicator={false}>
+          <QuizResultCard
+            result={result}
+            onContinue={() => {
+              resetQuiz();
+              router.back();
+            }}
+            onRetry={() => {
+              resetQuiz();
+              startQuiz();
+            }}
+          />
+          <QuizAttemptHistory lessonId={lessonId} />
+        </ScrollView>
       </SafeAreaView>
     );
   }
@@ -151,9 +168,16 @@ export default function QuizScreen() {
 
   if (!currentQuestion) return null;
 
-  const handleSelect = (optionId: string) => {
-    answerQuestion(currentQuestion.id, optionId);
-  };
+  // A `false` true/false answer or an empty (but touched) array must still count as
+  // "answered" — checking selectedAnswer for truthiness would block the Next button.
+  const hasAnswered =
+    selectedAnswer === undefined
+      ? false
+      : Array.isArray(selectedAnswer)
+        ? selectedAnswer.length > 0
+        : typeof selectedAnswer === 'string'
+          ? selectedAnswer.trim().length > 0
+          : true;
 
   const handleNext = () => {
     if (isLastQuestion) {
@@ -180,15 +204,64 @@ export default function QuizScreen() {
             {currentQuestion.question}
           </Text>
 
-          {currentQuestion.options.map((option, index) => (
-            <QuizOption
-              key={option.id}
-              option={option}
-              selected={selectedAnswer === option.id}
-              onSelect={handleSelect}
-              index={index}
+          {currentQuestion.type === 'fill_blank' ? (
+            <TextInput
+              value={typeof selectedAnswer === 'string' ? selectedAnswer : ''}
+              onChangeText={(text) => answerQuestion(currentQuestion.id, text)}
+              placeholder="Javobingizni shu yerga yozing..."
+              placeholderTextColor="#94A3B8"
+              multiline
+              numberOfLines={4}
+              textAlignVertical="top"
+              className="border-2 border-slate-200 rounded-2xl px-4 py-3 text-base text-slate-800 min-h-[100px]"
             />
-          ))}
+          ) : currentQuestion.type === 'true_false' ? (
+            // Answer must be a real boolean (per API contract), not an option id, so
+            // this renders its own Yes/No pair instead of `options`.
+            ([
+              { label: "To'g'ri", value: true },
+              { label: "Noto'g'ri", value: false },
+            ] as const).map((opt, index) => (
+              <QuizOption
+                key={String(opt.value)}
+                option={{ id: String(opt.value), text: opt.label }}
+                selected={selectedAnswer === opt.value}
+                onSelect={() => answerQuestion(currentQuestion.id, opt.value)}
+                index={index}
+              />
+            ))
+          ) : currentQuestion.type === 'matching' ? (
+            <Text className="text-sm text-slate-400">
+              Bu turdagi savol hozircha mobil ilovada qo'llab-quvvatlanmaydi. Davom etish uchun
+              "Keyingisi" tugmasini bosing.
+            </Text>
+          ) : (
+            currentQuestion.options.map((option, index) => {
+              const isMultiple = currentQuestion.type === 'multiple';
+              const isSelected = isMultiple
+                ? Array.isArray(selectedAnswer) && selectedAnswer.includes(option.id)
+                : selectedAnswer === option.id;
+              return (
+                <QuizOption
+                  key={option.id}
+                  option={option}
+                  selected={isSelected}
+                  onSelect={() => {
+                    if (!isMultiple) {
+                      answerQuestion(currentQuestion.id, option.id);
+                      return;
+                    }
+                    const current = Array.isArray(selectedAnswer) ? selectedAnswer : [];
+                    const next = current.includes(option.id)
+                      ? current.filter((v) => v !== option.id)
+                      : [...current, option.id];
+                    answerQuestion(currentQuestion.id, next);
+                  }}
+                  index={index}
+                />
+              );
+            })
+          )}
         </View>
       </ScrollView>
 
@@ -197,7 +270,7 @@ export default function QuizScreen() {
           fullWidth
           size="lg"
           onPress={handleNext}
-          disabled={!selectedAnswer}
+          disabled={currentQuestion.type !== 'matching' && !hasAnswered}
           loading={submitMutation.isPending}
         >
           {isLastQuestion ? 'Tugatish' : 'Keyingisi'}

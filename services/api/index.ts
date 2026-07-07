@@ -4,5 +4,5 @@ export { homeService, categoriesService, coursesService, enrollmentsService } fr
 export { paymentsService } from './payments';
 export { aiService } from './ai';
 export { reviewsService } from './reviews';
-export { lessonsService, quizService } from './lessons';
+export { lessonsService, quizService, assignmentService } from './lessons';
 export { notificationsService, certificatesService, wishlistService } from './progress';

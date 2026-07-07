@@ -7,13 +7,14 @@ import {
   StyleSheet,
   Modal,
   TextInput,
-  ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { Image } from 'expo-image';
 import {
   ChevronLeft,
+  ChevronDown,
+  ChevronRight,
   Star,
   Users,
   Clock,
@@ -25,19 +26,25 @@ import {
   AlertTriangle,
   X,
   Wallet,
-  Bot,
-  Send,
 } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useCourse, useEnrollCourse, useEnrollmentDetail } from '@/hooks/useCourses';
 import { useInitiatePayment } from '@/hooks/usePayments';
-import { useAskAI } from '@/hooks/useAI';
 import { useReviews, useReviewsSummary, useCreateReview } from '@/hooks/useReviews';
 import { Badge, ProgressBar, Skeleton } from '@/components/ui';
 import { HtmlText } from '@/components/common/HtmlText';
 import { ScreenBackground } from '@/components/common/ScreenBackground';
-import { formatPrice, formatDate, paymentProviderLabels } from '@/utils';
-import type { AISource, PaymentProvider, SectionLesson } from '@/types';
+import { AITutor } from '@/components/common/AITutor';
+import { LessonTypeIcon } from '@/components/lesson';
+import {
+  formatPrice,
+  formatDate,
+  paymentProviderLabels,
+  lessonTypeLabels,
+  groupLessonsByModule,
+  LESSON_SLOT_ORDER,
+} from '@/utils';
+import type { PaymentProvider, SectionLesson } from '@/types';
 
 const levelLabels: Record<string, string> = {
   beginner: "Boshlang'ich",
@@ -56,11 +63,14 @@ export default function CourseDetailScreen() {
   useFocusEffect(
     useCallback(() => {
       refetchCourse();
-      refetchEnrollmentDetail();
-    }, [refetchCourse, refetchEnrollmentDetail])
+      // `refetch` ignores the query's `enabled` flag, so guard it manually —
+      // otherwise this fires with courseId=0 before `course` has loaded.
+      if (course?.id) refetchEnrollmentDetail();
+    }, [refetchCourse, refetchEnrollmentDetail, course?.id])
   );
 
   const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; msg: string } | null>(null);
+  const [expandedModules, setExpandedModules] = useState<Record<number, boolean>>({});
   const [paymentModalVisible, setPaymentModalVisible] = useState(false);
   const [selectedProvider, setSelectedProvider] = useState<PaymentProvider>('payme');
 
@@ -90,29 +100,6 @@ export default function CourseDetailScreen() {
       const e = err as { response?: { data?: { message?: string } } };
       const msg = e?.response?.data?.message ?? "To'lovni boshlashda xatolik yuz berdi.";
       setFeedback({ type: 'error', msg });
-    },
-  });
-
-  const [aiQuestion, setAiQuestion] = useState('');
-  const [aiExchanges, setAiExchanges] = useState<
-    { question: string; answer?: string; sources?: AISource[]; error?: string }[]
-  >([]);
-
-  const askAI = useAskAI({
-    onSuccess: (res) => {
-      setAiExchanges((prev) =>
-        prev.map((ex, i) =>
-          i === prev.length - 1 ? { ...ex, answer: res.answer, sources: res.sources } : ex
-        )
-      );
-    },
-    onError: (err: unknown) => {
-      const e = err as { response?: { status?: number } };
-      const msg =
-        e?.response?.status === 503
-          ? "AI xizmat hozircha mavjud emas. Birozdan so'ng qayta urinib ko'ring."
-          : 'Savolga javob berishda xatolik yuz berdi.';
-      setAiExchanges((prev) => prev.map((ex, i) => (i === prev.length - 1 ? { ...ex, error: msg } : ex)));
     },
   });
 
@@ -209,14 +196,6 @@ export default function CourseDetailScreen() {
     if (nextLesson) {
       router.push(`/lesson/${nextLesson.id}?courseId=${course.id}&courseSlug=${id}`);
     }
-  };
-
-  const handleAskAI = () => {
-    const question = aiQuestion.trim();
-    if (!question || askAI.isPending) return;
-    setAiExchanges((prev) => [...prev, { question }]);
-    setAiQuestion('');
-    askAI.mutate({ question, course_id: course.id, language: 'uz' });
   };
 
   const handleSubmitReview = () => {
@@ -370,122 +349,152 @@ export default function CourseDetailScreen() {
             </View>
           </View>
 
-          {/* Sections */}
-          {course.sections && course.sections.length > 0 && (
-            <View style={styles.sections}>
-              <Text style={styles.sectionsTitle}>Kurs dasturi</Text>
-              {course.sections.map((section) => (
-                <View key={section.id} style={styles.sectionBlock}>
-                  <Text style={styles.sectionTitle}>{section.title}</Text>
-                  {(section.lessons ?? []).map((lesson: SectionLesson) => {
-                    const isUnlocked = isEnrolled
-                      ? unlockedLessonIds.has(lesson.id) || lesson.is_preview
-                      : lesson.is_preview;
-                    return (
-                      <TouchableOpacity
-                        key={lesson.id}
-                        onPress={() => {
-                          if (!isUnlocked) return;
-                          router.push(`/lesson/${lesson.id}?courseId=${course.id}&courseSlug=${id}`);
-                        }}
-                        style={styles.lessonRow}
-                        activeOpacity={0.7}
-                      >
-                        <View style={styles.lessonIcon}>
-                          {lesson.is_completed || completedLessonIds.has(lesson.id) ? (
-                            <CheckCircle size={18} color="#34d399" />
-                          ) : !isUnlocked ? (
-                            <Lock size={16} color="rgba(255,255,255,0.30)" />
-                          ) : (
-                            <Play size={16} color="#60a5fa" />
-                          )}
-                        </View>
-                        <View style={styles.lessonInfo}>
-                          <Text style={[styles.lessonTitle, !isUnlocked && styles.lessonLocked]}>
-                            {lesson.title}
-                          </Text>
-                          <Text style={styles.lessonDuration}>
-                            {Math.round(lesson.duration_seconds / 60)} min
-                          </Text>
-                        </View>
-                        {lesson.is_preview && !isEnrolled && (
-                          <View style={styles.previewBadge}>
-                            <Text style={styles.previewBadgeText}>Bepul ko'rish</Text>
-                          </View>
-                        )}
-                      </TouchableOpacity>
-                    );
-                  })}
+          {/* What you'll learn / requirements / includes */}
+          {(course.what_you_learn?.length ||
+            course.requirements?.length ||
+            course.includes?.length) ? (
+            <View style={styles.infoLists}>
+              {!!course.what_you_learn?.length && (
+                <View style={styles.infoBlock}>
+                  <Text style={styles.sectionsTitle}>Nimalarni o'rganasiz</Text>
+                  {course.what_you_learn.map((item, i) => (
+                    <View key={i} style={styles.infoRow}>
+                      <CheckCircle2 size={15} color="#34d399" />
+                      <Text style={styles.infoText}>{item}</Text>
+                    </View>
+                  ))}
                 </View>
-              ))}
+              )}
+              {!!course.requirements?.length && (
+                <View style={styles.infoBlock}>
+                  <Text style={styles.sectionsTitle}>Talablar</Text>
+                  {course.requirements.map((item, i) => (
+                    <View key={i} style={styles.infoRow}>
+                      <Text style={styles.infoBullet}>•</Text>
+                      <Text style={styles.infoText}>{item}</Text>
+                    </View>
+                  ))}
+                </View>
+              )}
+              {!!course.includes?.length && (
+                <View style={styles.infoBlock}>
+                  <Text style={styles.sectionsTitle}>Kursga nimalar kiradi</Text>
+                  {course.includes.map((item, i) => (
+                    <View key={i} style={styles.infoRow}>
+                      <CheckCircle2 size={15} color="#60a5fa" />
+                      <Text style={styles.infoText}>{item}</Text>
+                    </View>
+                  ))}
+                </View>
+              )}
+            </View>
+          ) : null}
+
+          {/* Full description */}
+          {course.description && (
+            <View style={styles.infoLists}>
+              <View style={styles.infoBlock}>
+                <Text style={styles.sectionsTitle}>Kurs haqida</Text>
+                <HtmlText html={course.description} baseFontSize={14} color="rgba(255,255,255,0.70)" />
+              </View>
             </View>
           )}
 
-          {/* AI Tutor */}
-          <View style={styles.aiSection}>
-            <View style={styles.aiHeader}>
-              <View style={styles.aiHeaderIcon}>
-                <Bot size={18} color="#60a5fa" />
-              </View>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.aiTitle}>AI yordamchi</Text>
-                <Text style={styles.aiSubtitle}>Kurs bo'yicha savol bering, AI tutor javob beradi</Text>
-              </View>
-            </View>
+          {/* Darslar — flat "Dars N" list, each collapsible (no Bo'lim wrapper) */}
+          {(() => {
+            const sections = course.sections;
+            if (!sections || sections.length === 0) return null;
 
-            {aiExchanges.map((ex, i) => {
-              const isPending = i === aiExchanges.length - 1 && askAI.isPending && !ex.answer && !ex.error;
+            const allLessonsForGrouping = sections.flatMap((section) => section.lessons ?? []);
+            const { modules, legacy } = groupLessonsByModule(allLessonsForGrouping);
+            if (modules.length === 0 && legacy.length === 0) return null;
+
+            const moduleWithNextLesson = modules.find((mod) =>
+              Object.values(mod.items).some((lesson) => lesson?.id === nextLessonId)
+            );
+            const defaultOpenModuleId = moduleWithNextLesson?.id ?? modules[0]?.id;
+
+            const renderLessonRow = (lesson: SectionLesson) => {
+              const isUnlocked = isEnrolled
+                ? unlockedLessonIds.has(lesson.id) || lesson.is_preview
+                : lesson.is_preview;
               return (
-                <View key={i} style={styles.aiExchange}>
-                  <View style={styles.aiQuestionBubble}>
-                    <Text style={styles.aiQuestionText}>{ex.question}</Text>
+                <TouchableOpacity
+                  key={lesson.id}
+                  onPress={() => {
+                    if (!isUnlocked) return;
+                    router.push(`/lesson/${lesson.id}?courseId=${course.id}&courseSlug=${id}`);
+                  }}
+                  style={styles.lessonRow}
+                  activeOpacity={0.7}
+                >
+                  <View style={styles.lessonIcon}>
+                    {lesson.is_completed || completedLessonIds.has(lesson.id) ? (
+                      <CheckCircle size={18} color="#34d399" />
+                    ) : !isUnlocked ? (
+                      <Lock size={16} color="rgba(255,255,255,0.30)" />
+                    ) : (
+                      <LessonTypeIcon type={lesson.type} size={16} color="#60a5fa" />
+                    )}
                   </View>
-                  {isPending ? (
-                    <View style={styles.aiAnswerBubble}>
-                      <ActivityIndicator size="small" color="#60a5fa" />
+                  <View style={styles.lessonInfo}>
+                    <Text style={[styles.lessonTitle, !isUnlocked && styles.lessonLocked]}>
+                      {lessonTypeLabels[lesson.type]} · {lesson.title}
+                    </Text>
+                    <Text style={styles.lessonDuration}>
+                      {Math.round(lesson.duration_seconds / 60)} min
+                    </Text>
+                  </View>
+                  {lesson.is_preview && !isEnrolled && (
+                    <View style={styles.previewBadge}>
+                      <Text style={styles.previewBadgeText}>Bepul ko'rish</Text>
                     </View>
-                  ) : ex.error ? (
-                    <View style={styles.aiErrorBubble}>
-                      <AlertTriangle size={14} color="#f87171" />
-                      <Text style={styles.aiErrorText}>{ex.error}</Text>
-                    </View>
-                  ) : ex.answer ? (
-                    <View style={styles.aiAnswerBubble}>
-                      <Text style={styles.aiAnswerText}>{ex.answer}</Text>
-                      {ex.sources && ex.sources.length > 0 && (
-                        <View style={styles.aiSources}>
-                          {ex.sources.map((s, si) => (
-                            <View key={si} style={styles.aiSourceChip}>
-                              <Text style={styles.aiSourceText} numberOfLines={1}>
-                                {s.lesson_title} · {s.timestamp}
-                              </Text>
-                            </View>
-                          ))}
-                        </View>
-                      )}
-                    </View>
-                  ) : null}
-                </View>
+                  )}
+                </TouchableOpacity>
               );
-            })}
+            };
 
-            <View style={styles.aiInputRow}>
-              <TextInput
-                style={styles.aiInput}
-                value={aiQuestion}
-                onChangeText={setAiQuestion}
-                placeholder="Masalan: React hookslar nima?"
-                placeholderTextColor="rgba(255,255,255,0.35)"
-                multiline
-              />
-              <TouchableOpacity
-                onPress={handleAskAI}
-                disabled={!aiQuestion.trim() || askAI.isPending}
-                style={[styles.aiSendBtn, (!aiQuestion.trim() || askAI.isPending) && styles.btnDisabled]}
-              >
-                <Send size={16} color="#fff" />
-              </TouchableOpacity>
-            </View>
+            return (
+              <View style={styles.sections}>
+                <Text style={styles.sectionsTitle}>Darslar</Text>
+                {modules.map((mod) => {
+                  const isOpen = expandedModules[mod.id] ?? mod.id === defaultOpenModuleId;
+                  return (
+                    <View key={mod.id} style={styles.sectionBlock}>
+                      <TouchableOpacity
+                        onPress={() =>
+                          setExpandedModules((prev) => ({
+                            ...prev,
+                            [mod.id]: !(prev[mod.id] ?? mod.id === defaultOpenModuleId),
+                          }))
+                        }
+                        style={styles.sectionHeader}
+                        activeOpacity={0.7}
+                      >
+                        <Text style={styles.sectionTitle}>{`Dars ${mod.title}`}</Text>
+                        {isOpen ? (
+                          <ChevronDown size={16} color="rgba(255,255,255,0.45)" />
+                        ) : (
+                          <ChevronRight size={16} color="rgba(255,255,255,0.45)" />
+                        )}
+                      </TouchableOpacity>
+
+                      {isOpen &&
+                        LESSON_SLOT_ORDER.map((slotType) => {
+                          const lesson = mod.items[slotType];
+                          return lesson ? renderLessonRow(lesson) : null;
+                        })}
+                    </View>
+                  );
+                })}
+                {legacy.map((lesson) => renderLessonRow(lesson))}
+              </View>
+            );
+          })()}
+
+          {/* AI Tutor */}
+          <View style={{ marginHorizontal: 20, marginTop: 8 }}>
+            <AITutor courseId={course.id} courseSlug={id} sections={course.sections} variant="dark" />
           </View>
 
           {/* Reviews */}
@@ -798,11 +807,21 @@ const styles = StyleSheet.create({
   },
   btnDisabled: { backgroundColor: 'rgba(37,99,235,0.45)' },
   btnPrimaryText: { color: '#ffffff', fontSize: 15, fontWeight: '700' },
+  // Info lists (what you'll learn / requirements / includes / description)
+  infoLists: { paddingHorizontal: 20, marginBottom: 8 },
+  infoBlock: { marginBottom: 20 },
+  infoRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 8, marginBottom: 8 },
+  infoBullet: { color: 'rgba(255,255,255,0.45)', fontSize: 13, lineHeight: 19 },
+  infoText: { flex: 1, color: 'rgba(255,255,255,0.70)', fontSize: 13, lineHeight: 19 },
   // Sections
   sections: { paddingHorizontal: 20 },
   sectionsTitle: { color: '#ffffff', fontSize: 16, fontWeight: '700', marginBottom: 14 },
-  sectionBlock: { marginBottom: 18 },
-  sectionTitle: { color: 'rgba(255,255,255,0.75)', fontSize: 13, fontWeight: '600', marginBottom: 6 },
+  sectionBlock: { marginBottom: 10 },
+  sectionHeader: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    paddingVertical: 8,
+  },
+  sectionTitle: { flex: 1, color: 'rgba(255,255,255,0.85)', fontSize: 13, fontWeight: '600', marginRight: 8 },
   lessonRow: {
     flexDirection: 'row', alignItems: 'center',
     paddingVertical: 12, gap: 12,
@@ -858,64 +877,6 @@ const styles = StyleSheet.create({
   submitBtn: {
     backgroundColor: '#2563eb', borderRadius: 14, height: 50,
     alignItems: 'center', justifyContent: 'center',
-  },
-  // AI tutor
-  aiSection: {
-    marginHorizontal: 20, marginTop: 8,
-    backgroundColor: 'rgba(255,255,255,0.05)',
-    borderRadius: 20, borderWidth: 1, borderColor: 'rgba(255,255,255,0.10)',
-    padding: 16,
-  },
-  aiHeader: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 14 },
-  aiHeaderIcon: {
-    width: 38, height: 38, borderRadius: 13,
-    backgroundColor: 'rgba(37,99,235,0.20)',
-    borderWidth: 1, borderColor: 'rgba(96,165,250,0.30)',
-    alignItems: 'center', justifyContent: 'center',
-  },
-  aiTitle: { color: '#ffffff', fontSize: 14, fontWeight: '700' },
-  aiSubtitle: { color: 'rgba(255,255,255,0.45)', fontSize: 11, marginTop: 1 },
-  aiExchange: { marginBottom: 14, gap: 8 },
-  aiQuestionBubble: {
-    alignSelf: 'flex-end', maxWidth: '85%',
-    backgroundColor: '#2563eb', borderRadius: 14, borderBottomRightRadius: 4,
-    paddingHorizontal: 13, paddingVertical: 9,
-  },
-  aiQuestionText: { color: '#ffffff', fontSize: 13, lineHeight: 19 },
-  aiAnswerBubble: {
-    alignSelf: 'flex-start', maxWidth: '92%',
-    backgroundColor: 'rgba(255,255,255,0.08)',
-    borderWidth: 1, borderColor: 'rgba(255,255,255,0.12)',
-    borderRadius: 14, borderBottomLeftRadius: 4,
-    paddingHorizontal: 13, paddingVertical: 10,
-  },
-  aiAnswerText: { color: 'rgba(255,255,255,0.88)', fontSize: 13, lineHeight: 20 },
-  aiErrorBubble: {
-    alignSelf: 'flex-start', maxWidth: '92%', flexDirection: 'row', alignItems: 'center', gap: 6,
-    backgroundColor: 'rgba(239,68,68,0.14)',
-    borderWidth: 1, borderColor: 'rgba(248,113,113,0.30)',
-    borderRadius: 14, borderBottomLeftRadius: 4,
-    paddingHorizontal: 13, paddingVertical: 9,
-  },
-  aiErrorText: { color: '#fca5a5', fontSize: 12, fontWeight: '600', flex: 1 },
-  aiSources: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 10 },
-  aiSourceChip: {
-    maxWidth: '100%',
-    backgroundColor: 'rgba(96,165,250,0.14)',
-    borderWidth: 1, borderColor: 'rgba(96,165,250,0.28)',
-    borderRadius: 8, paddingHorizontal: 8, paddingVertical: 4,
-  },
-  aiSourceText: { color: '#93c5fd', fontSize: 10, fontWeight: '600' },
-  aiInputRow: { flexDirection: 'row', alignItems: 'flex-end', gap: 8, marginTop: 4 },
-  aiInput: {
-    flex: 1, backgroundColor: 'rgba(255,255,255,0.07)',
-    borderRadius: 14, borderWidth: 1, borderColor: 'rgba(255,255,255,0.14)',
-    paddingHorizontal: 13, paddingVertical: 10,
-    color: '#ffffff', fontSize: 13, maxHeight: 100,
-  },
-  aiSendBtn: {
-    width: 42, height: 42, borderRadius: 14,
-    backgroundColor: '#2563eb', alignItems: 'center', justifyContent: 'center',
   },
   // Reviews
   reviewsSection: { paddingHorizontal: 20, marginTop: 24 },

@@ -44,6 +44,10 @@ export interface StreamResponse {
   cookies: StreamCookies | [];
 }
 
+export interface VideoPlayerHandle {
+  seekTo: (seconds: number) => void;
+}
+
 // Quiz
 export type QuizAnswers = Record<string, string | string[] | boolean>;
 
@@ -79,6 +83,12 @@ export interface QuizAttempt {
   submitted_at: string;
 }
 
+export interface QuizHistory {
+  attempts: QuizAttempt[];
+  best_score: number;
+  passed: boolean;
+}
+
 export interface QuizSubmitResult {
   attempt_number: number;
   score: number;
@@ -96,10 +106,36 @@ export interface QuizQuestionResult {
   your_answer: string | string[] | boolean;
 }
 
+// Assignment
+export type AssignmentSubmissionStatus = 'pending' | 'approved' | 'rejected';
+
+export interface AssignmentSubmission {
+  id: number;
+  content: string | null;
+  file_url: string | null;
+  status: AssignmentSubmissionStatus;
+  grade: number | null;
+  feedback: string | null;
+  submitted_at: string;
+}
+
+export interface Assignment {
+  content: string;
+  submissions: AssignmentSubmission[];
+}
+
 // Transcript
 export interface TranscriptSegment {
   id: number;
   start: number;
   end: number;
   text: string;
+}
+
+export type TranscriptStatus = 'not_available' | 'processing' | 'completed';
+
+export interface Transcript {
+  status: TranscriptStatus;
+  vtt_url: string | null;
+  segments: TranscriptSegment[];
 }
