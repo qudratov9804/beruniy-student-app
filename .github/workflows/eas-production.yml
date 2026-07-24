@@ -68,9 +68,11 @@ jobs:
 
       - name: Write Google Service Account Key
         id: write-key
+        env:
+          GOOGLE_SERVICE_ACCOUNT_KEY: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_KEY }}
         run: |
-          if [ -n "${{ secrets.GOOGLE_SERVICE_ACCOUNT_KEY }}" ]; then
-            echo '${{ secrets.GOOGLE_SERVICE_ACCOUNT_KEY }}' > google-service-account-key.json
+          if [ -n "$GOOGLE_SERVICE_ACCOUNT_KEY" ]; then
+            echo "$GOOGLE_SERVICE_ACCOUNT_KEY" > google-service-account-key.json
             echo "has_key=true" >> $GITHUB_OUTPUT
           else
             echo "has_key=false" >> $GITHUB_OUTPUT
