@@ -49,8 +49,8 @@ export const wishlistService = {
     return res.data.data;
   },
 
-  toggle: async (courseId: number): Promise<{ wishlisted: boolean }> => {
-    const res = await apiClient.post<ApiResponse<{ wishlisted: boolean }>>(
+  toggle: async (courseId: number): Promise<{ added: boolean; wishlist_count: number }> => {
+    const res = await apiClient.post<ApiResponse<{ added: boolean; wishlist_count: number }>>(
       `/wishlist/${courseId}`
     );
     return res.data.data;

@@ -58,17 +58,7 @@ export interface Course {
   prerequisites?: CoursePrerequisite[];
   is_enrolled?: boolean;
   is_in_wishlist?: boolean;
-  sections?: Section[];
-}
-
-export interface Section {
-  id: number;
-  title: string;
-  description: string | null;
-  order: number;
-  lessons_count: number;
-  duration_seconds: number;
-  // Omitted by the API for sections with no lessons yet.
+  // Flat list from the API — group by `module_id` (see groupLessonsByModule) to render "Dars N" blocks.
   lessons?: SectionLesson[];
 }
 

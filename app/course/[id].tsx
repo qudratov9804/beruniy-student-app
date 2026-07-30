@@ -26,11 +26,14 @@ import {
   AlertTriangle,
   X,
   Wallet,
+  Heart,
 } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useTranslation } from 'react-i18next';
 import { useCourse, useEnrollCourse, useEnrollmentDetail } from '@/hooks/useCourses';
 import { useInitiatePayment } from '@/hooks/usePayments';
 import { useReviews, useReviewsSummary, useCreateReview } from '@/hooks/useReviews';
+import { useToggleWishlist } from '@/hooks/useProgress';
 import { Badge, ProgressBar, Skeleton } from '@/components/ui';
 import { HtmlText } from '@/components/common/HtmlText';
 import { ScreenBackground } from '@/components/common/ScreenBackground';
@@ -40,21 +43,16 @@ import {
   formatPrice,
   formatDate,
   paymentProviderLabels,
-  lessonTypeLabels,
   groupLessonsByModule,
   LESSON_SLOT_ORDER,
+  flattenLessonsInModuleOrder,
 } from '@/utils';
 import type { PaymentProvider, SectionLesson } from '@/types';
-
-const levelLabels: Record<string, string> = {
-  beginner: "Boshlang'ich",
-  intermediate: "O'rta",
-  advanced: 'Yuqori',
-};
 
 export default function CourseDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
+  const { t, i18n } = useTranslation();
   const { data: course, isLoading, refetch: refetchCourse } = useCourse(id);
   const { data: enrollmentDetail, refetch: refetchEnrollmentDetail } = useEnrollmentDetail(
     course?.id ?? 0
@@ -75,10 +73,10 @@ export default function CourseDetailScreen() {
   const [selectedProvider, setSelectedProvider] = useState<PaymentProvider>('payme');
 
   const enrollMutation = useEnrollCourse({
-    onSuccess: () => setFeedback({ type: 'success', msg: 'Kursga muvaffaqiyatli yozildingiz!' }),
+    onSuccess: () => setFeedback({ type: 'success', msg: t('course.enrollSuccess') }),
     onError: (err: unknown) => {
       const e = err as { response?: { data?: { message?: string } } };
-      const msg = e?.response?.data?.message ?? 'Kursga yozilishda xatolik yuz berdi.';
+      const msg = e?.response?.data?.message ?? t('course.enrollError');
       setFeedback({ type: 'error', msg });
     },
   });
@@ -98,10 +96,12 @@ export default function CourseDetailScreen() {
     },
     onError: (err: unknown) => {
       const e = err as { response?: { data?: { message?: string } } };
-      const msg = e?.response?.data?.message ?? "To'lovni boshlashda xatolik yuz berdi.";
+      const msg = e?.response?.data?.message ?? t('course.paymentStartError');
       setFeedback({ type: 'error', msg });
     },
   });
+
+  const toggleWishlistMutation = useToggleWishlist();
 
   const { data: reviewsData } = useReviews(course?.id ?? 0, { sort: 'newest' });
   const { data: reviewsSummary } = useReviewsSummary(course?.id ?? 0);
@@ -118,17 +118,17 @@ export default function CourseDetailScreen() {
       setReviewBody('');
       setReviewRating(5);
       setReviewError(null);
-      setFeedback({ type: 'success', msg: "Sharhingiz uchun rahmat! U moderatsiyadan so'ng ko'rinadi." });
+      setFeedback({ type: 'success', msg: t('course.reviewThanks') });
     },
     onError: (err: unknown) => {
       const e = err as { response?: { status?: number; data?: { message?: string } } };
       const status = e?.response?.status;
       const msg =
         status === 403
-          ? "Sharh qoldirish uchun kursga yozilgan bo'lishingiz kerak."
+          ? t('course.reviewRequiresEnrollment')
           : status === 409
-            ? 'Siz bu kursga allaqachon sharh yozgansiz.'
-            : (e?.response?.data?.message ?? 'Sharh yuborishda xatolik yuz berdi.');
+            ? t('course.reviewAlreadyExists')
+            : (e?.response?.data?.message ?? t('course.reviewSubmitError'));
       setReviewError(msg);
     },
   });
@@ -152,9 +152,11 @@ export default function CourseDetailScreen() {
   const progressPercent = enrollment?.progress_percent ?? 0;
 
   // Lessons unlock in order: a lesson is playable once the previous one is completed.
-  // The course-detail sections endpoint doesn't return per-lesson completion, so we
+  // The course-detail endpoint doesn't return per-lesson completion, so we
   // derive the unlock boundary from the enrollment's `next_lesson` pointer instead.
-  const allLessons = (course.sections ?? []).flatMap((section) => section.lessons ?? []);
+  // The API's own lessons array order isn't reliable within a module (see
+  // flattenLessonsInModuleOrder) — index-based unlock math needs the canonical order.
+  const allLessons = flattenLessonsInModuleOrder(course.lessons ?? []);
   const nextLessonId = enrollmentDetail?.next_lesson?.id;
   const nextLessonIndex =
     nextLessonId != null ? allLessons.findIndex((lesson) => lesson.id === nextLessonId) : -1;
@@ -228,13 +230,24 @@ export default function CourseDetailScreen() {
             >
               <ChevronLeft size={24} color="#fff" />
             </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => toggleWishlistMutation.mutate({ courseId: course.id, slug: id })}
+              disabled={toggleWishlistMutation.isPending}
+              style={styles.wishlistBtn}
+            >
+              <Heart
+                size={20}
+                color={course.is_in_wishlist ? '#f87171' : '#fff'}
+                fill={course.is_in_wishlist ? '#f87171' : 'transparent'}
+              />
+            </TouchableOpacity>
           </View>
 
           <View style={styles.body}>
             {/* Badges */}
             <View style={styles.badgeRow}>
-              <Badge variant="warning" size="sm">{levelLabels[course.level]}</Badge>
-              {course.is_free && <Badge variant="success" size="sm">Bepul</Badge>}
+              <Badge variant="warning" size="sm">{t(`courses.levels.${course.level}`)}</Badge>
+              {course.is_free && <Badge variant="success" size="sm">{t('common.free')}</Badge>}
             </View>
 
             <Text style={styles.title}>{course.title}</Text>
@@ -246,8 +259,8 @@ export default function CourseDetailScreen() {
             <View style={styles.statsRow}>
               {[
                 { icon: <Star size={14} color="#F59E0B" fill="#F59E0B" />, value: Number(course.rating).toFixed(1) },
-                { icon: <Users size={14} color="#60a5fa" />, value: `${course.enrolled_count} o'quvchi` },
-                { icon: <BookOpen size={14} color="#60a5fa" />, value: `${course.lessons_count} dars` },
+                { icon: <Users size={14} color="#60a5fa" />, value: t('course.studentsCount', { count: course.enrolled_count }) },
+                { icon: <BookOpen size={14} color="#60a5fa" />, value: t('myCourses.lessonsCount', { count: course.lessons_count }) },
                 { icon: <Clock size={14} color="#60a5fa" />, value: `${Number(course.duration_hours).toFixed(1)}h` },
               ].map(({ icon, value }, i) => (
                 <View key={i} style={styles.statItem}>
@@ -278,7 +291,7 @@ export default function CourseDetailScreen() {
             {isEnrolled && progressPercent > 0 && (
               <View style={styles.progressCard}>
                 <View style={styles.progressHeader}>
-                  <Text style={styles.progressLabel}>Siz o'qimoqdasiz</Text>
+                  <Text style={styles.progressLabel}>{t('course.currentlyLearning')}</Text>
                   <Text style={styles.progressPct}>{progressPercent}%</Text>
                 </View>
                 <ProgressBar progress={progressPercent} height={8} />
@@ -324,12 +337,12 @@ export default function CourseDetailScreen() {
               {isEnrolled ? (
                 <TouchableOpacity onPress={handleContinue} style={styles.btnPrimary}>
                   <Play size={18} color="#fff" />
-                  <Text style={styles.btnPrimaryText}>Davom etish</Text>
+                  <Text style={styles.btnPrimaryText}>{t('common.continue')}</Text>
                 </TouchableOpacity>
               ) : (
                 <>
                   <View>
-                    <Text style={styles.price}>{formatPrice(course.effective_price)}</Text>
+                    <Text style={styles.price}>{formatPrice(course.effective_price, t, i18n.language)}</Text>
                   </View>
                   <TouchableOpacity
                     onPress={handleEnroll}
@@ -338,10 +351,10 @@ export default function CourseDetailScreen() {
                   >
                     <Text style={styles.btnPrimaryText}>
                       {enrollMutation.isPending
-                        ? 'Yozilmoqda...'
+                        ? t('course.enrolling')
                         : course.is_free
-                          ? 'Kursga yozilish'
-                          : "Sotib olish"}
+                          ? t('course.enroll')
+                          : t('course.buy')}
                     </Text>
                   </TouchableOpacity>
                 </>
@@ -356,7 +369,7 @@ export default function CourseDetailScreen() {
             <View style={styles.infoLists}>
               {!!course.what_you_learn?.length && (
                 <View style={styles.infoBlock}>
-                  <Text style={styles.sectionsTitle}>Nimalarni o'rganasiz</Text>
+                  <Text style={styles.sectionsTitle}>{t('course.whatYouLearn')}</Text>
                   {course.what_you_learn.map((item, i) => (
                     <View key={i} style={styles.infoRow}>
                       <CheckCircle2 size={15} color="#34d399" />
@@ -367,7 +380,7 @@ export default function CourseDetailScreen() {
               )}
               {!!course.requirements?.length && (
                 <View style={styles.infoBlock}>
-                  <Text style={styles.sectionsTitle}>Talablar</Text>
+                  <Text style={styles.sectionsTitle}>{t('course.requirements')}</Text>
                   {course.requirements.map((item, i) => (
                     <View key={i} style={styles.infoRow}>
                       <Text style={styles.infoBullet}>•</Text>
@@ -378,7 +391,7 @@ export default function CourseDetailScreen() {
               )}
               {!!course.includes?.length && (
                 <View style={styles.infoBlock}>
-                  <Text style={styles.sectionsTitle}>Kursga nimalar kiradi</Text>
+                  <Text style={styles.sectionsTitle}>{t('course.includes')}</Text>
                   {course.includes.map((item, i) => (
                     <View key={i} style={styles.infoRow}>
                       <CheckCircle2 size={15} color="#60a5fa" />
@@ -394,7 +407,7 @@ export default function CourseDetailScreen() {
           {course.description && (
             <View style={styles.infoLists}>
               <View style={styles.infoBlock}>
-                <Text style={styles.sectionsTitle}>Kurs haqida</Text>
+                <Text style={styles.sectionsTitle}>{t('course.about')}</Text>
                 <HtmlText html={course.description} baseFontSize={14} color="rgba(255,255,255,0.70)" />
               </View>
             </View>
@@ -402,11 +415,9 @@ export default function CourseDetailScreen() {
 
           {/* Darslar — flat "Dars N" list, each collapsible (no Bo'lim wrapper) */}
           {(() => {
-            const sections = course.sections;
-            if (!sections || sections.length === 0) return null;
+            if (allLessons.length === 0) return null;
 
-            const allLessonsForGrouping = sections.flatMap((section) => section.lessons ?? []);
-            const { modules, legacy } = groupLessonsByModule(allLessonsForGrouping);
+            const { modules, legacy } = groupLessonsByModule(allLessons);
             if (modules.length === 0 && legacy.length === 0) return null;
 
             const moduleWithNextLesson = modules.find((mod) =>
@@ -439,15 +450,17 @@ export default function CourseDetailScreen() {
                   </View>
                   <View style={styles.lessonInfo}>
                     <Text style={[styles.lessonTitle, !isUnlocked && styles.lessonLocked]}>
-                      {lessonTypeLabels[lesson.type]} · {lesson.title}
+                      {t(`enums.lessonType.${lesson.type}`)} · {lesson.title}
                     </Text>
-                    <Text style={styles.lessonDuration}>
-                      {Math.round(lesson.duration_seconds / 60)} min
-                    </Text>
+                    {lesson.type !== 'quiz' && lesson.type !== 'assignment' && (
+                      <Text style={styles.lessonDuration}>
+                        {Math.round(lesson.duration_seconds / 60)} min
+                      </Text>
+                    )}
                   </View>
                   {lesson.is_preview && !isEnrolled && (
                     <View style={styles.previewBadge}>
-                      <Text style={styles.previewBadgeText}>Bepul ko'rish</Text>
+                      <Text style={styles.previewBadgeText}>{t('course.freePreview')}</Text>
                     </View>
                   )}
                 </TouchableOpacity>
@@ -456,7 +469,7 @@ export default function CourseDetailScreen() {
 
             return (
               <View style={styles.sections}>
-                <Text style={styles.sectionsTitle}>Darslar</Text>
+                <Text style={styles.sectionsTitle}>{t('course.lessons')}</Text>
                 {modules.map((mod) => {
                   const isOpen = expandedModules[mod.id] ?? mod.id === defaultOpenModuleId;
                   return (
@@ -471,7 +484,7 @@ export default function CourseDetailScreen() {
                         style={styles.sectionHeader}
                         activeOpacity={0.7}
                       >
-                        <Text style={styles.sectionTitle}>{`Dars ${mod.title}`}</Text>
+                        <Text style={styles.sectionTitle}>{t('course.moduleLabel', { title: mod.title })}</Text>
                         {isOpen ? (
                           <ChevronDown size={16} color="rgba(255,255,255,0.45)" />
                         ) : (
@@ -493,21 +506,21 @@ export default function CourseDetailScreen() {
           })()}
 
           {/* AI Tutor */}
-          <View style={{ marginHorizontal: 20, marginTop: 8 }}>
-            <AITutor courseId={course.id} courseSlug={id} sections={course.sections} variant="dark" />
+          <View style={{ marginHorizontal: 20, marginTop: 24 }}>
+            <AITutor courseId={course.id} courseSlug={id} lessons={course.lessons} variant="dark" />
           </View>
 
           {/* Reviews */}
           <View style={styles.reviewsSection}>
             <View style={styles.reviewsHeader}>
-              <Text style={styles.sectionsTitle}>Sharhlar</Text>
+              <Text style={styles.sectionsTitle}>{t('course.reviews')}</Text>
               {isEnrolled && (
                 <TouchableOpacity
                   onPress={() => setReviewModalVisible(true)}
                   style={styles.writeReviewBtn}
                 >
                   <Star size={13} color="#fbbf24" />
-                  <Text style={styles.writeReviewBtnText}>Sharh qoldirish</Text>
+                  <Text style={styles.writeReviewBtnText}>{t('course.writeReview')}</Text>
                 </TouchableOpacity>
               )}
             </View>
@@ -526,7 +539,7 @@ export default function CourseDetailScreen() {
                       />
                     ))}
                   </View>
-                  <Text style={styles.summaryTotal}>{reviewsSummary.total} ta sharh</Text>
+                  <Text style={styles.summaryTotal}>{t('course.reviewsCount', { count: reviewsSummary.total })}</Text>
                 </View>
                 <View style={styles.summaryBars}>
                   {[5, 4, 3, 2, 1].map((star) => {
@@ -574,13 +587,13 @@ export default function CourseDetailScreen() {
                         ))}
                       </View>
                     </View>
-                    <Text style={styles.reviewDate}>{formatDate(review.created_at)}</Text>
+                    <Text style={styles.reviewDate}>{formatDate(review.created_at, i18n.language)}</Text>
                   </View>
                   {review.title && <Text style={styles.reviewTitle}>{review.title}</Text>}
                   {review.body && <Text style={styles.reviewBody}>{review.body}</Text>}
                   {review.instructor_reply && (
                     <View style={styles.instructorReply}>
-                      <Text style={styles.instructorReplyLabel}>O'qituvchi javobi:</Text>
+                      <Text style={styles.instructorReplyLabel}>{t('course.instructorReplyLabel')}</Text>
                       <Text style={styles.instructorReplyText}>{review.instructor_reply}</Text>
                     </View>
                   )}
@@ -588,7 +601,7 @@ export default function CourseDetailScreen() {
               ))
             ) : (
               <Text style={styles.noReviews}>
-                Hozircha sharhlar yo'q. Birinchi bo'lib sharh qoldiring!
+                {t('course.noReviews')}
               </Text>
             )}
           </View>
@@ -613,9 +626,9 @@ export default function CourseDetailScreen() {
               <X size={20} color="rgba(255,255,255,0.7)" />
             </TouchableOpacity>
 
-            <Text style={styles.modalTitle}>To'lov usulini tanlang</Text>
+            <Text style={styles.modalTitle}>{t('course.selectPaymentMethod')}</Text>
             <Text style={styles.modalSub}>
-              {course.title} — {formatPrice(course.effective_price)}
+              {course.title} — {formatPrice(course.effective_price, t, i18n.language)}
             </Text>
 
             <View style={styles.providerRow}>
@@ -650,7 +663,7 @@ export default function CourseDetailScreen() {
               style={[styles.submitBtn, initiatePaymentMutation.isPending && styles.btnDisabled]}
             >
               <Text style={styles.btnPrimaryText}>
-                {initiatePaymentMutation.isPending ? 'Boshlanmoqda...' : "To'lovga o'tish"}
+                {initiatePaymentMutation.isPending ? t('course.paymentStarting') : t('course.proceedToPayment')}
               </Text>
             </TouchableOpacity>
           </View>
@@ -673,7 +686,7 @@ export default function CourseDetailScreen() {
               <X size={20} color="rgba(255,255,255,0.7)" />
             </TouchableOpacity>
 
-            <Text style={styles.modalTitle}>Sharh qoldiring</Text>
+            <Text style={styles.modalTitle}>{t('course.leaveReviewTitle')}</Text>
             <Text style={styles.modalSub}>{course.title}</Text>
 
             <View style={styles.starsPickerRow}>
@@ -692,7 +705,7 @@ export default function CourseDetailScreen() {
               style={styles.reviewTitleInput}
               value={reviewTitle}
               onChangeText={setReviewTitle}
-              placeholder="Sarlavha (ixtiyoriy)"
+              placeholder={t('course.reviewTitlePlaceholder')}
               placeholderTextColor="rgba(255,255,255,0.35)"
               maxLength={255}
             />
@@ -700,7 +713,7 @@ export default function CourseDetailScreen() {
               style={styles.reviewBodyInput}
               value={reviewBody}
               onChangeText={setReviewBody}
-              placeholder="Fikringizni yozing (ixtiyoriy)..."
+              placeholder={t('course.reviewBodyPlaceholder')}
               placeholderTextColor="rgba(255,255,255,0.35)"
               multiline
               numberOfLines={4}
@@ -720,7 +733,7 @@ export default function CourseDetailScreen() {
               style={[styles.submitBtn, createReviewMutation.isPending && styles.btnDisabled]}
             >
               <Text style={styles.btnPrimaryText}>
-                {createReviewMutation.isPending ? 'Yuborilmoqda...' : 'Yuborish'}
+                {createReviewMutation.isPending ? t('course.submitting') : t('common.submit')}
               </Text>
             </TouchableOpacity>
           </View>
@@ -738,6 +751,12 @@ const styles = StyleSheet.create({
   heroImg: { width: '100%', height: 220 },
   backBtn: {
     position: 'absolute', top: 16, left: 16,
+    width: 40, height: 40, borderRadius: 20,
+    backgroundColor: 'rgba(0,0,0,0.45)',
+    alignItems: 'center', justifyContent: 'center',
+  },
+  wishlistBtn: {
+    position: 'absolute', top: 16, right: 16,
     width: 40, height: 40, borderRadius: 20,
     backgroundColor: 'rgba(0,0,0,0.45)',
     alignItems: 'center', justifyContent: 'center',

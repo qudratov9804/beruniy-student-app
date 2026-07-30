@@ -3,11 +3,13 @@ import { View, Text, TouchableOpacity, Vibration, Platform } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import * as LocalAuthentication from 'expo-local-authentication';
+import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '@/stores';
 import { PinKeypad } from '@/components/common';
 
 export default function PinSetupScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const { setupPin, enableBiometric } = useAuthStore();
   const [step, setStep] = useState<'create' | 'confirm'>('create');
   const [pin, setPin] = useState('');
@@ -46,7 +48,7 @@ export default function PinSetupScreen() {
           handleFinish(pin);
         } else {
           if (Platform.OS !== 'web') Vibration.vibrate(300);
-          setError("PIN kodlar mos kelmadi. Qaytadan urinib ko'ring");
+          setError(t('auth.pinSetup.mismatch'));
           setConfirmPin('');
           setTimeout(() => {
             setStep('create');
@@ -62,8 +64,8 @@ export default function PinSetupScreen() {
     await setupPin(finalPin);
     if (biometricAvailable) {
       const result = await LocalAuthentication.authenticateAsync({
-        promptMessage: 'Barmoq izi orqali kirishni yoqing',
-        cancelLabel: 'Keyinroq',
+        promptMessage: t('auth.pinSetup.biometricPrompt'),
+        cancelLabel: t('auth.pinSetup.later'),
       });
       if (result.success) await enableBiometric();
     }
@@ -77,12 +79,12 @@ export default function PinSetupScreen() {
       <View className="flex-1 items-center justify-between px-6 py-10">
         <View className="items-center">
           <Text className="text-2xl font-sans-bold text-slate-800 mb-2">
-            {step === 'create' ? 'PIN kod o\'rnating' : 'PIN kodni tasdiqlang'}
+            {step === 'create' ? t('auth.pinSetup.createTitle') : t('auth.pinSetup.confirmTitle')}
           </Text>
           <Text className="text-slate-500 text-base text-center">
             {step === 'create'
-              ? 'Keyingi kirishlarda foydalanish uchun 4 xonali PIN'
-              : 'Xavfsizlik uchun PIN kodni qaytadan kiriting'}
+              ? t('auth.pinSetup.createSubtitle')
+              : t('auth.pinSetup.confirmSubtitle')}
           </Text>
         </View>
 
@@ -111,7 +113,7 @@ export default function PinSetupScreen() {
             onPress={() => router.replace('/(tabs)')}
             className="items-center py-3"
           >
-            <Text className="text-slate-400 text-sm">Hozircha o'tkazib yuborish</Text>
+            <Text className="text-slate-400 text-sm">{t('auth.pinSetup.skip')}</Text>
           </TouchableOpacity>
         </View>
       </View>

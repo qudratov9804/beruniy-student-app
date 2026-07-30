@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { BookOpen, CheckCircle, Clock, ChevronRight, GraduationCap } from 'lucide-react-native';
 import { ScreenBackground, AppHeader } from '@/components/common';
 import { useEnrolledCourses } from '@/hooks/useCourses';
@@ -17,14 +18,11 @@ import type { Enrollment } from '@/types';
 
 type Filter = 'all' | 'active' | 'completed';
 
-const FILTERS: { key: Filter; label: string }[] = [
-  { key: 'all', label: 'Barcha' },
-  { key: 'active', label: 'Faol' },
-  { key: 'completed', label: 'Tugatilgan' },
-];
+const FILTER_KEYS: Filter[] = ['all', 'active', 'completed'];
 
 function EnrolledCourseCard({ item }: { item: Enrollment }) {
   const router = useRouter();
+  const { t } = useTranslation();
   const isFree = item.paid_amount === 0 || item.course?.is_free;
   const isCompleted = item.status === 'completed';
 
@@ -45,14 +43,14 @@ function EnrolledCourseCard({ item }: { item: Enrollment }) {
         )}
         {/* Badge */}
         <View style={[styles.badge, isFree ? styles.badgeFree : styles.badgePaid]}>
-          <Text style={styles.badgeText}>{isFree ? 'Bepul' : 'Sotib olingan'}</Text>
+          <Text style={styles.badgeText}>{isFree ? t('common.free') : t('myCourses.purchased')}</Text>
         </View>
       </View>
 
       {/* Info */}
       <View style={styles.info}>
         <Text style={styles.title} numberOfLines={2}>
-          {item.course?.title ?? 'Kurs'}
+          {item.course?.title ?? t('myCourses.course')}
         </Text>
 
         {item.course?.instructor && (
@@ -74,18 +72,18 @@ function EnrolledCourseCard({ item }: { item: Enrollment }) {
           {isCompleted ? (
             <View style={styles.metaItem}>
               <CheckCircle size={13} color="#34d399" />
-              <Text style={[styles.metaText, { color: '#34d399' }]}>Tugatilgan</Text>
+              <Text style={[styles.metaText, { color: '#34d399' }]}>{t('myCourses.completed')}</Text>
             </View>
           ) : (
             <View style={styles.metaItem}>
               <Clock size={13} color="#60a5fa" />
-              <Text style={styles.metaText}>Davom etmoqda</Text>
+              <Text style={styles.metaText}>{t('myCourses.inProgress')}</Text>
             </View>
           )}
 
           {item.course?.lessons_count ? (
             <Text style={styles.metaRight}>
-              {item.course.lessons_count} ta dars
+              {t('myCourses.lessonsCount', { count: item.course.lessons_count })}
             </Text>
           ) : null}
         </View>
@@ -97,9 +95,15 @@ function EnrolledCourseCard({ item }: { item: Enrollment }) {
 }
 
 export default function MyCoursesScreen() {
+  const { t } = useTranslation();
   const [filter, setFilter] = useState<Filter>('all');
   const [refreshing, setRefreshing] = useState(false);
   const { data: enrollments, isLoading, refetch } = useEnrolledCourses();
+
+  const FILTERS: { key: Filter; label: string }[] = FILTER_KEYS.map((key) => ({
+    key,
+    label: t(`myCourses.filters.${key}`),
+  }));
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -122,15 +126,15 @@ export default function MyCoursesScreen() {
   return (
     <ScreenBackground>
       <SafeAreaView style={styles.safe}>
-        <AppHeader title="Mening kurslarim" />
+        <AppHeader title={t('myCourses.title')} />
 
         {/* Summary cards */}
         {enrollments && (
           <View style={styles.summaryRow}>
             {[
-              { label: 'Jami', value: stats.all, color: '#60a5fa', icon: <BookOpen size={16} color="#60a5fa" /> },
-              { label: 'Faol', value: stats.active, color: '#a78bfa', icon: <Clock size={16} color="#a78bfa" /> },
-              { label: 'Tugatilgan', value: stats.completed, color: '#34d399', icon: <CheckCircle size={16} color="#34d399" /> },
+              { label: t('myCourses.total'), value: stats.all, color: '#60a5fa', icon: <BookOpen size={16} color="#60a5fa" /> },
+              { label: t('myCourses.filters.active'), value: stats.active, color: '#a78bfa', icon: <Clock size={16} color="#a78bfa" /> },
+              { label: t('myCourses.completed'), value: stats.completed, color: '#34d399', icon: <CheckCircle size={16} color="#34d399" /> },
             ].map((s) => (
               <View key={s.label} style={styles.summaryCard}>
                 {s.icon}
@@ -170,12 +174,12 @@ export default function MyCoursesScreen() {
               <View style={styles.empty}>
                 <GraduationCap size={52} color="rgba(255,255,255,0.15)" />
                 <Text style={styles.emptyTitle}>
-                  {filter === 'completed' ? 'Tugatilgan kurslar yo\'q' :
-                   filter === 'active' ? 'Faol kurslar yo\'q' :
-                   'Hali kursga yozilmagansiz'}
+                  {filter === 'completed' ? t('myCourses.emptyCompleted') :
+                   filter === 'active' ? t('myCourses.emptyActive') :
+                   t('myCourses.emptyAll')}
                 </Text>
                 <Text style={styles.emptySub}>
-                  Kurslar bo'limiga o'tib, o'zingizga mos kursni tanlang
+                  {t('myCourses.emptySubtitle')}
                 </Text>
               </View>
             ) : null

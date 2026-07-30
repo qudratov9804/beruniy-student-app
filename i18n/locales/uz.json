@@ -1,0 +1,438 @@
+{
+  "common": {
+    "cancel": "Bekor qilish",
+    "save": "Saqlash",
+    "confirm": "Tasdiqlash",
+    "delete": "O'chirish",
+    "retry": "Qayta urinish",
+    "yes": "Ha",
+    "no": "Yo'q",
+    "ok": "OK",
+    "back": "Orqaga",
+    "next": "Keyingi",
+    "continue": "Davom etish",
+    "submit": "Yuborish",
+    "loading": "Yuklanmoqda...",
+    "error": "Xato",
+    "success": "Muvaffaqiyatli",
+    "search": "Qidirish",
+    "close": "Yopish",
+    "seeAll": "Barchasi",
+    "free": "Bepul",
+    "currency": "so'm",
+    "pending": "Kutilmoqda",
+    "system": "Tizim",
+    "logout": "Chiqish",
+    "loggingOut": "Chiqilmoqda...",
+    "somethingWentWrong": "Nimadir xato ketdi",
+    "noInternet": "Internet aloqasi yo'q",
+    "requiredField": "Bu maydon to'ldirilishi shart"
+  },
+  "settings": {
+    "title": "Sozlamalar",
+    "appearance": "Ko'rinish",
+    "theme": {
+      "light": "Yorug'",
+      "dark": "Qorong'i",
+      "system": "Tizim"
+    },
+    "language": "Til",
+    "security": "Xavfsizlik",
+    "changePin": "PIN kodni o'zgartirish",
+    "setPin": "PIN kod o'rnatish",
+    "notifications": "Bildirishnomalar",
+    "aboutSection": "Ilova haqida",
+    "aboutUs": "Biz haqimizda"
+  },
+  "auth": {
+    "validation": {
+      "phoneRequired": "Telefon raqam kiritish shart",
+      "phoneInvalid": "Telefon raqam noto'g'ri (+998XXXXXXXXX)",
+      "passwordRequired": "Parol kiritish shart"
+    },
+    "login": {
+      "title": "Xush kelibsiz!",
+      "subtitle": "Beruniy Talim platformasiga kiring",
+      "phoneLabel": "Telefon raqam",
+      "passwordLabel": "Parol",
+      "passwordPlaceholder": "Parolni kiriting",
+      "forgotPassword": "Parolni unutdingizmi?",
+      "invalidCredentials": "Telefon yoki parol noto'g'ri",
+      "submit": "Kirish",
+      "noAccount": "Hisob yo'qmi? ",
+      "registerLink": "Ro'yxatdan o'ting"
+    },
+    "register": {
+      "title": "Ro'yxatdan o'ting",
+      "subtitle": "Telefon raqamingizni kiriting",
+      "phoneLabel": "Telefon raqam",
+      "sendOtp": "SMS kod olish",
+      "otpTitle": "Kodni kiriting",
+      "otpSubtitle": "{{phone}} raqamiga yuborilgan kodni kiriting",
+      "resendIn": "Qayta yuborish: ",
+      "resend": "Kodni qayta yuborish",
+      "verify": "Tasdiqlash",
+      "profileTitle": "Profilingiz",
+      "profileSubtitle": "Ismingizni kiriting va rolingizni tanlang",
+      "fullNameLabel": "To'liq ism",
+      "fullNamePlaceholder": "Ismingizni kiriting",
+      "chooseRole": "Rol tanlang",
+      "roleStudent": "Talaba",
+      "roleInstructor": "O'qituvchi",
+      "finish": "Yakunlash",
+      "haveAccount": "Hisobingiz bormi? ",
+      "loginLink": "Kirish",
+      "errors": {
+        "digitsRequired": "9 ta raqam kiriting",
+        "errorPrefix": "Xato: {{detail}}",
+        "allDigitsRequired": "Barcha raqamlarni kiriting",
+        "wrongCode": "Noto'g'ri kod",
+        "wrongOrExpiredCode": "Noto'g'ri kod yoki muddat tugagan",
+        "smsSendError": "SMS yuborishda xato",
+        "nameRequired": "Ism kiritish shart",
+        "registerError": "Ro'yxatdan o'tishda xatolik yuz berdi"
+      }
+    },
+    "forgotPassword": {
+      "title": "Parolni tiklash",
+      "subtitle": "Telefon raqamingizni kiriting, SMS kod yuboramiz.",
+      "submit": "SMS yuborish",
+      "sentTitle": "SMS yuborildi!",
+      "sentSubtitle": "{{phone}} raqamiga tasdiqlash kodi yuborildi.",
+      "back": "Ortga qaytish",
+      "sendError": "OTP yuborishda xato yuz berdi"
+    },
+    "pinLogin": {
+      "title": "PIN kod kiriting",
+      "wrongPin": "Noto'g'ri PIN. {{count}} ta urinish qoldi",
+      "biometricPrompt": "Barmoq izi orqali kiring",
+      "biometricFallback": "PIN kiriting",
+      "useBiometric": "Barmoq izi bilan kiring",
+      "useOtherAccount": "Boshqa hisob bilan kiring"
+    },
+    "pinSetup": {
+      "createTitle": "PIN kod o'rnating",
+      "confirmTitle": "PIN kodni tasdiqlang",
+      "createSubtitle": "Keyingi kirishlarda foydalanish uchun 4 xonali PIN",
+      "confirmSubtitle": "Xavfsizlik uchun PIN kodni qaytadan kiriting",
+      "mismatch": "PIN kodlar mos kelmadi. Qaytadan urinib ko'ring",
+      "biometricPrompt": "Barmoq izi orqali kirishni yoqing",
+      "later": "Keyinroq",
+      "skip": "Hozircha o'tkazib yuborish"
+    }
+  },
+  "home": {
+    "welcome": "Xush kelibsiz 👋",
+    "defaultName": "Talaba",
+    "phone": "Telefon",
+    "roleStudent": "Talaba",
+    "roleInstructor": "O'qituvchi",
+    "quickLinks": {
+      "courses": "Kurslar",
+      "myCourses": "Mening kurslarim",
+      "progress": "Progress",
+      "aiHelp": "AI Yordam",
+      "itCourses": "IT kurslari",
+      "businessCourses": "Biznes kurslari",
+      "certificates": "Sertifikatlar",
+      "leaveReview": "Izoh\nqoldirish"
+    },
+    "activeCoursesCount": "{{count}} ta faol kurs",
+    "quickAccess": "Tezkor o'tish",
+    "continueCoursesTitle": "Davom etayotgan kurslar",
+    "percentDone": "{{percent}}% tugatildi",
+    "statistics": "Statistika",
+    "activeCourses": "Faol kurslar",
+    "completed": "Tugatilgan",
+    "reviewModal": {
+      "title": "Platforma haqida fikr bildiring",
+      "subtitle": "Sizning fikringiz platformani yaxshilashga yordam beradi",
+      "commentPlaceholder": "Izohingizni yozing...",
+      "submit": "Yuborish",
+      "submitting": "Yuborilmoqda...",
+      "ratingRequired": "Iltimos, baho bering",
+      "commentRequired": "Iltimos, izoh yozing",
+      "successTitle": "Rahmat!",
+      "successSubtitle": "Izohingiz qabul qilindi.",
+      "close": "Yopish"
+    }
+  },
+  "courses": {
+    "title": "Kurslar",
+    "searchPlaceholder": "Kurs qidirish...",
+    "category": "Kategoriya",
+    "level": "Daraja",
+    "levels": {
+      "beginner": "Boshlang'ich",
+      "intermediate": "O'rta",
+      "advanced": "Yuqori"
+    },
+    "noResults": "Natija topilmadi",
+    "noCourses": "Kurslar yo'q",
+    "tryAnotherKeyword": "Boshqa kalit so'z kiriting",
+    "noCoursesYet": "Hozircha kurslar mavjud emas",
+    "selectCategory": "Kategoriya tanlang",
+    "allCategories": "Barcha kategoriyalar",
+    "selectLevel": "Darajani tanlang",
+    "allLevels": "Barcha darajalar"
+  },
+  "myCourses": {
+    "title": "Mening kurslarim",
+    "total": "Jami",
+    "purchased": "Sotib olingan",
+    "course": "Kurs",
+    "completed": "Tugatilgan",
+    "inProgress": "Davom etmoqda",
+    "lessonsCount": "{{count}} ta dars",
+    "filters": {
+      "all": "Barcha",
+      "active": "Faol",
+      "completed": "Tugatilgan"
+    },
+    "emptyCompleted": "Tugatilgan kurslar yo'q",
+    "emptyActive": "Faol kurslar yo'q",
+    "emptyAll": "Hali kursga yozilmagansiz",
+    "emptySubtitle": "Kurslar bo'limiga o'tib, o'zingizga mos kursni tanlang"
+  },
+  "progress": {
+    "title": "Progress",
+    "overview": "Umumiy ko'rsatkichlar",
+    "totalCourses": "Jami kurslar",
+    "averageProgress": "O'rtacha progress",
+    "activeCourses": "Faol kurslar ({{count}})",
+    "certificates": "Sertifikatlar ({{count}})",
+    "noCertificatesYet": "Hali sertifikat yo'q",
+    "certificateHint": "Kursni tugatgandan so'ng sertifikat beriladi"
+  },
+  "profile": {
+    "logoutConfirm": "Hisobdan chiqishni xohlaysizmi?",
+    "active": "Faol",
+    "inactive": "Nofaol",
+    "status": "Status",
+    "passwordSet": "O'rnatilgan",
+    "password": "Parol",
+    "saved": "Saqlanganlar",
+    "myCertificates": "Sertifikatlarim",
+    "paymentHistory": "To'lovlar tarixi"
+  },
+  "aiChat": {
+    "welcome": "Assalomu alaykum! Men Beruniy Talim platformasining AI yordamchisiman. Kurslar, darslar yoki ta'lim bo'yicha savollaringizga javob berishga tayyorman.",
+    "error": "Xatolik yuz berdi. Iltimos, qayta urinib ko'ring.",
+    "title": "AI Yordamchi",
+    "subtitle": "Beruniy Talim AI",
+    "inputPlaceholder": "Xabar yozing..."
+  },
+  "tabs": {
+    "home": "Bosh sahifa",
+    "courses": "Kurslar",
+    "progress": "Progress",
+    "aiChat": "AI Chat"
+  },
+  "notFound": {
+    "title": "Sahifa topilmadi",
+    "subtitle": "Siz izlayotgan sahifa mavjud emas yoki ko'chirilgan.",
+    "goHome": "Bosh sahifaga qaytish"
+  },
+  "about": {
+    "tagline": "O'zbekistonning yetakchi online ta'lim platformasi",
+    "stats": {
+      "courses": "Kurslar",
+      "students": "O'quvchilar",
+      "instructors": "O'qituvchilar",
+      "rating": "Reyting"
+    },
+    "missionTitle": "Missiyamiz",
+    "missionParagraph1": "Beruniy Talim — O'zbekistondagi har bir insonning sifatli ta'limga ega bo'lishini ta'minlash uchun yaratilgan zamonaviy online ta'lim platformasi. Biz eng yaxshi o'qituvchilar bilan hamkorlikda amaliy bilim va ko'nikmalar berishga intilmoqdamiz.",
+    "missionParagraph2": "Dasturlash, dizayn, biznes, til o'rganish va ko'plab sohalarda professional kurslar orqali o'z karerengizni yangi bosqichga olib chiqing.",
+    "contact": "Bog'lanish",
+    "contacts": {
+      "website": "Veb-sayt",
+      "phone": "Telefon",
+      "email": "Email",
+      "address": "Manzil",
+      "addressValue": "Toshkent, O'zbekiston"
+    }
+  },
+  "notifications": {
+    "empty": "Bildirishnomalar yo'q",
+    "emptySubtitle": "Hozircha yangi bildirishnomalar mavjud emas"
+  },
+  "wishlist": {
+    "empty": "Saqlangan kurslar yo'q",
+    "emptySubtitle": "Kurs sahifasida yurak belgisini bosib saqlang",
+    "browseCourses": "Kurslarni ko'rish"
+  },
+  "editProfile": {
+    "title": "Profilni tahrirlash",
+    "personalInfo": "Shaxsiy ma'lumotlar",
+    "name": "Ism",
+    "namePlaceholder": "Ismingizni kiriting",
+    "email": "Email",
+    "phoneImmutable": "Telefon (o'zgartirib bo'lmaydi)",
+    "bio": "Bio",
+    "bioPlaceholder": "O'zingiz haqingizda qisqacha",
+    "headline": "Sarlavha",
+    "headlinePlaceholder": "Masalan: Frontend dasturchi",
+    "website": "Veb-sayt",
+    "changePassword": "Parolni o'zgartirish",
+    "setPassword": "Parol o'rnatish",
+    "currentPassword": "Joriy parol",
+    "currentPasswordPlaceholder": "Joriy parolni kiriting",
+    "newPassword": "Yangi parol",
+    "newPasswordPlaceholder": "Kamida 6 ta belgi",
+    "confirmPassword": "Parolni tasdiqlang",
+    "confirmPasswordPlaceholder": "Yangi parolni qayta kiriting",
+    "profileUpdated": "Profil muvaffaqiyatli yangilandi",
+    "profileSaveError": "Profilni saqlashda xatolik",
+    "passwordSaved": "Parol muvaffaqiyatli saqlandi",
+    "passwordSaveError": "Parolni saqlashda xatolik",
+    "errors": {
+      "nameRequired": "Ism kiritish shart",
+      "emailInvalid": "Email noto'g'ri",
+      "currentPasswordRequired": "Joriy parolni kiriting",
+      "newPasswordRequired": "Yangi parol kiriting",
+      "passwordMinLength": "Parol kamida 6 ta belgi",
+      "confirmPasswordRequired": "Parolni tasdiqlang",
+      "passwordMismatch": "Parollar mos kelmaydi"
+    }
+  },
+  "payments": {
+    "notFound": "To'lovlar topilmadi",
+    "emptySubtitle": "Pullik kursga yozilganingizda bu yerda ko'rinadi"
+  },
+  "paymentStatus": {
+    "checking": "Tekshirilmoqda...",
+    "success": "To'lov muvaffaqiyatli amalga oshirildi!",
+    "amountPaid": "{{amount}} to'landi",
+    "startCourse": "Kursni boshlash",
+    "cancelled": "To'lov bekor qilindi",
+    "failed": "To'lov amalga oshmadi",
+    "retryHint": "Qaytadan urinib ko'ring yoki boshqa usulni tanlang.",
+    "pending": "To'lov kutilmoqda...",
+    "pendingHint": "To'lov sahifasida amalni yakunlang. Tasdiqlangach, bu sahifa avtomatik yangilanadi.",
+    "reopenPage": "To'lov sahifasini qayta ochish"
+  },
+  "enums": {
+    "paymentStatus": {
+      "pending": "Kutilmoqda",
+      "completed": "Muvaffaqiyatli",
+      "failed": "Muvaffaqiyatsiz",
+      "cancelled": "Bekor qilindi"
+    },
+    "subscriptionType": {
+      "lifetime": "Umrbod",
+      "monthly": "Oylik",
+      "yearly": "Yillik"
+    },
+    "lessonType": {
+      "video": "Video",
+      "article": "Maqola",
+      "quiz": "Test",
+      "assignment": "Topshiriq"
+    },
+    "assignmentStatus": {
+      "pending": "Tekshirilmoqda",
+      "approved": "Qabul qilindi",
+      "rejected": "Rad etildi"
+    }
+  },
+  "course": {
+    "studentsCount": "{{count}} o'quvchi",
+    "currentlyLearning": "Siz o'qimoqdasiz",
+    "enrollSuccess": "Kursga muvaffaqiyatli yozildingiz!",
+    "enrollError": "Kursga yozilishda xatolik yuz berdi.",
+    "paymentStartError": "To'lovni boshlashda xatolik yuz berdi.",
+    "reviewThanks": "Sharhingiz uchun rahmat! U moderatsiyadan so'ng ko'rinadi.",
+    "reviewRequiresEnrollment": "Sharh qoldirish uchun kursga yozilgan bo'lishingiz kerak.",
+    "reviewAlreadyExists": "Siz bu kursga allaqachon sharh yozgansiz.",
+    "reviewSubmitError": "Sharh yuborishda xatolik yuz berdi.",
+    "enrolling": "Yozilmoqda...",
+    "enroll": "Kursga yozilish",
+    "buy": "Sotib olish",
+    "whatYouLearn": "Nimalarni o'rganasiz",
+    "requirements": "Talablar",
+    "includes": "Kursga nimalar kiradi",
+    "about": "Kurs haqida",
+    "freePreview": "Bepul ko'rish",
+    "moduleLabel": "Dars {{title}}",
+    "lessons": "Darslar",
+    "reviews": "Sharhlar",
+    "writeReview": "Sharh qoldirish",
+    "reviewsCount": "{{count}} ta sharh",
+    "instructorReplyLabel": "O'qituvchi javobi:",
+    "noReviews": "Hozircha sharhlar yo'q. Birinchi bo'lib sharh qoldiring!",
+    "selectPaymentMethod": "To'lov usulini tanlang",
+    "paymentStarting": "Boshlanmoqda...",
+    "proceedToPayment": "To'lovga o'tish",
+    "leaveReviewTitle": "Sharh qoldiring",
+    "reviewTitlePlaceholder": "Sarlavha (ixtiyoriy)",
+    "reviewBodyPlaceholder": "Fikringizni yozing (ixtiyoriy)...",
+    "submitting": "Yuborilmoqda..."
+  },
+  "lesson": {
+    "enrollmentRequired": "Bu darsni ko'rish uchun kursga yozilgan bo'lishingiz kerak.",
+    "loadError": "Darsni yuklashda xatolik yuz berdi.",
+    "playbackError": "Videoni ijro etishda xatolik yuz berdi.",
+    "videoProcessing": "Video hozircha tayyorlanmoqda. Birozdan so'ng qayta urinib ko'ring.",
+    "videoUploadError": "Videoni yuklashda xatolik yuz berdi.",
+    "videoNotAvailable": "Video hali mavjud emas.",
+    "viewResult": "Natijani ko'rish",
+    "questionsCount": "{{count}} ta savol",
+    "startQuiz": "Testni boshlash",
+    "viewAssignment": "Topshiriqni ko'rish",
+    "completed": "Tugatildi",
+    "markComplete": "Tugatdim"
+  },
+  "quiz": {
+    "enrollmentRequired": "Bu testni ko'rish uchun kursga yozilgan bo'lishingiz kerak.",
+    "loadError": "Testni yuklashda xatolik yuz berdi.",
+    "submitError": "Javoblarni yuborishda xatolik yuz berdi.",
+    "leaveTitle": "Testni tark etish",
+    "leaveMessage": "Hozir chiqsangiz, progress saqlanmaydi.",
+    "stay": "Qolish",
+    "exit": "Chiqish",
+    "noQuestions": "Bu testda hozircha savollar mavjud emas.",
+    "questionCounter": "Savol {{current}}/{{total}}",
+    "fillBlankPlaceholder": "Javobingizni shu yerga yozing...",
+    "true": "To'g'ri",
+    "false": "Noto'g'ri",
+    "unsupportedQuestionType": "Bu turdagi savol hozircha mobil ilovada qo'llab-quvvatlanmaydi. Davom etish uchun \"Keyingisi\" tugmasini bosing.",
+    "finish": "Tugatish",
+    "next": "Keyingisi",
+    "result": {
+      "passedTitle": "Ajoyib!",
+      "failedTitle": "Qaytadan urining",
+      "passedSubtitle": "Siz testni muvaffaqiyatli topshirdingiz!",
+      "failedSubtitle": "Yana bir marta ko'rib chiqing.",
+      "score": "Ball",
+      "correctOfTotal": "To'g'ri/Hammasi"
+    },
+    "history": {
+      "title": "Urinishlar tarixi",
+      "attempt": "{{number}}-urinish",
+      "best": " · eng yaxshi"
+    }
+  },
+  "assignment": {
+    "enrollmentRequired": "Bu topshiriqni ko'rish uchun kursga yozilgan bo'lishingiz kerak.",
+    "loadError": "Topshiriqni yuklashda xatolik yuz berdi.",
+    "title": "Topshiriq",
+    "submissions": "Yuborilgan javoblar",
+    "grade": "Baho: {{grade}}",
+    "feedback": "Izoh: {{feedback}}",
+    "writeYourAnswer": "Javobingizni yozing",
+    "answerPlaceholder": "Topshiriq bo'yicha javobingizni shu yerga yozing..."
+  },
+  "aiTutor": {
+    "title": "AI yordamchi",
+    "subtitle": "Kurs bo'yicha savol bering, AI tutor javob beradi",
+    "inputPlaceholder": "Masalan: React hookslar nima?",
+    "thinking": "O'ylanyapman…",
+    "serviceUnavailable": "AI xizmat hozircha mavjud emas. Birozdan so'ng qayta urinib ko'ring.",
+    "answerError": "Savolga javob berishda xatolik yuz berdi."
+  },
+  "errorBoundary": {
+    "title": "Xatolik yuz berdi",
+    "subtitle": "Nimadir noto'g'ri ketdi. Sahifani yangilang."
+  }
+}

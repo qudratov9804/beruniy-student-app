@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { Stack } from 'expo-router';
-import { Appearance, Platform, View, StyleSheet } from 'react-native';
+import { Appearance, AppState, Platform, View, StyleSheet } from 'react-native';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -9,7 +9,8 @@ import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
 import { useColorScheme } from 'nativewind';
 import '../global.css';
-import { useAuthStore, useThemeStore } from '@/stores';
+import i18n, { resolveDeviceLanguage } from '@/i18n';
+import { useAuthStore, useThemeStore, useLocaleStore } from '@/stores';
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
@@ -30,6 +31,7 @@ export default function RootLayout() {
   const { initialize } = useAuthStore();
   const { mode } = useThemeStore();
   const { setColorScheme } = useColorScheme();
+  const { mode: localeMode, resolvedLanguage } = useLocaleStore();
 
   useEffect(() => {
     if (mode === 'system') {
@@ -39,6 +41,24 @@ export default function RootLayout() {
       setColorScheme(mode);
     }
   }, [mode, setColorScheme]);
+
+  useEffect(() => {
+    i18n.changeLanguage(resolvedLanguage);
+  }, [resolvedLanguage]);
+
+  useEffect(() => {
+    if (localeMode !== 'system') return;
+    // Android lets users change the system language without restarting the app.
+    const subscription = AppState.addEventListener('change', (state) => {
+      if (state === 'active') {
+        const device = resolveDeviceLanguage();
+        if (device !== useLocaleStore.getState().resolvedLanguage) {
+          useLocaleStore.setState({ resolvedLanguage: device });
+        }
+      }
+    });
+    return () => subscription.remove();
+  }, [localeMode]);
 
   const [fontsLoaded, fontError] = useFonts({
     'Inter-Regular': require('../assets/fonts/Inter-Regular.ttf'),

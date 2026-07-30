@@ -4,19 +4,25 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ChevronLeft } from 'lucide-react-native';
+import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
 import { quizService } from '@/services/api';
 import { useQuizStore } from '@/stores';
+import { useCourse } from '@/hooks/useCourses';
+import { flattenLessonsInModuleOrder } from '@/utils';
 import { QuizOption, QuizProgressHeader, QuizResultCard, QuizAttemptHistory } from '@/components/quiz';
 import { Button, Skeleton } from '@/components/ui';
 import { EmptyState } from '@/components/common/EmptyState';
+import { HtmlText } from '@/components/common/HtmlText';
 import { QUERY_KEYS } from '@/constants/config';
+import type { Quiz, QuizAnswers } from '@/types';
 
-const getErrorMessage = (err: unknown): string => {
+const getErrorMessage = (err: unknown, t: TFunction): string => {
   const e = err as { response?: { status?: number; data?: { message?: string } } };
   if (e?.response?.status === 403) {
-    return "Bu testni ko'rish uchun kursga yozilgan bo'lishingiz kerak.";
+    return t('quiz.enrollmentRequired');
   }
-  return e?.response?.data?.message ?? 'Testni yuklashda xatolik yuz berdi.';
+  return e?.response?.data?.message ?? t('quiz.loadError');
 };
 
 const noRetryOnAuthError = (failureCount: number, err: unknown) => {
@@ -25,12 +31,54 @@ const noRetryOnAuthError = (failureCount: number, err: unknown) => {
   return failureCount < 2;
 };
 
+// Choice answers are tracked locally by option index (some questions repeat the same
+// option text twice, so comparing/selecting by value would highlight both) — convert
+// back to the actual option text the API expects right before submitting.
+const buildAnswersPayload = (quiz: Quiz, answers: QuizAnswers): QuizAnswers => {
+  const payload: QuizAnswers = {};
+  for (const q of quiz.questions) {
+    const raw = answers[String(q.id)];
+    if (raw === undefined) continue;
+    if (q.type === 'single_choice' && typeof raw === 'string') {
+      payload[String(q.id)] = q.options[Number(raw)] ?? raw;
+    } else if (q.type === 'multiple_choice' && Array.isArray(raw)) {
+      payload[String(q.id)] = raw.map((idx) => q.options[Number(idx)] ?? idx);
+    } else {
+      payload[String(q.id)] = raw;
+    }
+  }
+  return payload;
+};
+
 export default function QuizScreen() {
-  const { id, courseId: courseIdParam } = useLocalSearchParams<{ id: string; courseId?: string }>();
+  const {
+    id,
+    courseId: courseIdParam,
+    courseSlug,
+  } = useLocalSearchParams<{ id: string; courseId?: string; courseSlug?: string }>();
   const router = useRouter();
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const lessonId = Number(id);
   const courseId = Number(courseIdParam);
+  const justSubmittedRef = React.useRef(false);
+
+  const { data: course } = useCourse(courseSlug ?? '');
+  // The API's own lessons array order isn't reliable within a module (e.g. a quiz can
+  // be listed before its module's article) — index-based "what's next" needs this
+  // canonical order instead, same as the lesson and course-detail screens.
+  const orderedLessons = flattenLessonsInModuleOrder(course?.lessons ?? []);
+
+  // Direct URL access on web (or a fresh tab) leaves no history entry to go back
+  // to — router.back() then silently no-ops (GO_BACK not handled) and strands the
+  // user on this screen. Always fall back to an explicit route instead.
+  const goBackToLesson = () => {
+    if (router.canGoBack()) {
+      router.back();
+    } else {
+      router.replace(`/lesson/${lessonId}?courseId=${courseId}`);
+    }
+  };
 
   const {
     currentQuestionIndex,
@@ -63,13 +111,17 @@ export default function QuizScreen() {
   // only to hit a 422 at the end.
   const lockedWithPastResult = !!quiz && !quiz.can_retake && quiz.attempts_count > 0;
 
+  // Fetched in parallel with `quiz` (not gated on lockedWithPastResult, which itself
+  // needs `quiz` loaded first) — gating on it would waterfall two round-trips before a
+  // returning, already-passed visit ever shows its result. A fresh quiz just eats one
+  // harmless 404 here.
   const {
     data: existingResult,
     isError: existingResultIsError,
   } = useQuery({
     queryKey: QUERY_KEYS.QUIZ.RESULT(lessonId),
     queryFn: () => quizService.getResult(lessonId),
-    enabled: lockedWithPastResult,
+    enabled: !!lessonId,
     retry: noRetryOnAuthError,
   });
 
@@ -92,8 +144,9 @@ export default function QuizScreen() {
   };
 
   const submitMutation = useMutation({
-    mutationFn: () => quizService.submit(lessonId, answers),
+    mutationFn: () => quizService.submit(lessonId, quiz ? buildAnswersPayload(quiz, answers) : answers),
     onSuccess: (data) => {
+      justSubmittedRef.current = true;
       setResult(data);
       invalidateProgress();
     },
@@ -103,6 +156,7 @@ export default function QuizScreen() {
         // Already passed a previous attempt — show that result instead of leaving the
         // user stuck on the last question.
         try {
+          justSubmittedRef.current = true;
           setResult(await quizService.getResult(lessonId));
           invalidateProgress();
           return;
@@ -110,17 +164,25 @@ export default function QuizScreen() {
           // fall through to the generic alert below
         }
       }
-      Alert.alert('Xatolik', e?.response?.data?.message ?? 'Javoblarni yuborishda xatolik yuz berdi.');
+      Alert.alert(t('common.error'), e?.response?.data?.message ?? t('quiz.submitError'));
     },
   });
 
   useEffect(() => {
     if (!quiz) return;
+    // Post-submit invalidation can flip lockedWithPastResult and re-fire this effect — don't reset the result we just submitted in this session.
+    if (justSubmittedRef.current) return;
     // Clear any stale result left in the store from a previously-viewed quiz before
     // this one's own `existingResult` fetch resolves — otherwise navigating directly
-    // between two already-passed quizzes could flash the wrong one's result.
+    // between two already-passed quizzes could flash the wrong one's result. But only
+    // when we don't already have it: `existingResult` fetches in parallel with `quiz`
+    // and can resolve in the very same render as this effect firing — the effect below
+    // that sets it runs first (declared earlier), so resetting unconditionally here
+    // would wipe the just-set correct result right back out and strand the screen on
+    // the waiting skeleton forever (existingResult's query reference won't change again
+    // to re-trigger that effect).
     if (lockedWithPastResult) {
-      resetQuiz();
+      if (!existingResult) resetQuiz();
     } else {
       startQuiz();
     }
@@ -129,15 +191,12 @@ export default function QuizScreen() {
   }, [quiz?.questions_count, lockedWithPastResult]);
 
   const handleClose = () => {
-    Alert.alert('Testni tark etish', 'Hozir chiqsangiz, progress saqlanmaydi.', [
-      { text: 'Qolish', style: 'cancel' },
+    Alert.alert(t('quiz.leaveTitle'), t('quiz.leaveMessage'), [
+      { text: t('quiz.stay'), style: 'cancel' },
       {
-        text: 'Chiqish',
+        text: t('quiz.exit'),
         style: 'destructive',
-        onPress: () => {
-          resetQuiz();
-          router.back();
-        },
+        onPress: goBackToLesson,
       },
     ]);
   };
@@ -146,14 +205,14 @@ export default function QuizScreen() {
     return (
       <SafeAreaView className="flex-1 bg-white">
         <View className="flex-row items-center px-5 py-4">
-          <TouchableOpacity onPress={() => router.back()} className="p-2 -ml-2">
+          <TouchableOpacity onPress={goBackToLesson} className="p-2 -ml-2">
             <ChevronLeft size={28} color="#0F172A" />
           </TouchableOpacity>
         </View>
         <EmptyState
           emoji="😕"
-          title={getErrorMessage(error)}
-          actionLabel="Qayta urinish"
+          title={getErrorMessage(error, t)}
+          actionLabel={t('common.retry')}
           onAction={() => refetch()}
         />
       </SafeAreaView>
@@ -178,11 +237,11 @@ export default function QuizScreen() {
     return (
       <SafeAreaView className="flex-1 bg-white">
         <View className="flex-row items-center px-5 py-4">
-          <TouchableOpacity onPress={() => router.back()} className="p-2 -ml-2">
+          <TouchableOpacity onPress={goBackToLesson} className="p-2 -ml-2">
             <ChevronLeft size={28} color="#0F172A" />
           </TouchableOpacity>
         </View>
-        <EmptyState emoji="📝" title="Bu testda hozircha savollar mavjud emas." />
+        <EmptyState emoji="📝" title={t('quiz.noQuestions')} />
       </SafeAreaView>
     );
   }
@@ -202,12 +261,24 @@ export default function QuizScreen() {
   if (isCompleted && result) {
     return (
       <SafeAreaView className="flex-1 bg-white">
-        <ScrollView showsVerticalScrollIndicator={false}>
+        <ScrollView className="flex-1" contentContainerClassName="flex-grow" showsVerticalScrollIndicator={false}>
           <QuizResultCard
             result={result}
             onContinue={() => {
-              resetQuiz();
-              router.back();
+              // Don't resetQuiz() here — navigating away unmounts this screen, and the
+              // effect below already resets on unmount. Doing it here first causes an
+              // extra render where lockedWithPastResult is true (if the just-passed
+              // quiz's own data already refetched) but result is null, which gets
+              // stuck on the "waiting for past result" skeleton before the
+              // navigation actually takes effect.
+              const currentIndex = orderedLessons.findIndex((l) => l.id === lessonId);
+              const nextLesson =
+                result.passed && currentIndex >= 0 ? orderedLessons[currentIndex + 1] : undefined;
+              if (nextLesson) {
+                router.replace(`/lesson/${nextLesson.id}?courseId=${courseId}&courseSlug=${courseSlug ?? ''}`);
+              } else {
+                goBackToLesson();
+              }
             }}
             onRetry={() => {
               resetQuiz();
@@ -258,17 +329,17 @@ export default function QuizScreen() {
       <ScrollView className="flex-1 px-5" showsVerticalScrollIndicator={false}>
         <View className="py-6">
           <Text className="text-xs text-slate-400 font-sans-medium mb-2">
-            Savol {currentQuestionIndex + 1}/{quiz.questions.length}
+            {t('quiz.questionCounter', { current: currentQuestionIndex + 1, total: quiz.questions.length })}
           </Text>
-          <Text className="text-xl font-sans-bold text-slate-800 mb-6 leading-7">
-            {currentQuestion.question}
-          </Text>
+          <View className="mb-6">
+            <HtmlText html={currentQuestion.question} baseFontSize={20} color="#1E293B" weight="bold" />
+          </View>
 
           {currentQuestion.type === 'fill_blank' ? (
             <TextInput
               value={typeof selectedAnswer === 'string' ? selectedAnswer : ''}
               onChangeText={(text) => answerQuestion(currentQuestion.id, text)}
-              placeholder="Javobingizni shu yerga yozing..."
+              placeholder={t('quiz.fillBlankPlaceholder')}
               placeholderTextColor="#94A3B8"
               multiline
               numberOfLines={4}
@@ -279,12 +350,12 @@ export default function QuizScreen() {
             // Answer must be a real boolean (per API contract), not an option id, so
             // this renders its own Yes/No pair instead of `options`.
             ([
-              { label: "To'g'ri", value: true },
-              { label: "Noto'g'ri", value: false },
+              { label: t('quiz.true'), value: true },
+              { label: t('quiz.false'), value: false },
             ] as const).map((opt, index) => (
               <QuizOption
                 key={String(opt.value)}
-                option={{ id: String(opt.value), text: opt.label }}
+                text={opt.label}
                 selected={selectedAnswer === opt.value}
                 onSelect={() => answerQuestion(currentQuestion.id, opt.value)}
                 index={index}
@@ -292,29 +363,33 @@ export default function QuizScreen() {
             ))
           ) : currentQuestion.type === 'matching' ? (
             <Text className="text-sm text-slate-400">
-              Bu turdagi savol hozircha mobil ilovada qo'llab-quvvatlanmaydi. Davom etish uchun
-              "Keyingisi" tugmasini bosing.
+              {t('quiz.unsupportedQuestionType')}
             </Text>
           ) : (
             currentQuestion.options.map((option, index) => {
-              const isMultiple = currentQuestion.type === 'multiple';
+              // The API has no option ids, and some questions repeat the same option
+              // text more than once — track selection by index, not value, so two
+              // identical-looking options don't highlight together. Converted back to
+              // the actual option text in buildAnswersPayload right before submitting.
+              const indexKey = String(index);
+              const isMultiple = currentQuestion.type === 'multiple_choice';
               const isSelected = isMultiple
-                ? Array.isArray(selectedAnswer) && selectedAnswer.includes(option.id)
-                : selectedAnswer === option.id;
+                ? Array.isArray(selectedAnswer) && selectedAnswer.includes(indexKey)
+                : selectedAnswer === indexKey;
               return (
                 <QuizOption
-                  key={option.id}
-                  option={option}
+                  key={index}
+                  text={option}
                   selected={isSelected}
                   onSelect={() => {
                     if (!isMultiple) {
-                      answerQuestion(currentQuestion.id, option.id);
+                      answerQuestion(currentQuestion.id, indexKey);
                       return;
                     }
                     const current = Array.isArray(selectedAnswer) ? selectedAnswer : [];
-                    const next = current.includes(option.id)
-                      ? current.filter((v) => v !== option.id)
-                      : [...current, option.id];
+                    const next = current.includes(indexKey)
+                      ? current.filter((v) => v !== indexKey)
+                      : [...current, indexKey];
                     answerQuestion(currentQuestion.id, next);
                   }}
                   index={index}
@@ -333,7 +408,7 @@ export default function QuizScreen() {
           disabled={currentQuestion.type !== 'matching' && !hasAnswered}
           loading={submitMutation.isPending}
         >
-          {isLastQuestion ? 'Tugatish' : 'Keyingisi'}
+          {isLastQuestion ? t('quiz.finish') : t('quiz.next')}
         </Button>
       </View>
     </SafeAreaView>

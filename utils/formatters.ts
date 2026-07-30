@@ -34,26 +34,19 @@ export const getLevelProgress = (
   };
 };
 
-export const formatDate = (dateStr: string): string => {
+const LOCALE_TAGS: Record<string, string> = {
+  uz: 'uz-UZ',
+  ru: 'ru-RU',
+  en: 'en-US',
+};
+
+export const formatDate = (dateStr: string, language = 'uz'): string => {
   const date = new Date(dateStr);
-  return date.toLocaleDateString('uz-UZ', {
+  return date.toLocaleDateString(LOCALE_TAGS[language] ?? LOCALE_TAGS.uz, {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
   });
-};
-
-export const getRelativeTime = (dateStr: string): string => {
-  const date = new Date(dateStr);
-  const now = new Date();
-  const diffMs = now.getTime() - date.getTime();
-  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-
-  if (diffDays === 0) return 'Bugun';
-  if (diffDays === 1) return 'Kecha';
-  if (diffDays < 7) return `${diffDays} kun oldin`;
-  if (diffDays < 30) return `${Math.floor(diffDays / 7)} hafta oldin`;
-  return `${Math.floor(diffDays / 30)} oy oldin`;
 };
 
 export const truncateText = (text: string, maxLength: number): string => {
@@ -68,34 +61,15 @@ export const stripHtml = (html: string): string =>
     .replace(/\s+/g, ' ')
     .trim();
 
-export const formatPrice = (price: number): string => {
-  if (price === 0) return 'Bepul';
-  return new Intl.NumberFormat('uz-UZ').format(price) + " so'm";
+export const formatPrice = (price: number, t: (key: string) => string, language = 'uz'): string => {
+  if (price === 0) return t('common.free');
+  const amount = new Intl.NumberFormat(LOCALE_TAGS[language] ?? LOCALE_TAGS.uz).format(price);
+  return `${amount} ${t('common.currency')}`;
 };
 
 export const paymentProviderLabels: Record<'payme' | 'click', string> = {
   payme: 'Payme',
   click: 'Click',
-};
-
-export const paymentStatusLabels: Record<'pending' | 'completed' | 'failed' | 'cancelled', string> = {
-  pending: 'Kutilmoqda',
-  completed: 'Muvaffaqiyatli',
-  failed: 'Muvaffaqiyatsiz',
-  cancelled: 'Bekor qilindi',
-};
-
-export const subscriptionTypeLabels: Record<'lifetime' | 'monthly' | 'yearly', string> = {
-  lifetime: 'Umrbod',
-  monthly: 'Oylik',
-  yearly: 'Yillik',
-};
-
-export const lessonTypeLabels: Record<'video' | 'article' | 'quiz' | 'assignment', string> = {
-  video: 'Video',
-  article: 'Maqola',
-  quiz: 'Test',
-  assignment: 'Topshiriq',
 };
 
 type LessonType = 'video' | 'article' | 'quiz' | 'assignment';
@@ -145,3 +119,20 @@ export const groupLessonsByModule = <T extends ModuleGroupable>(
 };
 
 export const LESSON_SLOT_ORDER: LessonType[] = ['video', 'article', 'quiz', 'assignment'];
+
+// The API's own lessons array order is unreliable within a module (e.g. a quiz can be
+// listed before its module's article despite having a higher `order`) — anything doing
+// index-based lock/unlock or "what's next" math needs this canonical order instead of
+// the raw array: modules by module_order, each module's items by LESSON_SLOT_ORDER,
+// then legacy (no module_id) lessons by their own order.
+export const flattenLessonsInModuleOrder = <T extends ModuleGroupable>(lessons: T[]): T[] => {
+  const { modules, legacy } = groupLessonsByModule(lessons);
+  const ordered: T[] = [];
+  for (const mod of modules) {
+    for (const slot of LESSON_SLOT_ORDER) {
+      const lesson = mod.items[slot];
+      if (lesson) ordered.push(lesson);
+    }
+  }
+  return [...ordered, ...legacy];
+};

@@ -17,6 +17,7 @@ import {
   Wallet,
 } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/hooks/useAuth';
 import { ScreenBackground } from '@/components/common';
 import { useRouter } from 'expo-router';
@@ -49,17 +50,18 @@ const MenuItem: React.FC<MenuItemProps> = ({ icon, label, onPress, danger }) => 
 );
 
 export default function ProfileScreen() {
+  const { t } = useTranslation();
   const { user, logout, isLoggingOut } = useAuth();
   const router = useRouter();
 
   const handleLogout = () => {
     if (Platform.OS === 'web') {
-      if (window.confirm('Hisobdan chiqishni xohlaysizmi?')) logout();
+      if (window.confirm(t('profile.logoutConfirm'))) logout();
       return;
     }
-    Alert.alert('Chiqish', 'Hisobdan chiqishni xohlaysizmi?', [
-      { text: 'Bekor qilish', style: 'cancel' },
-      { text: 'Chiqish', style: 'destructive', onPress: () => logout() },
+    Alert.alert(t('common.logout'), t('profile.logoutConfirm'), [
+      { text: t('common.cancel'), style: 'cancel' },
+      { text: t('common.logout'), style: 'destructive', onPress: () => logout() },
     ]);
   };
 
@@ -90,7 +92,7 @@ export default function ProfileScreen() {
             )}
             <View className="mt-3 px-4 py-1.5 bg-white/20 rounded-2xl border border-white/30">
               <Text className="text-white font-sans-semibold text-sm">
-                {user?.role === 'student' ? 'Talaba' : 'Instructor'}
+                {user?.role === 'student' ? t('home.roleStudent') : t('home.roleInstructor')}
               </Text>
             </View>
             <TouchableOpacity
@@ -107,17 +109,17 @@ export default function ProfileScreen() {
               <View className="w-8 h-8 bg-green-500/20 rounded-xl items-center justify-center mb-1">
                 <User size={16} color="#34d399" />
               </View>
-              <Text className="text-sm font-sans-bold text-white">{user?.is_active ? 'Faol' : 'Nofaol'}</Text>
-              <Text className="text-xs text-white/50">Status</Text>
+              <Text className="text-sm font-sans-bold text-white">{user?.is_active ? t('profile.active') : t('profile.inactive')}</Text>
+              <Text className="text-xs text-white/50">{t('profile.status')}</Text>
             </View>
             <View className="flex-1 bg-white/10 rounded-3xl p-3 items-center border border-white/15">
               <View className="w-8 h-8 bg-blue-500/20 rounded-xl items-center justify-center mb-1">
                 <Lock size={16} color="#60a5fa" />
               </View>
               <Text className="text-sm font-sans-bold text-white">
-                {user?.has_password ? "O'rnatilgan" : "Yo'q"}
+                {user?.has_password ? t('profile.passwordSet') : t('common.no')}
               </Text>
-              <Text className="text-xs text-white/50">Parol</Text>
+              <Text className="text-xs text-white/50">{t('profile.password')}</Text>
             </View>
           </View>
 
@@ -125,25 +127,25 @@ export default function ProfileScreen() {
           <View className="mx-5 mt-4 bg-white/10 rounded-3xl p-4 border border-white/15">
             <MenuItem
               icon={<BookOpen size={20} color="#34d399" />}
-              label="Mening kurslarim"
+              label={t('home.quickLinks.myCourses')}
               onPress={() => router.push('/(tabs)/courses')}
             />
             <View className="h-px bg-white/10 ml-14" />
             <MenuItem
               icon={<Heart size={20} color="#f87171" />}
-              label="Saqlanganlar"
+              label={t('profile.saved')}
               onPress={() => router.push('/wishlist')}
             />
             <View className="h-px bg-white/10 ml-14" />
             <MenuItem
               icon={<Trophy size={20} color="#fbbf24" />}
-              label="Sertifikatlarim"
+              label={t('profile.myCertificates')}
               onPress={() => router.push('/(tabs)/progress')}
             />
             <View className="h-px bg-white/10 ml-14" />
             <MenuItem
               icon={<Wallet size={20} color="#60a5fa" />}
-              label="To'lovlar tarixi"
+              label={t('profile.paymentHistory')}
               onPress={() => router.push('/payments')}
             />
           </View>
@@ -151,19 +153,19 @@ export default function ProfileScreen() {
           <View className="mx-5 mt-3 bg-white/10 rounded-3xl p-4 border border-white/15">
             <MenuItem
               icon={<Bell size={20} color="#a78bfa" />}
-              label="Bildirishnomalar"
+              label={t('settings.notifications')}
               onPress={() => router.push('/notifications')}
             />
             <View className="h-px bg-white/10 ml-14" />
             <MenuItem
               icon={<Settings size={20} color="rgba(255,255,255,0.60)" />}
-              label="Sozlamalar"
+              label={t('settings.title')}
               onPress={() => router.push('/settings')}
             />
             <View className="h-px bg-white/10 ml-14" />
             <MenuItem
               icon={<Info size={20} color="#60a5fa" />}
-              label="Biz haqimizda"
+              label={t('settings.aboutUs')}
               onPress={() => router.push('/about')}
             />
           </View>
@@ -171,7 +173,7 @@ export default function ProfileScreen() {
           <View className="mx-5 mt-3 mb-8 bg-white/10 rounded-3xl p-4 border border-white/15">
             <MenuItem
               icon={<LogOut size={20} color="#f87171" />}
-              label={isLoggingOut ? 'Chiqilmoqda...' : 'Chiqish'}
+              label={isLoggingOut ? t('common.loggingOut') : t('common.logout')}
               onPress={handleLogout}
               danger
             />

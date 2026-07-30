@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useQueryClient } from '@tanstack/react-query';
 import { CheckCircle2, XCircle, ExternalLink, ChevronLeft } from 'lucide-react-native';
+import { useTranslation } from 'react-i18next';
 import { usePaymentStatus } from '@/hooks/usePayments';
 import { ScreenBackground } from '@/components/common/ScreenBackground';
 import { QUERY_KEYS } from '@/constants/config';
@@ -17,6 +18,7 @@ export default function PaymentStatusScreen() {
     courseId?: string;
   }>();
   const router = useRouter();
+  const { t, i18n } = useTranslation();
   const queryClient = useQueryClient();
   const { data: payment, isLoading } = usePaymentStatus(transactionId ?? null);
   const openedOnce = useRef(false);
@@ -76,14 +78,14 @@ export default function PaymentStatusScreen() {
           {isLoading && !payment ? (
             <>
               <ActivityIndicator size="large" color="#60a5fa" />
-              <Text style={styles.title}>Tekshirilmoqda...</Text>
+              <Text style={styles.title}>{t('paymentStatus.checking')}</Text>
             </>
           ) : status === 'completed' ? (
             <>
               <CheckCircle2 size={72} color="#34d399" />
-              <Text style={styles.title}>To'lov muvaffaqiyatli amalga oshirildi!</Text>
+              <Text style={styles.title}>{t('paymentStatus.success')}</Text>
               {payment && (
-                <Text style={styles.sub}>{formatPrice(payment.amount)} to'landi</Text>
+                <Text style={styles.sub}>{t('paymentStatus.amountPaid', { amount: formatPrice(payment.amount, t, i18n.language) })}</Text>
               )}
               <TouchableOpacity
                 style={styles.primaryBtn}
@@ -91,16 +93,16 @@ export default function PaymentStatusScreen() {
                   courseSlug ? router.replace(`/course/${courseSlug}`) : router.replace('/(tabs)/my-courses')
                 }
               >
-                <Text style={styles.primaryBtnText}>Kursni boshlash</Text>
+                <Text style={styles.primaryBtnText}>{t('paymentStatus.startCourse')}</Text>
               </TouchableOpacity>
             </>
           ) : status === 'failed' || status === 'cancelled' ? (
             <>
               <XCircle size={72} color="#f87171" />
               <Text style={styles.title}>
-                {status === 'cancelled' ? "To'lov bekor qilindi" : "To'lov amalga oshmadi"}
+                {status === 'cancelled' ? t('paymentStatus.cancelled') : t('paymentStatus.failed')}
               </Text>
-              <Text style={styles.sub}>Qaytadan urinib ko'ring yoki boshqa usulni tanlang.</Text>
+              <Text style={styles.sub}>{t('paymentStatus.retryHint')}</Text>
               <TouchableOpacity
                 style={styles.primaryBtn}
                 onPress={() =>
@@ -109,19 +111,19 @@ export default function PaymentStatusScreen() {
                     : router.replace(courseSlug ? `/course/${courseSlug}` : '/(tabs)/my-courses')
                 }
               >
-                <Text style={styles.primaryBtnText}>Ortga qaytish</Text>
+                <Text style={styles.primaryBtnText}>{t('common.back')}</Text>
               </TouchableOpacity>
             </>
           ) : (
             <>
               <ActivityIndicator size="large" color="#60a5fa" />
-              <Text style={styles.title}>To'lov kutilmoqda...</Text>
+              <Text style={styles.title}>{t('paymentStatus.pending')}</Text>
               <Text style={styles.sub}>
-                To'lov sahifasida amalni yakunlang. Tasdiqlangach, bu sahifa avtomatik yangilanadi.
+                {t('paymentStatus.pendingHint')}
               </Text>
               <TouchableOpacity style={styles.secondaryBtn} onPress={handleReopen}>
                 <ExternalLink size={16} color="#60a5fa" />
-                <Text style={styles.secondaryBtnText}>To'lov sahifasini qayta ochish</Text>
+                <Text style={styles.secondaryBtnText}>{t('paymentStatus.reopenPage')}</Text>
               </TouchableOpacity>
             </>
           )}

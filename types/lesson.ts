@@ -53,15 +53,13 @@ export type QuizAnswers = Record<string, string | string[] | boolean>;
 
 export interface QuizQuestion {
   id: number;
-  type: 'single' | 'multiple' | 'true_false' | 'fill_blank' | 'matching';
+  type: 'single_choice' | 'multiple_choice' | 'true_false' | 'fill_blank' | 'matching';
   question: string;
-  options: QuizOption[];
+  // The API returns options as plain answer strings (no separate id/value) —
+  // the option text itself is what gets submitted as the answer.
+  options: string[];
+  pairs: unknown | null;
   order: number;
-}
-
-export interface QuizOption {
-  id: string;
-  text: string;
 }
 
 export interface Quiz {

@@ -62,11 +62,13 @@ describe('getLevelProgress', () => {
 });
 
 describe('formatPrice', () => {
+  const fakeT = (key: string) => (key === 'common.free' ? 'Bepul' : "so'm");
+
   it('returns "Bepul" for zero', () => {
-    expect(formatPrice(0)).toBe('Bepul');
+    expect(formatPrice(0, fakeT)).toBe('Bepul');
   });
   it('formats non-zero price', () => {
-    expect(formatPrice(50000)).toContain("so'm");
+    expect(formatPrice(50000, fakeT)).toContain("so'm");
   });
 });
 

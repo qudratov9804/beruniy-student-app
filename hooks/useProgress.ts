@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { notificationsService, certificatesService, wishlistService } from '@/services/api';
 import { QUERY_KEYS } from '@/constants/config';
 import { useAuthStore } from '@/stores';
+import type { Course } from '@/types';
 
 // Backend exposes no websocket/push channel for notifications (REST-only per API docs),
 // so "realtime" here means short-interval polling that also refires on refocus.
@@ -66,9 +67,13 @@ export const useWishlist = () => {
 export const useToggleWishlist = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (courseId: number) => wishlistService.toggle(courseId),
-    onSuccess: () => {
+    mutationFn: ({ courseId }: { courseId: number; slug: string }) =>
+      wishlistService.toggle(courseId),
+    onSuccess: (result, { slug }) => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.WISHLIST.ALL });
+      queryClient.setQueryData<Course>(QUERY_KEYS.COURSES.DETAIL(slug), (course) =>
+        course ? { ...course, is_in_wishlist: result.added } : course
+      );
     },
   });
 };

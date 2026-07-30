@@ -11,18 +11,20 @@ import {
 import { Image } from 'expo-image';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { User, ChevronLeft, GraduationCap, BookOpen } from 'lucide-react-native';
 import { Button, Input } from '@/components/ui';
 import { useAuth } from '@/hooks';
 import { useAuthStore } from '@/stores';
 import { ScreenBackground } from '@/components/common';
+import { PHONE_PREFIX, normalizePhoneInput, toFullPhone } from '@/utils/phone';
 
 type Step = 'phone' | 'otp' | 'profile';
 const OTP_LENGTH = 6;
-const PREFIX = '+998';
 
 export default function RegisterScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const { sendOtp, verifyOtp, registerComplete, isSendingOtp, isVerifyingOtp, isRegisteringComplete } =
     useAuth();
   const { setToken } = useAuthStore();
@@ -40,7 +42,7 @@ export default function RegisterScreen() {
   const cellRefs = useRef<(TextInput | null)[]>([]);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const phone = `${PREFIX}${phoneDigits}`;
+  const phone = toFullPhone(phoneDigits);
   const otp = digits.join('');
 
   const startCountdown = useCallback((seconds: number) => {
@@ -70,8 +72,7 @@ export default function RegisterScreen() {
   };
 
   const handlePhoneChange = (value: string) => {
-    const clean = value.replace(/[^0-9]/g, '').slice(0, 9);
-    setPhoneDigits(clean);
+    setPhoneDigits(normalizePhoneInput(value));
     setError('');
   };
 
@@ -81,7 +82,7 @@ export default function RegisterScreen() {
   };
 
   const handleSendOtp = async () => {
-    if (phoneDigits.length !== 9) { setError('9 ta raqam kiriting'); return; }
+    if (phoneDigits.length !== 9) { setError(t('auth.register.errors.digitsRequired')); return; }
     setError('');
     try {
       const res = await sendOtp({ phone, type: 'register' });
@@ -92,7 +93,7 @@ export default function RegisterScreen() {
     } catch (err: unknown) {
       const e = err as { response?: { data?: unknown }; message?: string };
       const detail = JSON.stringify(e?.response?.data ?? e?.message ?? err);
-      setError(`Xato: ${detail}`);
+      setError(t('auth.register.errors.errorPrefix', { detail }));
     }
   };
 
@@ -114,7 +115,7 @@ export default function RegisterScreen() {
 
   const handleVerifyOtp = async (code?: string) => {
     const finalCode = code ?? otp;
-    if (finalCode.length < OTP_LENGTH) { setError('Barcha raqamlarni kiriting'); return; }
+    if (finalCode.length < OTP_LENGTH) { setError(t('auth.register.errors.allDigitsRequired')); return; }
     setError('');
     try {
       const res = await verifyOtp({ phone, code: finalCode, type: 'register' });
@@ -125,12 +126,12 @@ export default function RegisterScreen() {
         await setToken(res.token);
         router.replace('/(tabs)');
       } else {
-        setError("Noto'g'ri kod");
+        setError(t('auth.register.errors.wrongCode'));
         setDigits(Array(OTP_LENGTH).fill(''));
         setTimeout(() => hiddenOtpRef.current?.focus(), 100);
       }
     } catch {
-      setError("Noto'g'ri kod yoki muddat tugagan");
+      setError(t('auth.register.errors.wrongOrExpiredCode'));
       setDigits(Array(OTP_LENGTH).fill(''));
       setTimeout(() => hiddenOtpRef.current?.focus(), 100);
     }
@@ -144,15 +145,15 @@ export default function RegisterScreen() {
       const res = await sendOtp({ phone, type: 'register' });
       if (res?.expires_in) startCountdown(res.expires_in);
       setTimeout(() => hiddenOtpRef.current?.focus(), 300);
-    } catch { setError('SMS yuborishda xato'); }
+    } catch { setError(t('auth.register.errors.smsSendError')); }
   };
 
   const handleComplete = async () => {
-    if (!name.trim()) { setError('Ism kiritish shart'); return; }
+    if (!name.trim()) { setError(t('auth.register.errors.nameRequired')); return; }
     setError('');
     try {
       await registerComplete({ registration_token: registrationToken, name: name.trim(), role });
-    } catch { setError("Ro'yxatdan o'tishda xatolik yuz berdi"); }
+    } catch { setError(t('auth.register.errors.registerError')); }
   };
 
   const formatTime = (s: number) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
@@ -191,14 +192,14 @@ export default function RegisterScreen() {
                       style={{ width: 120, height: 60, marginBottom: 16 }}
                       contentFit="contain"
                     />
-                    <Text className="text-2xl font-sans-bold text-white mb-1">Ro&apos;yxatdan o&apos;ting</Text>
-                    <Text className="text-base text-white/70 mb-8">Telefon raqamingizni kiriting</Text>
+                    <Text className="text-2xl font-sans-bold text-white mb-1">{t('auth.register.title')}</Text>
+                    <Text className="text-base text-white/70 mb-8">{t('auth.register.subtitle')}</Text>
 
                     <View className="mb-4">
-                      <Text className="mb-2 text-sm font-sans-semibold text-white/80">Telefon raqam</Text>
+                      <Text className="mb-2 text-sm font-sans-semibold text-white/80">{t('auth.register.phoneLabel')}</Text>
                       <View className={`flex-row items-center border rounded-2xl bg-white/85 px-4 ${error ? 'border-red-400' : 'border-white/40'}`}>
                         <View className="mr-2 pr-2 border-r border-slate-300 py-3">
-                          <Text className="text-base font-sans-semibold text-slate-800">{PREFIX}</Text>
+                          <Text className="text-base font-sans-semibold text-slate-800">{PHONE_PREFIX}</Text>
                         </View>
                         <TextInput
                           className="flex-1 h-12 text-slate-900 text-base"
@@ -217,7 +218,7 @@ export default function RegisterScreen() {
 
                     <Button fullWidth size="lg" onPress={handleSendOtp} loading={isSendingOtp}
                       disabled={phoneDigits.length !== 9}>
-                      SMS kod olish
+                      {t('auth.register.sendOtp')}
                     </Button>
                   </>
                 )}
@@ -225,9 +226,9 @@ export default function RegisterScreen() {
                 {/* OTP STEP */}
                 {step === 'otp' && (
                   <>
-                    <Text className="text-2xl font-sans-bold text-white mb-1">Kodni kiriting</Text>
+                    <Text className="text-2xl font-sans-bold text-white mb-1">{t('auth.register.otpTitle')}</Text>
                     <Text className="text-base text-white/70 mb-8">
-                      {PREFIX} {formatPhoneDisplay(phoneDigits)} raqamiga yuborilgan kodni kiriting
+                      {t('auth.register.otpSubtitle', { phone: `${PHONE_PREFIX} ${formatPhoneDisplay(phoneDigits)}` })}
                     </Text>
 
                     <TextInput
@@ -275,17 +276,17 @@ export default function RegisterScreen() {
                     ) : null}
 
                     <Button fullWidth size="lg" onPress={() => handleVerifyOtp()} loading={isVerifyingOtp} disabled={otp.length < OTP_LENGTH}>
-                      Tasdiqlash
+                      {t('auth.register.verify')}
                     </Button>
 
                     <View className="items-center mt-5">
                       {countdown > 0 ? (
                         <Text className="text-white/60 text-sm">
-                          Qayta yuborish: <Text className="text-blue-300 font-sans-semibold">{formatTime(countdown)}</Text>
+                          {t('auth.register.resendIn')}<Text className="text-blue-300 font-sans-semibold">{formatTime(countdown)}</Text>
                         </Text>
                       ) : (
                         <TouchableOpacity onPress={handleResend} disabled={isSendingOtp}>
-                          <Text className="text-blue-300 text-sm font-sans-medium">Kodni qayta yuborish</Text>
+                          <Text className="text-blue-300 text-sm font-sans-medium">{t('auth.register.resend')}</Text>
                         </TouchableOpacity>
                       )}
                     </View>
@@ -295,17 +296,17 @@ export default function RegisterScreen() {
                 {/* PROFILE STEP */}
                 {step === 'profile' && (
                   <>
-                    <Text className="text-2xl font-sans-bold text-white mb-1">Profilingiz</Text>
-                    <Text className="text-base text-white/70 mb-8">Ismingizni kiriting va rolingizni tanlang</Text>
+                    <Text className="text-2xl font-sans-bold text-white mb-1">{t('auth.register.profileTitle')}</Text>
+                    <Text className="text-base text-white/70 mb-8">{t('auth.register.profileSubtitle')}</Text>
                     <Input
-                      label="To'liq ism"
-                      placeholder="Ismingizni kiriting"
+                      label={t('auth.register.fullNameLabel')}
+                      placeholder={t('auth.register.fullNamePlaceholder')}
                       value={name}
                       onChangeText={(v) => { setName(v); setError(''); }}
                       leftIcon={<User size={20} color="#94A3B8" />}
                       error={error || undefined}
                     />
-                    <Text className="text-sm font-sans-semibold text-white/80 mb-3">Rol tanlang</Text>
+                    <Text className="text-sm font-sans-semibold text-white/80 mb-3">{t('auth.register.chooseRole')}</Text>
                     <View className="flex-row gap-3 mb-6">
                       {(['student', 'instructor'] as const).map((r) => (
                         <TouchableOpacity
@@ -317,7 +318,7 @@ export default function RegisterScreen() {
                             ? <GraduationCap size={28} color={role === r ? '#60a5fa' : 'rgba(255,255,255,0.50)'} />
                             : <BookOpen size={28} color={role === r ? '#60a5fa' : 'rgba(255,255,255,0.50)'} />}
                           <Text className={`mt-2 text-sm font-sans-semibold ${role === r ? 'text-blue-300' : 'text-white/60'}`}>
-                            {r === 'student' ? 'Talaba' : "O'qituvchi"}
+                            {r === 'student' ? t('auth.register.roleStudent') : t('auth.register.roleInstructor')}
                           </Text>
                         </TouchableOpacity>
                       ))}
@@ -328,16 +329,16 @@ export default function RegisterScreen() {
                       </View>
                     ) : null}
                     <Button fullWidth size="lg" onPress={handleComplete} loading={isRegisteringComplete}>
-                      Yakunlash
+                      {t('auth.register.finish')}
                     </Button>
                   </>
                 )}
               </View>
 
               <View className="flex-row items-center justify-center mt-6">
-                <Text className="text-white/70 text-base">Hisobingiz bormi? </Text>
+                <Text className="text-white/70 text-base">{t('auth.register.haveAccount')}</Text>
                 <TouchableOpacity onPress={() => router.push('/(auth)/login')}>
-                  <Text className="text-blue-300 text-base font-sans-bold">Kirish</Text>
+                  <Text className="text-blue-300 text-base font-sans-bold">{t('auth.register.loginLink')}</Text>
                 </TouchableOpacity>
               </View>
             </View>

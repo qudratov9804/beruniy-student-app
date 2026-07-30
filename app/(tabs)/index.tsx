@@ -27,6 +27,7 @@ import {
   Bot,
 } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/hooks/useAuth';
 import { useEnrolledCourses } from '@/hooks/useCourses';
 import { CourseCardSkeleton } from '@/components/ui';
@@ -45,6 +46,7 @@ interface QuickDef {
 
 export default function HomeScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const { user } = useAuth();
   const { data: enrollments, isLoading: loadingCourses, refetch } = useEnrolledCourses();
   const [refreshing, setRefreshing] = React.useState(false);
@@ -64,8 +66,8 @@ export default function HomeScreen() {
     enrollments?.filter((e) => e.status === 'active' && e.progress_percent < 100) ?? [];
 
   const submitReview = async () => {
-    if (rating === 0) { Alert.alert('Xato', 'Iltimos, baho bering'); return; }
-    if (!comment.trim()) { Alert.alert('Xato', 'Iltimos, izoh yozing'); return; }
+    if (rating === 0) { Alert.alert(t('common.error'), t('home.reviewModal.ratingRequired')); return; }
+    if (!comment.trim()) { Alert.alert(t('common.error'), t('home.reviewModal.commentRequired')); return; }
     setSubmitting(true);
     try { await apiClient.post('/reviews', { rating, comment: comment.trim() }); } catch { /* ignore */ }
     setSubmitting(false);
@@ -82,56 +84,56 @@ export default function HomeScreen() {
   const quickItems: QuickDef[] = [
     {
       id: 'courses',
-      label: 'Kurslar',
+      label: t('home.quickLinks.courses'),
       icon: <BookOpen size={22} color="#fff" />,
       colors: ['#2563eb', '#3b82f6'],
       onPress: () => router.push('/(tabs)/courses'),
     },
     {
       id: 'my-courses',
-      label: 'Mening\nkurslarim',
+      label: t('home.quickLinks.myCourses'),
       icon: <GraduationCap size={22} color="#fff" />,
       colors: ['#7c3aed', '#8b5cf6'],
       onPress: () => router.push('/(tabs)/my-courses'),
     },
     {
       id: 'progress',
-      label: 'Progress',
+      label: t('home.quickLinks.progress'),
       icon: <BarChart2 size={22} color="#fff" />,
       colors: ['#059669', '#10b981'],
       onPress: () => router.push('/(tabs)/progress'),
     },
     {
       id: 'ai',
-      label: 'AI Yordam',
+      label: t('home.quickLinks.aiHelp'),
       icon: <Bot size={22} color="#fff" />,
       colors: ['#4338ca', '#6366f1'],
       onPress: () => router.push('/(tabs)/ai-chat'),
     },
     {
       id: 'it',
-      label: 'IT kurslari',
+      label: t('home.quickLinks.itCourses'),
       icon: <Laptop2 size={22} color="#fff" />,
       colors: ['#db2777', '#ec4899'],
       onPress: () => router.push({ pathname: '/(tabs)/courses', params: { q: 'IT' } }),
     },
     {
       id: 'biznes',
-      label: 'Biznes\nkurslari',
+      label: t('home.quickLinks.businessCourses'),
       icon: <Briefcase size={22} color="#fff" />,
       colors: ['#d97706', '#f59e0b'],
       onPress: () => router.push({ pathname: '/(tabs)/courses', params: { q: 'Biznes' } }),
     },
     {
       id: 'certificates',
-      label: 'Sertifikatlar',
+      label: t('home.quickLinks.certificates'),
       icon: <Award size={22} color="#fff" />,
       colors: ['#0891b2', '#06b6d4'],
       onPress: () => router.push('/(tabs)/progress'),
     },
     {
       id: 'review',
-      label: 'Izoh\nqoldirish',
+      label: t('home.quickLinks.leaveReview'),
       icon: <Star size={22} color="#fff" />,
       colors: ['#dc2626', '#ef4444'],
       onPress: () => setReviewVisible(true),
@@ -147,7 +149,7 @@ export default function HomeScreen() {
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#60a5fa']} />
           }
         >
-          <AppHeader subtitle="Xush kelibsiz 👋" title={user?.name ?? 'Talaba'} />
+          <AppHeader subtitle={t('home.welcome')} title={user?.name ?? t('home.defaultName')} />
 
           {/* Hero Banner */}
           <LinearGradient
@@ -160,23 +162,23 @@ export default function HomeScreen() {
             <View style={styles.circle2} pointerEvents="none" />
             <View className="flex-row items-center justify-between mb-2">
               <View>
-                <Text className="text-white text-sm opacity-80">Telefon</Text>
+                <Text className="text-white text-sm opacity-80">{t('home.phone')}</Text>
                 <Text className="text-white text-lg font-sans-bold">{user?.phone ?? '—'}</Text>
               </View>
               <View style={styles.roleCard}>
                 <Text className="text-white font-sans-semibold text-sm">
-                  {user?.role === 'student' ? 'Talaba' : 'Instructor'}
+                  {user?.role === 'student' ? t('home.roleStudent') : t('home.roleInstructor')}
                 </Text>
               </View>
             </View>
             <Text className="text-white opacity-70 text-sm mt-1">
-              {activeCourses.length} ta faol kurs
+              {t('home.activeCoursesCount', { count: activeCourses.length })}
             </Text>
           </LinearGradient>
 
           {/* Quick Links */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Tezkor o'tish</Text>
+            <Text style={styles.sectionTitle}>{t('home.quickAccess')}</Text>
             <View style={styles.quickGrid}>
               {quickItems.map((item) => (
                 <TouchableOpacity
@@ -203,12 +205,12 @@ export default function HomeScreen() {
           {(activeCourses.length > 0 || loadingCourses) && (
             <View style={styles.section}>
               <View className="flex-row items-center justify-between mb-3">
-                <Text style={styles.sectionTitle}>Davom etayotgan kurslar</Text>
+                <Text style={styles.sectionTitle}>{t('home.continueCoursesTitle')}</Text>
                 <TouchableOpacity
                   onPress={() => router.push('/(tabs)/courses')}
                   className="flex-row items-center gap-1"
                 >
-                  <Text className="text-blue-300 text-sm font-sans-semibold">Hammasi</Text>
+                  <Text className="text-blue-300 text-sm font-sans-semibold">{t('common.seeAll')}</Text>
                   <ChevronRight size={16} color="#93c5fd" />
                 </TouchableOpacity>
               </View>
@@ -227,7 +229,7 @@ export default function HomeScreen() {
                         {item.course?.title}
                       </Text>
                       <Text className="text-xs text-white/60 mt-2">
-                        {item.progress_percent}% tugatildi
+                        {t('home.percentDone', { percent: item.progress_percent })}
                       </Text>
                       <View className="h-2 bg-white/20 rounded-full mt-2">
                         <View
@@ -245,17 +247,17 @@ export default function HomeScreen() {
           {/* Stats */}
           {enrollments && (
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Statistika</Text>
+              <Text style={styles.sectionTitle}>{t('home.statistics')}</Text>
               <View className="flex-row flex-wrap gap-3">
                 {[
                   {
-                    label: 'Faol kurslar',
+                    label: t('home.activeCourses'),
                     value: enrollments.filter((e) => e.status === 'active').length,
                     icon: <BookOpen size={22} color="#60a5fa" />,
                     bg: 'bg-blue-500/20',
                   },
                   {
-                    label: 'Tugatilgan',
+                    label: t('home.completed'),
                     value: enrollments.filter((e) => e.status === 'completed').length,
                     icon: <GraduationCap size={22} color="#34d399" />,
                     bg: 'bg-emerald-500/20',
@@ -291,18 +293,16 @@ export default function HomeScreen() {
             {submitted ? (
               <View style={styles.successBox}>
                 <Text style={styles.successEmoji}>🎉</Text>
-                <Text style={styles.successTitle}>Rahmat!</Text>
-                <Text style={styles.successSub}>Izohingiz qabul qilindi.</Text>
+                <Text style={styles.successTitle}>{t('home.reviewModal.successTitle')}</Text>
+                <Text style={styles.successSub}>{t('home.reviewModal.successSubtitle')}</Text>
                 <TouchableOpacity onPress={closeReview} style={styles.doneBtn}>
-                  <Text style={styles.doneBtnText}>Yopish</Text>
+                  <Text style={styles.doneBtnText}>{t('home.reviewModal.close')}</Text>
                 </TouchableOpacity>
               </View>
             ) : (
               <>
-                <Text style={styles.modalTitle}>Platforma haqida fikr bildiring</Text>
-                <Text style={styles.modalSub}>
-                  Sizning fikringiz platformani yaxshilashga yordam beradi
-                </Text>
+                <Text style={styles.modalTitle}>{t('home.reviewModal.title')}</Text>
+                <Text style={styles.modalSub}>{t('home.reviewModal.subtitle')}</Text>
                 <View style={styles.starsRow}>
                   {[1, 2, 3, 4, 5].map((s) => (
                     <TouchableOpacity key={s} onPress={() => setRating(s)}>
@@ -316,7 +316,7 @@ export default function HomeScreen() {
                 </View>
                 <TextInput
                   style={styles.commentInput}
-                  placeholder="Izohingizni yozing..."
+                  placeholder={t('home.reviewModal.commentPlaceholder')}
                   placeholderTextColor="rgba(255,255,255,0.35)"
                   multiline
                   numberOfLines={4}
@@ -331,7 +331,7 @@ export default function HomeScreen() {
                 >
                   <Send size={18} color="white" style={{ marginRight: 8 }} />
                   <Text style={styles.submitBtnText}>
-                    {submitting ? 'Yuborilmoqda...' : 'Yuborish'}
+                    {submitting ? t('home.reviewModal.submitting') : t('home.reviewModal.submit')}
                   </Text>
                 </TouchableOpacity>
               </>

@@ -1,0 +1,438 @@
+{
+  "common": {
+    "cancel": "Cancel",
+    "save": "Save",
+    "confirm": "Confirm",
+    "delete": "Delete",
+    "retry": "Retry",
+    "yes": "Yes",
+    "no": "No",
+    "ok": "OK",
+    "back": "Back",
+    "next": "Next",
+    "continue": "Continue",
+    "submit": "Submit",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "search": "Search",
+    "close": "Close",
+    "seeAll": "See all",
+    "free": "Free",
+    "currency": "UZS",
+    "pending": "Pending",
+    "system": "System",
+    "logout": "Log out",
+    "loggingOut": "Logging out...",
+    "somethingWentWrong": "Something went wrong",
+    "noInternet": "No internet connection",
+    "requiredField": "This field is required"
+  },
+  "settings": {
+    "title": "Settings",
+    "appearance": "Appearance",
+    "theme": {
+      "light": "Light",
+      "dark": "Dark",
+      "system": "System"
+    },
+    "language": "Language",
+    "security": "Security",
+    "changePin": "Change PIN code",
+    "setPin": "Set PIN code",
+    "notifications": "Notifications",
+    "aboutSection": "About the app",
+    "aboutUs": "About us"
+  },
+  "auth": {
+    "validation": {
+      "phoneRequired": "Phone number is required",
+      "phoneInvalid": "Invalid phone number (+998XXXXXXXXX)",
+      "passwordRequired": "Password is required"
+    },
+    "login": {
+      "title": "Welcome!",
+      "subtitle": "Sign in to the Beruniy Talim platform",
+      "phoneLabel": "Phone number",
+      "passwordLabel": "Password",
+      "passwordPlaceholder": "Enter your password",
+      "forgotPassword": "Forgot password?",
+      "invalidCredentials": "Incorrect phone number or password",
+      "submit": "Log in",
+      "noAccount": "Don't have an account? ",
+      "registerLink": "Sign up"
+    },
+    "register": {
+      "title": "Sign up",
+      "subtitle": "Enter your phone number",
+      "phoneLabel": "Phone number",
+      "sendOtp": "Get SMS code",
+      "otpTitle": "Enter the code",
+      "otpSubtitle": "Enter the code sent to {{phone}}",
+      "resendIn": "Resend in: ",
+      "resend": "Resend code",
+      "verify": "Verify",
+      "profileTitle": "Your profile",
+      "profileSubtitle": "Enter your name and choose a role",
+      "fullNameLabel": "Full name",
+      "fullNamePlaceholder": "Enter your name",
+      "chooseRole": "Choose a role",
+      "roleStudent": "Student",
+      "roleInstructor": "Instructor",
+      "finish": "Finish",
+      "haveAccount": "Already have an account? ",
+      "loginLink": "Log in",
+      "errors": {
+        "digitsRequired": "Enter 9 digits",
+        "errorPrefix": "Error: {{detail}}",
+        "allDigitsRequired": "Enter all digits",
+        "wrongCode": "Incorrect code",
+        "wrongOrExpiredCode": "Incorrect code or it has expired",
+        "smsSendError": "Failed to send SMS",
+        "nameRequired": "Name is required",
+        "registerError": "An error occurred during registration"
+      }
+    },
+    "forgotPassword": {
+      "title": "Reset password",
+      "subtitle": "Enter your phone number, we'll send an SMS code.",
+      "submit": "Send SMS",
+      "sentTitle": "SMS sent!",
+      "sentSubtitle": "A verification code has been sent to {{phone}}.",
+      "back": "Go back",
+      "sendError": "Failed to send OTP"
+    },
+    "pinLogin": {
+      "title": "Enter PIN code",
+      "wrongPin": "Incorrect PIN. {{count}} attempts left",
+      "biometricPrompt": "Sign in with fingerprint",
+      "biometricFallback": "Enter PIN",
+      "useBiometric": "Sign in with fingerprint",
+      "useOtherAccount": "Sign in with another account"
+    },
+    "pinSetup": {
+      "createTitle": "Set a PIN code",
+      "confirmTitle": "Confirm PIN code",
+      "createSubtitle": "A 4-digit PIN for future sign-ins",
+      "confirmSubtitle": "Enter the PIN code again for security",
+      "mismatch": "PIN codes don't match. Please try again",
+      "biometricPrompt": "Enable fingerprint sign-in",
+      "later": "Later",
+      "skip": "Skip for now"
+    }
+  },
+  "home": {
+    "welcome": "Welcome 👋",
+    "defaultName": "Student",
+    "phone": "Phone",
+    "roleStudent": "Student",
+    "roleInstructor": "Instructor",
+    "quickLinks": {
+      "courses": "Courses",
+      "myCourses": "My courses",
+      "progress": "Progress",
+      "aiHelp": "AI Help",
+      "itCourses": "IT courses",
+      "businessCourses": "Business courses",
+      "certificates": "Certificates",
+      "leaveReview": "Leave a\nreview"
+    },
+    "activeCoursesCount": "{{count}} active courses",
+    "quickAccess": "Quick access",
+    "continueCoursesTitle": "Continue learning",
+    "percentDone": "{{percent}}% done",
+    "statistics": "Statistics",
+    "activeCourses": "Active courses",
+    "completed": "Completed",
+    "reviewModal": {
+      "title": "Share your feedback about the platform",
+      "subtitle": "Your feedback helps us improve",
+      "commentPlaceholder": "Write your comment...",
+      "submit": "Submit",
+      "submitting": "Submitting...",
+      "ratingRequired": "Please give a rating",
+      "commentRequired": "Please write a comment",
+      "successTitle": "Thank you!",
+      "successSubtitle": "Your review has been received.",
+      "close": "Close"
+    }
+  },
+  "courses": {
+    "title": "Courses",
+    "searchPlaceholder": "Search courses...",
+    "category": "Category",
+    "level": "Level",
+    "levels": {
+      "beginner": "Beginner",
+      "intermediate": "Intermediate",
+      "advanced": "Advanced"
+    },
+    "noResults": "No results found",
+    "noCourses": "No courses",
+    "tryAnotherKeyword": "Try a different keyword",
+    "noCoursesYet": "No courses available yet",
+    "selectCategory": "Select a category",
+    "allCategories": "All categories",
+    "selectLevel": "Select a level",
+    "allLevels": "All levels"
+  },
+  "myCourses": {
+    "title": "My courses",
+    "total": "Total",
+    "purchased": "Purchased",
+    "course": "Course",
+    "completed": "Completed",
+    "inProgress": "In progress",
+    "lessonsCount": "{{count}} lessons",
+    "filters": {
+      "all": "All",
+      "active": "Active",
+      "completed": "Completed"
+    },
+    "emptyCompleted": "No completed courses",
+    "emptyActive": "No active courses",
+    "emptyAll": "You haven't enrolled in any courses yet",
+    "emptySubtitle": "Browse the courses section and pick one that suits you"
+  },
+  "progress": {
+    "title": "Progress",
+    "overview": "Overview",
+    "totalCourses": "Total courses",
+    "averageProgress": "Average progress",
+    "activeCourses": "Active courses ({{count}})",
+    "certificates": "Certificates ({{count}})",
+    "noCertificatesYet": "No certificates yet",
+    "certificateHint": "A certificate is issued once you complete a course"
+  },
+  "profile": {
+    "logoutConfirm": "Are you sure you want to log out?",
+    "active": "Active",
+    "inactive": "Inactive",
+    "status": "Status",
+    "passwordSet": "Set",
+    "password": "Password",
+    "saved": "Saved",
+    "myCertificates": "My certificates",
+    "paymentHistory": "Payment history"
+  },
+  "aiChat": {
+    "welcome": "Hello! I'm the AI assistant for the Beruniy Talim platform. I'm ready to answer your questions about courses, lessons, or education.",
+    "error": "Something went wrong. Please try again.",
+    "title": "AI Assistant",
+    "subtitle": "Beruniy Talim AI",
+    "inputPlaceholder": "Type a message..."
+  },
+  "tabs": {
+    "home": "Home",
+    "courses": "Courses",
+    "progress": "Progress",
+    "aiChat": "AI Chat"
+  },
+  "notFound": {
+    "title": "Page not found",
+    "subtitle": "The page you're looking for doesn't exist or has been moved.",
+    "goHome": "Back to home"
+  },
+  "about": {
+    "tagline": "Uzbekistan's leading online education platform",
+    "stats": {
+      "courses": "Courses",
+      "students": "Students",
+      "instructors": "Instructors",
+      "rating": "Rating"
+    },
+    "missionTitle": "Our mission",
+    "missionParagraph1": "Beruniy Talim is a modern online education platform built to ensure everyone in Uzbekistan has access to quality education. We strive to deliver practical knowledge and skills in partnership with the best instructors.",
+    "missionParagraph2": "Take your career to the next level with professional courses in programming, design, business, language learning, and many other fields.",
+    "contact": "Contact us",
+    "contacts": {
+      "website": "Website",
+      "phone": "Phone",
+      "email": "Email",
+      "address": "Address",
+      "addressValue": "Tashkent, Uzbekistan"
+    }
+  },
+  "notifications": {
+    "empty": "No notifications",
+    "emptySubtitle": "There are no new notifications yet"
+  },
+  "wishlist": {
+    "empty": "No saved courses",
+    "emptySubtitle": "Tap the heart icon on a course page to save it",
+    "browseCourses": "Browse courses"
+  },
+  "editProfile": {
+    "title": "Edit profile",
+    "personalInfo": "Personal information",
+    "name": "Name",
+    "namePlaceholder": "Enter your name",
+    "email": "Email",
+    "phoneImmutable": "Phone (cannot be changed)",
+    "bio": "Bio",
+    "bioPlaceholder": "A short description about yourself",
+    "headline": "Headline",
+    "headlinePlaceholder": "e.g. Frontend developer",
+    "website": "Website",
+    "changePassword": "Change password",
+    "setPassword": "Set password",
+    "currentPassword": "Current password",
+    "currentPasswordPlaceholder": "Enter your current password",
+    "newPassword": "New password",
+    "newPasswordPlaceholder": "At least 6 characters",
+    "confirmPassword": "Confirm password",
+    "confirmPasswordPlaceholder": "Re-enter the new password",
+    "profileUpdated": "Profile updated successfully",
+    "profileSaveError": "Failed to save profile",
+    "passwordSaved": "Password saved successfully",
+    "passwordSaveError": "Failed to save password",
+    "errors": {
+      "nameRequired": "Name is required",
+      "emailInvalid": "Invalid email",
+      "currentPasswordRequired": "Enter your current password",
+      "newPasswordRequired": "Enter a new password",
+      "passwordMinLength": "Password must be at least 6 characters",
+      "confirmPasswordRequired": "Confirm your password",
+      "passwordMismatch": "Passwords don't match"
+    }
+  },
+  "payments": {
+    "notFound": "No payments found",
+    "emptySubtitle": "This will show up once you enroll in a paid course"
+  },
+  "paymentStatus": {
+    "checking": "Checking...",
+    "success": "Payment completed successfully!",
+    "amountPaid": "{{amount}} paid",
+    "startCourse": "Start course",
+    "cancelled": "Payment cancelled",
+    "failed": "Payment failed",
+    "retryHint": "Please try again or choose a different payment method.",
+    "pending": "Payment pending...",
+    "pendingHint": "Complete the payment on the payment page. Once confirmed, this page will update automatically.",
+    "reopenPage": "Reopen payment page"
+  },
+  "enums": {
+    "paymentStatus": {
+      "pending": "Pending",
+      "completed": "Successful",
+      "failed": "Failed",
+      "cancelled": "Cancelled"
+    },
+    "subscriptionType": {
+      "lifetime": "Lifetime",
+      "monthly": "Monthly",
+      "yearly": "Yearly"
+    },
+    "lessonType": {
+      "video": "Video",
+      "article": "Article",
+      "quiz": "Quiz",
+      "assignment": "Assignment"
+    },
+    "assignmentStatus": {
+      "pending": "Pending review",
+      "approved": "Approved",
+      "rejected": "Rejected"
+    }
+  },
+  "course": {
+    "studentsCount": "{{count}} students",
+    "currentlyLearning": "You're learning",
+    "enrollSuccess": "You've successfully enrolled in the course!",
+    "enrollError": "Failed to enroll in the course.",
+    "paymentStartError": "Failed to start the payment.",
+    "reviewThanks": "Thanks for your review! It will appear after moderation.",
+    "reviewRequiresEnrollment": "You must be enrolled in the course to leave a review.",
+    "reviewAlreadyExists": "You've already reviewed this course.",
+    "reviewSubmitError": "Failed to submit the review.",
+    "enrolling": "Enrolling...",
+    "enroll": "Enroll",
+    "buy": "Buy",
+    "whatYouLearn": "What you'll learn",
+    "requirements": "Requirements",
+    "includes": "What's included",
+    "about": "About the course",
+    "freePreview": "Free preview",
+    "moduleLabel": "Lesson {{title}}",
+    "lessons": "Lessons",
+    "reviews": "Reviews",
+    "writeReview": "Write a review",
+    "reviewsCount": "{{count}} reviews",
+    "instructorReplyLabel": "Instructor's reply:",
+    "noReviews": "No reviews yet. Be the first to leave one!",
+    "selectPaymentMethod": "Select a payment method",
+    "paymentStarting": "Starting...",
+    "proceedToPayment": "Proceed to payment",
+    "leaveReviewTitle": "Leave a review",
+    "reviewTitlePlaceholder": "Title (optional)",
+    "reviewBodyPlaceholder": "Write your thoughts (optional)...",
+    "submitting": "Submitting..."
+  },
+  "lesson": {
+    "enrollmentRequired": "You must be enrolled in the course to view this lesson.",
+    "loadError": "Failed to load the lesson.",
+    "playbackError": "Failed to play the video.",
+    "videoProcessing": "The video is still processing. Please try again shortly.",
+    "videoUploadError": "Failed to upload the video.",
+    "videoNotAvailable": "Video not available yet.",
+    "viewResult": "View result",
+    "questionsCount": "{{count}} questions",
+    "startQuiz": "Start quiz",
+    "viewAssignment": "View assignment",
+    "completed": "Completed",
+    "markComplete": "Mark complete"
+  },
+  "quiz": {
+    "enrollmentRequired": "You must be enrolled in the course to take this quiz.",
+    "loadError": "Failed to load the quiz.",
+    "submitError": "Failed to submit your answers.",
+    "leaveTitle": "Leave the quiz",
+    "leaveMessage": "If you leave now, your progress won't be saved.",
+    "stay": "Stay",
+    "exit": "Exit",
+    "noQuestions": "This quiz has no questions yet.",
+    "questionCounter": "Question {{current}}/{{total}}",
+    "fillBlankPlaceholder": "Type your answer here...",
+    "true": "True",
+    "false": "False",
+    "unsupportedQuestionType": "This question type isn't supported in the mobile app yet. Tap \"Next\" to continue.",
+    "finish": "Finish",
+    "next": "Next",
+    "result": {
+      "passedTitle": "Great job!",
+      "failedTitle": "Try again",
+      "passedSubtitle": "You passed the quiz successfully!",
+      "failedSubtitle": "Review the material once more.",
+      "score": "Score",
+      "correctOfTotal": "Correct/Total"
+    },
+    "history": {
+      "title": "Attempt history",
+      "attempt": "Attempt {{number}}",
+      "best": " · best"
+    }
+  },
+  "assignment": {
+    "enrollmentRequired": "You must be enrolled in the course to view this assignment.",
+    "loadError": "Failed to load the assignment.",
+    "title": "Assignment",
+    "submissions": "Submitted answers",
+    "grade": "Grade: {{grade}}",
+    "feedback": "Feedback: {{feedback}}",
+    "writeYourAnswer": "Write your answer",
+    "answerPlaceholder": "Write your answer to the assignment here..."
+  },
+  "aiTutor": {
+    "title": "AI assistant",
+    "subtitle": "Ask a question about the course, and the AI tutor will answer",
+    "inputPlaceholder": "E.g.: What are React hooks?",
+    "thinking": "Thinking…",
+    "serviceUnavailable": "The AI service is currently unavailable. Please try again shortly.",
+    "answerError": "Failed to answer the question."
+  },
+  "errorBoundary": {
+    "title": "Something went wrong",
+    "subtitle": "Something went wrong. Please refresh the page."
+  }
+}
