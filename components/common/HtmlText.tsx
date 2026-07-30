@@ -2,10 +2,13 @@ import React, { useMemo } from 'react';
 import { Platform, useWindowDimensions } from 'react-native';
 import RenderHtml from 'react-native-render-html';
 
+type Weight = 'regular' | 'medium' | 'bold';
+
 interface HtmlTextProps {
   html: string;
   baseFontSize?: number;
   color?: string;
+  weight?: Weight;
 }
 
 const tagsStyles: Record<string, object> = {
@@ -16,10 +19,17 @@ const tagsStyles: Record<string, object> = {
   li: { marginVertical: 2 },
 };
 
+const FONT_FILES: Record<Weight, string> = {
+  regular: 'Inter-Regular',
+  medium: 'Inter-Medium',
+  bold: 'Inter-Bold',
+};
+
 export const HtmlText: React.FC<HtmlTextProps> = ({
   html,
   baseFontSize = 14,
   color = '#475569',
+  weight = 'regular',
 }) => {
   const { width } = useWindowDimensions();
 
@@ -33,9 +43,11 @@ export const HtmlText: React.FC<HtmlTextProps> = ({
       fontSize: baseFontSize,
       color,
       lineHeight: baseFontSize * 1.6,
-      fontFamily: Platform.OS === 'web' ? 'Inter-Regular, sans-serif' : 'Inter-Regular',
+      fontFamily: Platform.OS === 'web'
+        ? `${FONT_FILES[weight]}, sans-serif`
+        : FONT_FILES[weight],
     }),
-    [baseFontSize, color]
+    [baseFontSize, color, weight]
   );
 
   return (

@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { ChevronLeft, Heart, Trash2 } from 'lucide-react-native';
 import { Image } from 'expo-image';
+import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { wishlistService } from '@/services/api';
 import { Skeleton } from '@/components/ui';
@@ -13,6 +14,7 @@ const WISHLIST_KEY = ['wishlist'];
 
 export default function WishlistScreen() {
   const router = useRouter();
+  const { t, i18n } = useTranslation();
   const queryClient = useQueryClient();
 
   const { data: items, isLoading } = useQuery({
@@ -31,7 +33,7 @@ export default function WishlistScreen() {
         <TouchableOpacity onPress={() => router.back()} className="p-1 -ml-1">
           <ChevronLeft size={26} color="#0F172A" />
         </TouchableOpacity>
-        <Text className="text-lg font-sans-bold text-slate-800 dark:text-white">Saqlanganlar</Text>
+        <Text className="text-lg font-sans-bold text-slate-800 dark:text-white">{t('profile.saved')}</Text>
         <View className="w-8" />
       </View>
 
@@ -44,13 +46,13 @@ export default function WishlistScreen() {
           <View className="w-20 h-20 bg-red-50 rounded-full items-center justify-center mb-4">
             <Heart size={36} color="#EF4444" />
           </View>
-          <Text className="text-base font-sans-bold text-slate-700 dark:text-slate-200">Saqlangan kurslar yo'q</Text>
+          <Text className="text-base font-sans-bold text-slate-700 dark:text-slate-200">{t('wishlist.empty')}</Text>
           <Text className="text-sm text-slate-400 mt-1 text-center px-8">
-            Kurs sahifasida yurak belgisini bosib saqlang
+            {t('wishlist.emptySubtitle')}
           </Text>
           <TouchableOpacity onPress={() => router.push('/(tabs)/courses')}
             className="mt-6 bg-primary-600 px-6 py-3 rounded-2xl">
-            <Text className="text-white font-sans-semibold">Kurslarni ko'rish</Text>
+            <Text className="text-white font-sans-semibold">{t('wishlist.browseCourses')}</Text>
           </TouchableOpacity>
         </View>
       ) : (
@@ -75,7 +77,7 @@ export default function WishlistScreen() {
                 </Text>
                 <View className="flex-row items-center justify-between mt-2">
                   <Text className="text-sm font-sans-bold text-primary-600">
-                    {formatPrice(item.course?.effective_price ?? 0)}
+                    {formatPrice(item.course?.effective_price ?? 0, t, i18n.language)}
                   </Text>
                   <TouchableOpacity onPress={() => toggleMutation.mutate(item.course.id)} className="p-1">
                     <Trash2 size={16} color="#EF4444" />

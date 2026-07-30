@@ -1,5 +1,6 @@
 import React, { Component, type ReactNode, type ErrorInfo } from 'react';
 import { View, Text } from 'react-native';
+import i18n from '@/i18n';
 import { Button } from '@/components/ui';
 import { ErrorIllustration } from './illustrations';
 
@@ -30,11 +31,11 @@ export class ErrorBoundary extends Component<Props, State> {
       return (
         <View className="flex-1 items-center justify-center px-6">
           <ErrorIllustration size={160} />
-          <Text className="text-xl font-sans-bold text-slate-800 mt-4 mb-2">Xatolik yuz berdi</Text>
+          <Text className="text-xl font-sans-bold text-slate-800 mt-4 mb-2">{i18n.t('errorBoundary.title')}</Text>
           <Text className="text-sm text-slate-500 text-center mb-6">
-            Nimadir noto&apos;g&apos;ri ketdi. Sahifani yangilang.
+            {i18n.t('errorBoundary.subtitle')}
           </Text>
-          <Button onPress={() => this.setState({ hasError: false })}>Qayta urinish</Button>
+          <Button onPress={() => this.setState({ hasError: false })}>{i18n.t('common.retry')}</Button>
         </View>
       );
     }

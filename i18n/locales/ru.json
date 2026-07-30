@@ -1,0 +1,438 @@
+{
+  "common": {
+    "cancel": "Отмена",
+    "save": "Сохранить",
+    "confirm": "Подтвердить",
+    "delete": "Удалить",
+    "retry": "Повторить",
+    "yes": "Да",
+    "no": "Нет",
+    "ok": "ОК",
+    "back": "Назад",
+    "next": "Далее",
+    "continue": "Продолжить",
+    "submit": "Отправить",
+    "loading": "Загрузка...",
+    "error": "Ошибка",
+    "success": "Успешно",
+    "search": "Поиск",
+    "close": "Закрыть",
+    "seeAll": "Все",
+    "free": "Бесплатно",
+    "currency": "сум",
+    "pending": "В ожидании",
+    "system": "Системный",
+    "logout": "Выйти",
+    "loggingOut": "Выход...",
+    "somethingWentWrong": "Что-то пошло не так",
+    "noInternet": "Нет подключения к интернету",
+    "requiredField": "Это поле обязательно для заполнения"
+  },
+  "settings": {
+    "title": "Настройки",
+    "appearance": "Внешний вид",
+    "theme": {
+      "light": "Светлая",
+      "dark": "Тёмная",
+      "system": "Системная"
+    },
+    "language": "Язык",
+    "security": "Безопасность",
+    "changePin": "Изменить PIN-код",
+    "setPin": "Установить PIN-код",
+    "notifications": "Уведомления",
+    "aboutSection": "О приложении",
+    "aboutUs": "О нас"
+  },
+  "auth": {
+    "validation": {
+      "phoneRequired": "Введите номер телефона",
+      "phoneInvalid": "Неверный номер телефона (+998XXXXXXXXX)",
+      "passwordRequired": "Введите пароль"
+    },
+    "login": {
+      "title": "Добро пожаловать!",
+      "subtitle": "Войдите на платформу Beruniy Talim",
+      "phoneLabel": "Номер телефона",
+      "passwordLabel": "Пароль",
+      "passwordPlaceholder": "Введите пароль",
+      "forgotPassword": "Забыли пароль?",
+      "invalidCredentials": "Неверный телефон или пароль",
+      "submit": "Войти",
+      "noAccount": "Нет аккаунта? ",
+      "registerLink": "Зарегистрироваться"
+    },
+    "register": {
+      "title": "Регистрация",
+      "subtitle": "Введите номер телефона",
+      "phoneLabel": "Номер телефона",
+      "sendOtp": "Получить SMS-код",
+      "otpTitle": "Введите код",
+      "otpSubtitle": "Введите код, отправленный на номер {{phone}}",
+      "resendIn": "Повторная отправка: ",
+      "resend": "Отправить код повторно",
+      "verify": "Подтвердить",
+      "profileTitle": "Ваш профиль",
+      "profileSubtitle": "Введите имя и выберите роль",
+      "fullNameLabel": "Полное имя",
+      "fullNamePlaceholder": "Введите ваше имя",
+      "chooseRole": "Выберите роль",
+      "roleStudent": "Студент",
+      "roleInstructor": "Преподаватель",
+      "finish": "Завершить",
+      "haveAccount": "Уже есть аккаунт? ",
+      "loginLink": "Войти",
+      "errors": {
+        "digitsRequired": "Введите 9 цифр",
+        "errorPrefix": "Ошибка: {{detail}}",
+        "allDigitsRequired": "Введите все цифры",
+        "wrongCode": "Неверный код",
+        "wrongOrExpiredCode": "Неверный код или срок действия истёк",
+        "smsSendError": "Ошибка отправки SMS",
+        "nameRequired": "Введите имя",
+        "registerError": "Произошла ошибка при регистрации"
+      }
+    },
+    "forgotPassword": {
+      "title": "Восстановление пароля",
+      "subtitle": "Введите номер телефона, мы отправим SMS-код.",
+      "submit": "Отправить SMS",
+      "sentTitle": "SMS отправлено!",
+      "sentSubtitle": "Код подтверждения отправлен на номер {{phone}}.",
+      "back": "Назад",
+      "sendError": "Ошибка при отправке OTP"
+    },
+    "pinLogin": {
+      "title": "Введите PIN-код",
+      "wrongPin": "Неверный PIN. Осталось попыток: {{count}}",
+      "biometricPrompt": "Войдите с помощью отпечатка пальца",
+      "biometricFallback": "Ввести PIN",
+      "useBiometric": "Войти по отпечатку пальца",
+      "useOtherAccount": "Войти в другой аккаунт"
+    },
+    "pinSetup": {
+      "createTitle": "Установите PIN-код",
+      "confirmTitle": "Подтвердите PIN-код",
+      "createSubtitle": "4-значный PIN для последующих входов",
+      "confirmSubtitle": "Введите PIN-код ещё раз для безопасности",
+      "mismatch": "PIN-коды не совпадают. Попробуйте ещё раз",
+      "biometricPrompt": "Включите вход по отпечатку пальца",
+      "later": "Позже",
+      "skip": "Пропустить пока"
+    }
+  },
+  "home": {
+    "welcome": "Добро пожаловать 👋",
+    "defaultName": "Студент",
+    "phone": "Телефон",
+    "roleStudent": "Студент",
+    "roleInstructor": "Преподаватель",
+    "quickLinks": {
+      "courses": "Курсы",
+      "myCourses": "Мои курсы",
+      "progress": "Прогресс",
+      "aiHelp": "ИИ-помощник",
+      "itCourses": "IT-курсы",
+      "businessCourses": "Бизнес-курсы",
+      "certificates": "Сертификаты",
+      "leaveReview": "Оставить\nотзыв"
+    },
+    "activeCoursesCount": "Активных курсов: {{count}}",
+    "quickAccess": "Быстрый доступ",
+    "continueCoursesTitle": "Продолжить обучение",
+    "percentDone": "Выполнено {{percent}}%",
+    "statistics": "Статистика",
+    "activeCourses": "Активные курсы",
+    "completed": "Завершено",
+    "reviewModal": {
+      "title": "Поделитесь мнением о платформе",
+      "subtitle": "Ваш отзыв поможет нам стать лучше",
+      "commentPlaceholder": "Напишите ваш отзыв...",
+      "submit": "Отправить",
+      "submitting": "Отправка...",
+      "ratingRequired": "Пожалуйста, поставьте оценку",
+      "commentRequired": "Пожалуйста, напишите отзыв",
+      "successTitle": "Спасибо!",
+      "successSubtitle": "Ваш отзыв принят.",
+      "close": "Закрыть"
+    }
+  },
+  "courses": {
+    "title": "Курсы",
+    "searchPlaceholder": "Поиск курсов...",
+    "category": "Категория",
+    "level": "Уровень",
+    "levels": {
+      "beginner": "Начальный",
+      "intermediate": "Средний",
+      "advanced": "Продвинутый"
+    },
+    "noResults": "Ничего не найдено",
+    "noCourses": "Курсов нет",
+    "tryAnotherKeyword": "Попробуйте другой запрос",
+    "noCoursesYet": "Пока нет доступных курсов",
+    "selectCategory": "Выберите категорию",
+    "allCategories": "Все категории",
+    "selectLevel": "Выберите уровень",
+    "allLevels": "Все уровни"
+  },
+  "myCourses": {
+    "title": "Мои курсы",
+    "total": "Всего",
+    "purchased": "Куплено",
+    "course": "Курс",
+    "completed": "Завершено",
+    "inProgress": "В процессе",
+    "lessonsCount": "Уроков: {{count}}",
+    "filters": {
+      "all": "Все",
+      "active": "Активные",
+      "completed": "Завершённые"
+    },
+    "emptyCompleted": "Нет завершённых курсов",
+    "emptyActive": "Нет активных курсов",
+    "emptyAll": "Вы ещё не записаны ни на один курс",
+    "emptySubtitle": "Перейдите в раздел курсов и выберите подходящий"
+  },
+  "progress": {
+    "title": "Прогресс",
+    "overview": "Общая статистика",
+    "totalCourses": "Всего курсов",
+    "averageProgress": "Средний прогресс",
+    "activeCourses": "Активные курсы ({{count}})",
+    "certificates": "Сертификаты ({{count}})",
+    "noCertificatesYet": "Пока нет сертификатов",
+    "certificateHint": "Сертификат будет выдан после завершения курса"
+  },
+  "profile": {
+    "logoutConfirm": "Вы уверены, что хотите выйти из аккаунта?",
+    "active": "Активен",
+    "inactive": "Неактивен",
+    "status": "Статус",
+    "passwordSet": "Установлен",
+    "password": "Пароль",
+    "saved": "Сохранённые",
+    "myCertificates": "Мои сертификаты",
+    "paymentHistory": "История платежей"
+  },
+  "aiChat": {
+    "welcome": "Здравствуйте! Я ИИ-помощник платформы Beruniy Talim. Готов ответить на ваши вопросы о курсах, уроках и учёбе.",
+    "error": "Произошла ошибка. Пожалуйста, попробуйте ещё раз.",
+    "title": "ИИ-помощник",
+    "subtitle": "Beruniy Talim AI",
+    "inputPlaceholder": "Напишите сообщение..."
+  },
+  "tabs": {
+    "home": "Главная",
+    "courses": "Курсы",
+    "progress": "Прогресс",
+    "aiChat": "ИИ-чат"
+  },
+  "notFound": {
+    "title": "Страница не найдена",
+    "subtitle": "Страница, которую вы ищете, не существует или была перемещена.",
+    "goHome": "Вернуться на главную"
+  },
+  "about": {
+    "tagline": "Ведущая онлайн-платформа образования в Узбекистане",
+    "stats": {
+      "courses": "Курсы",
+      "students": "Учащиеся",
+      "instructors": "Преподаватели",
+      "rating": "Рейтинг"
+    },
+    "missionTitle": "Наша миссия",
+    "missionParagraph1": "Beruniy Talim — современная онлайн-платформа образования, созданная для того, чтобы каждый житель Узбекистана имел доступ к качественному образованию. Мы стремимся давать практические знания и навыки в сотрудничестве с лучшими преподавателями.",
+    "missionParagraph2": "Выведите свою карьеру на новый уровень с помощью профессиональных курсов по программированию, дизайну, бизнесу, изучению языков и многим другим направлениям.",
+    "contact": "Связаться с нами",
+    "contacts": {
+      "website": "Веб-сайт",
+      "phone": "Телефон",
+      "email": "Email",
+      "address": "Адрес",
+      "addressValue": "Ташкент, Узбекистан"
+    }
+  },
+  "notifications": {
+    "empty": "Нет уведомлений",
+    "emptySubtitle": "Пока нет новых уведомлений"
+  },
+  "wishlist": {
+    "empty": "Нет сохранённых курсов",
+    "emptySubtitle": "Нажмите на значок сердечка на странице курса, чтобы сохранить его",
+    "browseCourses": "Посмотреть курсы"
+  },
+  "editProfile": {
+    "title": "Редактировать профиль",
+    "personalInfo": "Личные данные",
+    "name": "Имя",
+    "namePlaceholder": "Введите ваше имя",
+    "email": "Email",
+    "phoneImmutable": "Телефон (нельзя изменить)",
+    "bio": "О себе",
+    "bioPlaceholder": "Кратко расскажите о себе",
+    "headline": "Заголовок",
+    "headlinePlaceholder": "Например: Frontend-разработчик",
+    "website": "Веб-сайт",
+    "changePassword": "Изменить пароль",
+    "setPassword": "Установить пароль",
+    "currentPassword": "Текущий пароль",
+    "currentPasswordPlaceholder": "Введите текущий пароль",
+    "newPassword": "Новый пароль",
+    "newPasswordPlaceholder": "Минимум 6 символов",
+    "confirmPassword": "Подтвердите пароль",
+    "confirmPasswordPlaceholder": "Введите новый пароль ещё раз",
+    "profileUpdated": "Профиль успешно обновлён",
+    "profileSaveError": "Ошибка при сохранении профиля",
+    "passwordSaved": "Пароль успешно сохранён",
+    "passwordSaveError": "Ошибка при сохранении пароля",
+    "errors": {
+      "nameRequired": "Введите имя",
+      "emailInvalid": "Неверный email",
+      "currentPasswordRequired": "Введите текущий пароль",
+      "newPasswordRequired": "Введите новый пароль",
+      "passwordMinLength": "Пароль должен содержать минимум 6 символов",
+      "confirmPasswordRequired": "Подтвердите пароль",
+      "passwordMismatch": "Пароли не совпадают"
+    }
+  },
+  "payments": {
+    "notFound": "Платежи не найдены",
+    "emptySubtitle": "Здесь появится информация, когда вы оплатите платный курс"
+  },
+  "paymentStatus": {
+    "checking": "Проверка...",
+    "success": "Оплата прошла успешно!",
+    "amountPaid": "Оплачено {{amount}}",
+    "startCourse": "Начать курс",
+    "cancelled": "Платёж отменён",
+    "failed": "Платёж не выполнен",
+    "retryHint": "Попробуйте ещё раз или выберите другой способ оплаты.",
+    "pending": "Ожидание оплаты...",
+    "pendingHint": "Завершите оплату на странице платежа. После подтверждения эта страница обновится автоматически.",
+    "reopenPage": "Открыть страницу оплаты снова"
+  },
+  "enums": {
+    "paymentStatus": {
+      "pending": "В ожидании",
+      "completed": "Успешно",
+      "failed": "Неуспешно",
+      "cancelled": "Отменено"
+    },
+    "subscriptionType": {
+      "lifetime": "Пожизненный",
+      "monthly": "Ежемесячный",
+      "yearly": "Ежегодный"
+    },
+    "lessonType": {
+      "video": "Видео",
+      "article": "Статья",
+      "quiz": "Тест",
+      "assignment": "Задание"
+    },
+    "assignmentStatus": {
+      "pending": "На проверке",
+      "approved": "Принято",
+      "rejected": "Отклонено"
+    }
+  },
+  "course": {
+    "studentsCount": "{{count}} студентов",
+    "currentlyLearning": "Вы изучаете",
+    "enrollSuccess": "Вы успешно записались на курс!",
+    "enrollError": "Ошибка при записи на курс.",
+    "paymentStartError": "Ошибка при запуске оплаты.",
+    "reviewThanks": "Спасибо за ваш отзыв! Он появится после модерации.",
+    "reviewRequiresEnrollment": "Чтобы оставить отзыв, вы должны быть записаны на курс.",
+    "reviewAlreadyExists": "Вы уже оставили отзыв к этому курсу.",
+    "reviewSubmitError": "Ошибка при отправке отзыва.",
+    "enrolling": "Запись...",
+    "enroll": "Записаться на курс",
+    "buy": "Купить",
+    "whatYouLearn": "Чему вы научитесь",
+    "requirements": "Требования",
+    "includes": "Что входит в курс",
+    "about": "О курсе",
+    "freePreview": "Бесплатный просмотр",
+    "moduleLabel": "Урок {{title}}",
+    "lessons": "Уроки",
+    "reviews": "Отзывы",
+    "writeReview": "Оставить отзыв",
+    "reviewsCount": "{{count}} отзывов",
+    "instructorReplyLabel": "Ответ преподавателя:",
+    "noReviews": "Пока нет отзывов. Будьте первым, кто оставит отзыв!",
+    "selectPaymentMethod": "Выберите способ оплаты",
+    "paymentStarting": "Запуск...",
+    "proceedToPayment": "Перейти к оплате",
+    "leaveReviewTitle": "Оставьте отзыв",
+    "reviewTitlePlaceholder": "Заголовок (необязательно)",
+    "reviewBodyPlaceholder": "Напишите ваше мнение (необязательно)...",
+    "submitting": "Отправка..."
+  },
+  "lesson": {
+    "enrollmentRequired": "Чтобы посмотреть этот урок, вы должны быть записаны на курс.",
+    "loadError": "Ошибка при загрузке урока.",
+    "playbackError": "Ошибка при воспроизведении видео.",
+    "videoProcessing": "Видео пока обрабатывается. Попробуйте немного позже.",
+    "videoUploadError": "Ошибка при загрузке видео.",
+    "videoNotAvailable": "Видео пока недоступно.",
+    "viewResult": "Посмотреть результат",
+    "questionsCount": "{{count}} вопросов",
+    "startQuiz": "Начать тест",
+    "viewAssignment": "Посмотреть задание",
+    "completed": "Завершено",
+    "markComplete": "Завершить"
+  },
+  "quiz": {
+    "enrollmentRequired": "Чтобы пройти этот тест, вы должны быть записаны на курс.",
+    "loadError": "Ошибка при загрузке теста.",
+    "submitError": "Ошибка при отправке ответов.",
+    "leaveTitle": "Выйти из теста",
+    "leaveMessage": "Если вы выйдете сейчас, прогресс не сохранится.",
+    "stay": "Остаться",
+    "exit": "Выйти",
+    "noQuestions": "В этом тесте пока нет вопросов.",
+    "questionCounter": "Вопрос {{current}}/{{total}}",
+    "fillBlankPlaceholder": "Введите ваш ответ здесь...",
+    "true": "Верно",
+    "false": "Неверно",
+    "unsupportedQuestionType": "Этот тип вопроса пока не поддерживается в мобильном приложении. Нажмите «Далее», чтобы продолжить.",
+    "finish": "Завершить",
+    "next": "Далее",
+    "result": {
+      "passedTitle": "Отлично!",
+      "failedTitle": "Попробуйте ещё раз",
+      "passedSubtitle": "Вы успешно прошли тест!",
+      "failedSubtitle": "Повторите материал ещё раз.",
+      "score": "Балл",
+      "correctOfTotal": "Верно/Всего"
+    },
+    "history": {
+      "title": "История попыток",
+      "attempt": "Попытка {{number}}",
+      "best": " · лучшая"
+    }
+  },
+  "assignment": {
+    "enrollmentRequired": "Чтобы посмотреть это задание, вы должны быть записаны на курс.",
+    "loadError": "Ошибка при загрузке задания.",
+    "title": "Задание",
+    "submissions": "Отправленные ответы",
+    "grade": "Оценка: {{grade}}",
+    "feedback": "Комментарий: {{feedback}}",
+    "writeYourAnswer": "Напишите ваш ответ",
+    "answerPlaceholder": "Напишите здесь ваш ответ на задание..."
+  },
+  "aiTutor": {
+    "title": "ИИ-помощник",
+    "subtitle": "Задайте вопрос по курсу, и ИИ-репетитор ответит",
+    "inputPlaceholder": "Например: что такое хуки в React?",
+    "thinking": "Думаю…",
+    "serviceUnavailable": "ИИ-сервис сейчас недоступен. Попробуйте немного позже.",
+    "answerError": "Ошибка при ответе на вопрос."
+  },
+  "errorBoundary": {
+    "title": "Произошла ошибка",
+    "subtitle": "Что-то пошло не так. Обновите страницу."
+  }
+}

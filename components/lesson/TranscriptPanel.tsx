@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, LayoutChangeEvent } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
 import { FileText } from 'lucide-react-native';
+import { useTranslation } from 'react-i18next';
 import { lessonsService } from '@/services/api';
 import { Skeleton } from '@/components/ui';
 import { QUERY_KEYS } from '@/constants/config';
@@ -20,6 +21,7 @@ export const TranscriptPanel: React.FC<TranscriptPanelProps> = ({
   currentTime,
   onSeek,
 }) => {
+  const { t } = useTranslation();
   const { data: transcript, isLoading } = useQuery({
     queryKey: QUERY_KEYS.LESSONS.TRANSCRIPT(courseId, lessonId),
     queryFn: () => lessonsService.getTranscript(courseId, lessonId),
@@ -60,7 +62,7 @@ export const TranscriptPanel: React.FC<TranscriptPanelProps> = ({
     <View className="mb-6">
       <View className="flex-row items-center gap-2 mb-3">
         <FileText size={16} color="#64748B" />
-        <Text className="text-sm font-sans-bold text-slate-700">Transkripsiya</Text>
+        <Text className="text-sm font-sans-bold text-slate-700">{t('lesson.transcript')}</Text>
       </View>
       <ScrollView
         ref={scrollRef}

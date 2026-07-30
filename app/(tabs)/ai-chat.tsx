@@ -5,15 +5,15 @@ import {
   TextInput,
   TouchableOpacity,
   FlatList,
-  KeyboardAvoidingView,
-  Platform,
   ActivityIndicator,
   StyleSheet,
 } from 'react-native';
+import Animated, { useAnimatedKeyboard, useAnimatedStyle } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Bot, Send, User } from 'lucide-react-native';
+import { useTranslation } from 'react-i18next';
 import { ScreenBackground } from '@/components/common/ScreenBackground';
-import axios from 'axios';
+import { aiService } from '@/services/api';
 
 interface Message {
   id: string;
@@ -21,24 +21,21 @@ interface Message {
   content: string;
 }
 
-const PROXY_URL = process.env.EXPO_PUBLIC_PROXY_URL || 'http://localhost:3001';
-const CHAT_URL =
-  Platform.OS === 'web'
-    ? `${PROXY_URL}/chat`
-    : 'https://api.beruniy-talim.uz/api/v1/ai-chat';
-
-const WELCOME: Message = {
-  id: '0',
-  role: 'assistant',
-  content:
-    "Assalomu alaykum! Men Beruniy Talim platformasining AI yordamchisiman. Kurslar, darslar yoki ta'lim bo'yicha savollaringizga javob berishga tayyorman.",
-};
-
 export default function AiChatScreen() {
-  const [messages, setMessages] = useState<Message[]>([WELCOME]);
+  const { t, i18n } = useTranslation();
+  const [messages, setMessages] = useState<Message[]>([
+    { id: '0', role: 'assistant', content: t('aiChat.welcome') },
+  ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const listRef = useRef<FlatList>(null);
+  // useAnimatedKeyboard tracks the real native keyboard frame directly, unlike
+  // KeyboardAvoidingView/windowSoftInputMode which don't reliably resize the
+  // window on Android 15+ edge-to-edge — so the input bar lifts itself instead.
+  const keyboard = useAnimatedKeyboard();
+  const bottomBarStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: -keyboard.height.value }],
+  }));
 
   const sendMessage = useCallback(async () => {
     const text = input.trim();
@@ -51,11 +48,13 @@ export default function AiChatScreen() {
     setIsLoading(true);
 
     try {
-      const apiMessages = next.map((m) => ({ role: m.role, content: m.content }));
-      const { data } = await axios.post(CHAT_URL, { messages: apiMessages });
+      const { answer } = await aiService.ask({
+        question: text,
+        language: i18n.language as 'uz' | 'ru' | 'en',
+      });
       setMessages((prev) => [
         ...prev,
-        { id: (Date.now() + 1).toString(), role: 'assistant', content: data.reply },
+        { id: (Date.now() + 1).toString(), role: 'assistant', content: answer },
       ]);
     } catch {
       setMessages((prev) => [
@@ -63,14 +62,14 @@ export default function AiChatScreen() {
         {
           id: (Date.now() + 1).toString(),
           role: 'assistant',
-          content: "Xatolik yuz berdi. Iltimos, qayta urinib ko'ring.",
+          content: t('aiChat.error'),
         },
       ]);
     } finally {
       setIsLoading(false);
       setTimeout(() => listRef.current?.scrollToEnd({ animated: true }), 100);
     }
-  }, [input, messages, isLoading]);
+  }, [input, messages, isLoading, t, i18n.language]);
 
   const renderItem = ({ item }: { item: Message }) => {
     const isUser = item.role === 'user';
@@ -101,13 +100,14 @@ export default function AiChatScreen() {
             <Bot size={22} color="#60a5fa" />
           </View>
           <View>
-            <Text style={styles.headerTitle}>AI Yordamchi</Text>
-            <Text style={styles.headerSub}>Beruniy Talim AI</Text>
+            <Text style={styles.headerTitle}>{t('aiChat.title')}</Text>
+            <Text style={styles.headerSub}>{t('aiChat.subtitle')}</Text>
           </View>
         </View>
 
         <FlatList
           ref={listRef}
+          style={styles.flex}
           data={messages}
           keyExtractor={(item) => item.id}
           renderItem={renderItem}
@@ -116,24 +116,24 @@ export default function AiChatScreen() {
           showsVerticalScrollIndicator={false}
         />
 
-        {isLoading && (
-          <View style={styles.typingRow}>
-            <View style={styles.avatar}>
-              <Bot size={16} color="#60a5fa" />
+        <Animated.View style={bottomBarStyle}>
+          {isLoading && (
+            <View style={styles.typingRow}>
+              <View style={styles.avatar}>
+                <Bot size={16} color="#60a5fa" />
+              </View>
+              <View style={[styles.aiBubble, styles.typingBubble]}>
+                <ActivityIndicator size="small" color="#60a5fa" />
+              </View>
             </View>
-            <View style={[styles.aiBubble, styles.typingBubble]}>
-              <ActivityIndicator size="small" color="#60a5fa" />
-            </View>
-          </View>
-        )}
+          )}
 
-        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
           <View style={styles.inputRow}>
             <TextInput
               style={styles.input}
               value={input}
               onChangeText={setInput}
-              placeholder="Xabar yozing..."
+              placeholder={t('aiChat.inputPlaceholder')}
               placeholderTextColor="rgba(255,255,255,0.35)"
               multiline
               maxLength={500}
@@ -146,7 +146,7 @@ export default function AiChatScreen() {
               <Send size={18} color="white" />
             </TouchableOpacity>
           </View>
-        </KeyboardAvoidingView>
+        </Animated.View>
       </SafeAreaView>
     </ScreenBackground>
   );
@@ -154,6 +154,7 @@ export default function AiChatScreen() {
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: 'transparent' },
+  flex: { flex: 1 },
   header: {
     flexDirection: 'row',
     alignItems: 'center',

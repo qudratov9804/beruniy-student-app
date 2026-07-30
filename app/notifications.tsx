@@ -3,6 +3,7 @@ import { View, Text, FlatList, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { ChevronLeft, Bell, CheckCheck, Trash2 } from 'lucide-react-native';
+import { useTranslation } from 'react-i18next';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { notificationsService } from '@/services/api';
 import { QUERY_KEYS } from '@/constants/config';
@@ -11,6 +12,7 @@ import { Skeleton } from '@/components/ui';
 
 export default function NotificationsScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
 
   const { data, isLoading } = useNotifications();
@@ -39,7 +41,7 @@ export default function NotificationsScreen() {
         <TouchableOpacity onPress={() => router.back()} className="p-1 -ml-1">
           <ChevronLeft size={26} color="#0F172A" />
         </TouchableOpacity>
-        <Text className="text-lg font-sans-bold text-slate-800 dark:text-white">Bildirishnomalar</Text>
+        <Text className="text-lg font-sans-bold text-slate-800 dark:text-white">{t('settings.notifications')}</Text>
         <TouchableOpacity onPress={() => markAllMutation.mutate()} className="p-1">
           <CheckCheck size={22} color="#6366F1" />
         </TouchableOpacity>
@@ -54,8 +56,8 @@ export default function NotificationsScreen() {
           <View className="w-20 h-20 bg-primary-50 rounded-full items-center justify-center mb-4">
             <Bell size={36} color="#6366F1" />
           </View>
-          <Text className="text-base font-sans-bold text-slate-700 dark:text-slate-200">Bildirishnomalar yo'q</Text>
-          <Text className="text-sm text-slate-400 mt-1">Hozircha yangi bildirishnomalar mavjud emas</Text>
+          <Text className="text-base font-sans-bold text-slate-700 dark:text-slate-200">{t('notifications.empty')}</Text>
+          <Text className="text-sm text-slate-400 mt-1">{t('notifications.emptySubtitle')}</Text>
         </View>
       ) : (
         <FlatList

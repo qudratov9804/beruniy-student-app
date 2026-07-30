@@ -4,12 +4,14 @@ import { Image } from 'expo-image';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import * as LocalAuthentication from 'expo-local-authentication';
+import { useTranslation } from 'react-i18next';
 import { Fingerprint } from 'lucide-react-native';
 import { useAuthStore } from '@/stores';
 import { ScreenBackground, PinKeypad } from '@/components/common';
 
 export default function PinLoginScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const { verifyPin, isBiometricEnabled, clearAuth } = useAuthStore();
   const [pin, setPin] = useState('');
   const [error, setError] = useState('');
@@ -17,14 +19,14 @@ export default function PinLoginScreen() {
 
   const handleBiometric = useCallback(async () => {
     const result = await LocalAuthentication.authenticateAsync({
-      promptMessage: 'Barmoq izi orqali kiring',
-      cancelLabel: 'Bekor qilish',
-      fallbackLabel: 'PIN kiriting',
+      promptMessage: t('auth.pinLogin.biometricPrompt'),
+      cancelLabel: t('common.cancel'),
+      fallbackLabel: t('auth.pinLogin.biometricFallback'),
     });
     if (result.success) {
       router.replace('/(tabs)');
     }
-  }, [router]);
+  }, [router, t]);
 
   useEffect(() => {
     if (isBiometricEnabled) {
@@ -56,7 +58,7 @@ export default function PinLoginScreen() {
           router.replace('/(auth)/login');
           return;
         }
-        setError(`Noto'g'ri PIN. ${5 - newAttempts} ta urinish qoldi`);
+        setError(t('auth.pinLogin.wrongPin', { count: 5 - newAttempts }));
         setPin('');
       }
     }
@@ -76,7 +78,7 @@ export default function PinLoginScreen() {
 
           <View className="items-center gap-6">
             <Text className="text-2xl font-sans-bold text-white">
-              PIN kod kiriting
+              {t('auth.pinLogin.title')}
             </Text>
             <View className="flex-row gap-4">
               {dots.map((i) => (
@@ -102,7 +104,7 @@ export default function PinLoginScreen() {
               <TouchableOpacity onPress={handleBiometric} className="items-center py-3">
                 <Fingerprint size={36} color="#60a5fa" />
                 <Text className="text-blue-300 text-sm mt-2 font-sans-medium">
-                  Barmoq izi bilan kiring
+                  {t('auth.pinLogin.useBiometric')}
                 </Text>
               </TouchableOpacity>
             )}
@@ -111,7 +113,7 @@ export default function PinLoginScreen() {
               onPress={() => router.replace('/(auth)/login')}
               className="items-center py-3 mt-2"
             >
-              <Text className="text-white/40 text-sm">Boshqa hisob bilan kiring</Text>
+              <Text className="text-white/40 text-sm">{t('auth.pinLogin.useOtherAccount')}</Text>
             </TouchableOpacity>
           </View>
         </View>

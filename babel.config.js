@@ -20,6 +20,7 @@ module.exports = function (api) {
             '@/types': './types',
             '@/constants': './constants',
             '@/utils': './utils',
+            '@/i18n': './i18n',
           },
         },
       ],

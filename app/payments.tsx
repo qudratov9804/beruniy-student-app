@@ -3,26 +3,16 @@ import { View, Text, FlatList, TouchableOpacity, StyleSheet, RefreshControl } fr
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { ChevronLeft, Wallet, Clock, CheckCircle2, XCircle, BanIcon } from 'lucide-react-native';
+import { useTranslation } from 'react-i18next';
 import { usePayments } from '@/hooks/usePayments';
 import { Skeleton } from '@/components/ui';
 import { ScreenBackground } from '@/components/common';
-import {
-  formatPrice,
-  formatDate,
-  paymentProviderLabels,
-  paymentStatusLabels,
-  subscriptionTypeLabels,
-} from '@/utils';
+import { formatPrice, formatDate, paymentProviderLabels } from '@/utils';
 import type { Payment, PaymentStatus } from '@/types';
 
 type Filter = 'all' | PaymentStatus;
 
-const FILTERS: { key: Filter; label: string }[] = [
-  { key: 'all', label: 'Barchasi' },
-  { key: 'pending', label: 'Kutilmoqda' },
-  { key: 'completed', label: 'Muvaffaqiyatli' },
-  { key: 'failed', label: 'Muvaffaqiyatsiz' },
-];
+const FILTER_KEYS: Filter[] = ['all', 'pending', 'completed', 'failed'];
 
 const statusMeta: Record<PaymentStatus, { color: string; bg: string; icon: React.ReactNode }> = {
   pending: { color: '#fbbf24', bg: 'rgba(251,191,36,0.16)', icon: <Clock size={14} color="#fbbf24" /> },
@@ -33,6 +23,7 @@ const statusMeta: Record<PaymentStatus, { color: string; bg: string; icon: React
 
 function PaymentRow({ item }: { item: Payment }) {
   const router = useRouter();
+  const { t, i18n } = useTranslation();
   const meta = statusMeta[item.status];
 
   const handlePress = () => {
@@ -54,17 +45,17 @@ function PaymentRow({ item }: { item: Payment }) {
       </View>
       <View style={styles.rowInfo}>
         <Text style={styles.rowTitle}>
-          {paymentProviderLabels[item.provider]} · {subscriptionTypeLabels[item.subscription_type]}
+          {paymentProviderLabels[item.provider]} · {t(`enums.subscriptionType.${item.subscription_type}`)}
         </Text>
         <Text style={styles.rowSub}>{item.transaction_id}</Text>
-        {item.paid_at && <Text style={styles.rowDate}>{formatDate(item.paid_at)}</Text>}
+        {item.paid_at && <Text style={styles.rowDate}>{formatDate(item.paid_at, i18n.language)}</Text>}
       </View>
       <View style={styles.rowRight}>
-        <Text style={styles.rowAmount}>{formatPrice(item.amount)}</Text>
+        <Text style={styles.rowAmount}>{formatPrice(item.amount, t, i18n.language)}</Text>
         <View style={[styles.statusBadge, { backgroundColor: meta.bg }]}>
           {meta.icon}
           <Text style={[styles.statusText, { color: meta.color }]}>
-            {paymentStatusLabels[item.status]}
+            {t(`enums.paymentStatus.${item.status}`)}
           </Text>
         </View>
       </View>
@@ -74,11 +65,17 @@ function PaymentRow({ item }: { item: Payment }) {
 
 export default function PaymentsHistoryScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const [filter, setFilter] = useState<Filter>('all');
   const [refreshing, setRefreshing] = useState(false);
   const { data: payments, isLoading, refetch } = usePayments(
     filter === 'all' ? undefined : { status: filter }
   );
+
+  const FILTERS: { key: Filter; label: string }[] = FILTER_KEYS.map((key) => ({
+    key,
+    label: key === 'all' ? t('common.seeAll') : t(`enums.paymentStatus.${key}`),
+  }));
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -96,7 +93,7 @@ export default function PaymentsHistoryScreen() {
           >
             <ChevronLeft size={22} color="rgba(255,255,255,0.85)" />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>To'lovlar tarixi</Text>
+          <Text style={styles.headerTitle}>{t('profile.paymentHistory')}</Text>
           <View style={{ width: 40 }} />
         </View>
 
@@ -132,8 +129,8 @@ export default function PaymentsHistoryScreen() {
             ListEmptyComponent={
               <View style={styles.empty}>
                 <Wallet size={52} color="rgba(255,255,255,0.15)" />
-                <Text style={styles.emptyTitle}>To'lovlar topilmadi</Text>
-                <Text style={styles.emptySub}>Pullik kursga yozilganingizda bu yerda ko'rinadi</Text>
+                <Text style={styles.emptyTitle}>{t('payments.notFound')}</Text>
+                <Text style={styles.emptySub}>{t('payments.emptySubtitle')}</Text>
               </View>
             }
             renderItem={({ item }) => <PaymentRow item={item} />}

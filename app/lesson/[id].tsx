@@ -4,7 +4,9 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ChevronLeft, CheckCircle, Clock, AlertTriangle, Menu } from 'lucide-react-native';
-import { lessonsService } from '@/services/api';
+import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
+import { lessonsService, quizService } from '@/services/api';
 import { Button, Skeleton } from '@/components/ui';
 import { VideoPlayer, CourseSidebar, LessonTypeIcon, TranscriptPanel } from '@/components/lesson';
 import { HtmlText } from '@/components/common/HtmlText';
@@ -12,15 +14,15 @@ import { EmptyState } from '@/components/common/EmptyState';
 import { AITutor } from '@/components/common/AITutor';
 import { useCourse, useEnrollmentDetail } from '@/hooks/useCourses';
 import { QUERY_KEYS } from '@/constants/config';
-import { lessonTypeLabels } from '@/utils';
+import { flattenLessonsInModuleOrder } from '@/utils';
 import type { SectionLesson, VideoPlayerHandle } from '@/types';
 
-const getErrorMessage = (err: unknown): string => {
+const getErrorMessage = (err: unknown, t: TFunction): string => {
   const e = err as { response?: { status?: number; data?: { message?: string } } };
   if (e?.response?.status === 403) {
-    return "Bu darsni ko'rish uchun kursga yozilgan bo'lishingiz kerak.";
+    return t('lesson.enrollmentRequired');
   }
-  return e?.response?.data?.message ?? 'Darsni yuklashda xatolik yuz berdi.';
+  return e?.response?.data?.message ?? t('lesson.loadError');
 };
 
 const noRetryOnAuthError = (failureCount: number, err: unknown) => {
@@ -36,6 +38,7 @@ export default function LessonScreen() {
     courseSlug?: string;
   }>();
   const router = useRouter();
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
 
   const lessonId = Number(id);
@@ -46,8 +49,10 @@ export default function LessonScreen() {
   const { data: enrollmentDetail } = useEnrollmentDetail(cId);
 
   // Same lock/complete derivation as the course-detail screen: lessons unlock in
-  // order, boundary comes from the enrollment's `next_lesson` pointer.
-  const allLessons = (course?.sections ?? []).flatMap((section) => section.lessons ?? []);
+  // order, boundary comes from the enrollment's `next_lesson` pointer. The API's own
+  // lessons array order isn't reliable within a module (see flattenLessonsInModuleOrder)
+  // — index-based unlock math and "what's next" need the canonical order.
+  const allLessons = flattenLessonsInModuleOrder(course?.lessons ?? []);
   const nextLessonId = enrollmentDetail?.next_lesson?.id;
   const nextLessonIndex =
     nextLessonId != null ? allLessons.findIndex((l) => l.id === nextLessonId) : -1;
@@ -96,6 +101,16 @@ export default function LessonScreen() {
   });
 
   const isVideoReady = lesson?.type === 'video' && lesson.video_status === 'ready';
+
+  // Quiz lessons don't have a real duration_seconds (always 0) — show the question
+  // count in the header instead of a meaningless "0 min".
+  const { data: quizMeta } = useQuery({
+    queryKey: QUERY_KEYS.QUIZ.DETAIL(lessonId),
+    queryFn: () => quizService.getQuiz(lessonId),
+    enabled: lesson?.type === 'quiz',
+    staleTime: 1000 * 60,
+    retry: noRetryOnAuthError,
+  });
 
   const {
     data: stream,
@@ -154,8 +169,8 @@ export default function LessonScreen() {
         </View>
         <EmptyState
           emoji="😕"
-          title={getErrorMessage(error)}
-          actionLabel="Qayta urinish"
+          title={getErrorMessage(error, t)}
+          actionLabel={t('common.retry')}
           onAction={() => refetch()}
         />
       </SafeAreaView>
@@ -191,11 +206,16 @@ export default function LessonScreen() {
           <View className="flex-row items-center gap-1">
             <LessonTypeIcon type={lesson.type} size={12} color="#94A3B8" />
             <Text className="text-xs text-slate-400">
-              {lessonTypeLabels[lesson.type]} · {durationMin} min
+              {t(`enums.lessonType.${lesson.type}`)}
+              {lesson.type === 'quiz'
+                ? quizMeta
+                  ? ` · ${t('lesson.questionsCount', { count: quizMeta.questions_count })}`
+                  : ''
+                : ` · ${durationMin} min`}
             </Text>
           </View>
         </View>
-        {course?.sections && course.sections.length > 0 && (
+        {course?.lessons && course.lessons.length > 0 && (
           <TouchableOpacity onPress={() => setSidebarVisible(true)} className="p-2 -mr-2 ml-2">
             <Menu size={22} color="#0F172A" />
           </TouchableOpacity>
@@ -211,8 +231,8 @@ export default function LessonScreen() {
                   <AlertTriangle size={36} color="#f87171" />
                   <Text className="text-white text-sm text-center">
                     {videoPlaybackError
-                      ? 'Videoni ijro etishda xatolik yuz berdi.'
-                      : getErrorMessage(streamError)}
+                      ? t('lesson.playbackError')
+                      : getErrorMessage(streamError, t)}
                   </Text>
                   <TouchableOpacity
                     onPress={() => {
@@ -221,7 +241,7 @@ export default function LessonScreen() {
                     }}
                   >
                     <Text className="text-primary-300 text-sm font-sans-semibold">
-                      Qayta urinish
+                      {t('common.retry')}
                     </Text>
                   </TouchableOpacity>
                 </View>
@@ -245,20 +265,20 @@ export default function LessonScreen() {
               <View className="bg-slate-900 rounded-3xl h-56 items-center justify-center gap-3 px-6">
                 <ActivityIndicator size="large" color="#60A5FA" />
                 <Text className="text-white text-sm text-center">
-                  Video hozircha tayyorlanmoqda. Birozdan so'ng qayta urinib ko'ring.
+                  {t('lesson.videoProcessing')}
                 </Text>
               </View>
             ) : lesson.video_status === 'failed' ? (
               <View className="bg-slate-900 rounded-3xl h-56 items-center justify-center gap-3 px-6">
                 <AlertTriangle size={36} color="#f87171" />
                 <Text className="text-white text-sm text-center">
-                  Videoni yuklashda xatolik yuz berdi.
+                  {t('lesson.videoUploadError')}
                 </Text>
               </View>
             ) : (
               <View className="bg-slate-900 rounded-3xl h-56 items-center justify-center gap-3 px-6">
                 <Clock size={36} color="rgba(255,255,255,0.5)" />
-                <Text className="text-white/70 text-sm text-center">Video hali mavjud emas.</Text>
+                <Text className="text-white/70 text-sm text-center">{t('lesson.videoNotAvailable')}</Text>
               </View>
             )}
           </View>
@@ -285,8 +305,13 @@ export default function LessonScreen() {
           />
         )}
 
-        <View className="mb-6">
-          <AITutor courseId={cId} courseSlug={courseSlug ?? ''} sections={course?.sections} variant="light" />
+        <View className="mt-2 pt-6 mb-6 border-t border-slate-100">
+          <AITutor
+            courseId={cId}
+            courseSlug={courseSlug ?? ''}
+            lessons={course?.lessons}
+            variant="light"
+          />
         </View>
 
         <View className="h-24" />
@@ -297,10 +322,12 @@ export default function LessonScreen() {
           <Button
             fullWidth
             size="lg"
-            onPress={() => router.push(`/quiz/${lesson.id}?courseId=${courseId}`)}
+            onPress={() =>
+              router.push(`/quiz/${lesson.id}?courseId=${courseId}&courseSlug=${courseSlug ?? ''}`)
+            }
             icon={isCompleted ? <CheckCircle size={20} color="#fff" /> : undefined}
           >
-            {isCompleted ? 'Natijani ko\'rish' : 'Testni boshlash'}
+            {isCompleted ? t('lesson.viewResult') : t('lesson.startQuiz')}
           </Button>
         ) : lesson.type === 'assignment' ? (
           <Button
@@ -308,32 +335,43 @@ export default function LessonScreen() {
             size="lg"
             onPress={() => router.push(`/assignment/${lesson.id}?courseId=${courseId}`)}
           >
-            Topshiriqni ko'rish
+            {t('lesson.viewAssignment')}
           </Button>
         ) : (
           <Button
             fullWidth
             size="lg"
             onPress={async () => {
-              await completeMutation.mutateAsync(lesson.duration_seconds);
-              handleBack();
+              if (!isCompleted) {
+                await completeMutation.mutateAsync(lesson.duration_seconds);
+              }
+              // Navigate by this screen's own canonically-ordered lesson list rather
+              // than the enrollment's `next_lesson` pointer — that pointer is computed
+              // from the same unreliable raw API order (see flattenLessonsInModuleOrder)
+              // and can point at the wrong slot (e.g. quiz before its module's article).
+              const currentIndex = allLessons.findIndex((l) => l.id === lessonId);
+              const next = currentIndex >= 0 ? allLessons[currentIndex + 1] : undefined;
+              if (next) {
+                router.replace(`/lesson/${next.id}?courseId=${cId}&courseSlug=${courseSlug ?? ''}`);
+              } else {
+                handleBack();
+              }
             }}
             loading={completeMutation.isPending}
-            disabled={isCompleted}
             icon={isCompleted ? <CheckCircle size={20} color="#fff" /> : undefined}
           >
-            {isCompleted ? 'Tugatildi' : 'Tugatdim'}
+            {isCompleted ? t('common.continue') : t('lesson.markComplete')}
           </Button>
         )}
       </View>
 
-      {course?.sections && course.sections.length > 0 && (
+      {course?.lessons && course.lessons.length > 0 && (
         <CourseSidebar
           visible={sidebarVisible}
           onClose={() => setSidebarVisible(false)}
           courseTitle={course.title}
           categoryName={course.category?.name}
-          sections={course.sections}
+          lessons={course.lessons}
           currentLessonId={lessonId}
           unlockedLessonIds={unlockedLessonIds}
           completedLessonIds={completedLessonIds}

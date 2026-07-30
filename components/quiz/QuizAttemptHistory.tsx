@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
 import { Trophy } from 'lucide-react-native';
+import { useTranslation } from 'react-i18next';
 import { quizService } from '@/services/api';
 import { Card, Skeleton } from '@/components/ui';
 import { QUERY_KEYS } from '@/constants/config';
@@ -12,6 +13,7 @@ interface QuizAttemptHistoryProps {
 }
 
 export const QuizAttemptHistory: React.FC<QuizAttemptHistoryProps> = ({ lessonId }) => {
+  const { t, i18n } = useTranslation();
   const { data: history, isLoading } = useQuery({
     queryKey: QUERY_KEYS.QUIZ.HISTORY(lessonId),
     queryFn: () => quizService.getHistory(lessonId),
@@ -34,13 +36,14 @@ export const QuizAttemptHistory: React.FC<QuizAttemptHistoryProps> = ({ lessonId
 
   return (
     <View className="px-6 mt-2 mb-8">
-      <Text className="text-sm font-sans-bold text-slate-700 mb-3">Urinishlar tarixi</Text>
+      <Text className="text-sm font-sans-bold text-slate-700 mb-3">{t('quiz.history.title')}</Text>
       {sorted.map((attempt) => {
         const isBest = attempt.score === bestScore;
         return (
           <Card
             key={attempt.attempt_number}
             variant="filled"
+            theme="light"
             padding="md"
             className={`flex-row items-center justify-between mb-2 ${isBest ? 'border border-amber-300' : ''}`}
           >
@@ -48,9 +51,10 @@ export const QuizAttemptHistory: React.FC<QuizAttemptHistoryProps> = ({ lessonId
               {isBest && <Trophy size={16} color="#F59E0B" />}
               <View>
                 <Text className="text-sm font-sans-semibold text-slate-800">
-                  {attempt.attempt_number}-urinish{isBest ? ' · eng yaxshi' : ''}
+                  {t('quiz.history.attempt', { number: attempt.attempt_number })}
+                  {isBest ? t('quiz.history.best') : ''}
                 </Text>
-                <Text className="text-xs text-slate-400">{formatDate(attempt.submitted_at)}</Text>
+                <Text className="text-xs text-slate-400">{formatDate(attempt.submitted_at, i18n.language)}</Text>
               </View>
             </View>
             <View className="items-end">

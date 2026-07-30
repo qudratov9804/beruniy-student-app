@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Image } from 'expo-image';
 import { Star, Clock, Users, BookOpen } from 'lucide-react-native';
+import { useTranslation } from 'react-i18next';
 import { Card, Badge, ProgressBar } from '@/components/ui';
 import { formatPrice, stripHtml } from '@/utils';
 import type { Course } from '@/types';
@@ -19,18 +20,13 @@ const levelColors: Record<string, string> = {
   advanced: 'danger',
 };
 
-const levelLabels: Record<string, string> = {
-  beginner: "Boshlang'ich",
-  intermediate: "O'rta",
-  advanced: 'Yuqori',
-};
-
 export const CourseCard: React.FC<CourseCardProps> = ({
   course,
   variant = 'full',
   progressPercent,
 }) => {
   const router = useRouter();
+  const { t, i18n } = useTranslation();
 
   const handlePress = () => router.push(`/course/${course.slug}`);
 
@@ -68,12 +64,12 @@ export const CourseCard: React.FC<CourseCardProps> = ({
               variant={levelColors[course.level] as 'success' | 'warning' | 'danger'}
               size="sm"
             >
-              {levelLabels[course.level]}
+              {t(`courses.levels.${course.level}`)}
             </Badge>
             <Text className="text-base font-sans-bold text-white mt-2 mb-1" numberOfLines={2}>
               {course.title}
             </Text>
-            <Text className="text-xs text-white/60 mb-2">{progressPercent}% tugatildi</Text>
+            <Text className="text-xs text-white/60 mb-2">{t('home.percentDone', { percent: progressPercent })}</Text>
             <ProgressBar progress={progressPercent} height={6} />
           </View>
         </Card>
@@ -95,11 +91,11 @@ export const CourseCard: React.FC<CourseCardProps> = ({
               variant={levelColors[course.level] as 'success' | 'warning' | 'danger'}
               size="sm"
             >
-              {levelLabels[course.level]}
+              {t(`courses.levels.${course.level}`)}
             </Badge>
             {course.is_free && (
               <Badge variant="success" size="sm">
-                Bepul
+                {t('common.free')}
               </Badge>
             )}
           </View>
@@ -124,7 +120,7 @@ export const CourseCard: React.FC<CourseCardProps> = ({
             </View>
             <View className="flex-row items-center gap-1">
               <BookOpen size={14} color="rgba(255,255,255,0.50)" />
-              <Text className="text-xs text-white/50">{course.lessons_count} dars</Text>
+              <Text className="text-xs text-white/50">{t('myCourses.lessonsCount', { count: course.lessons_count })}</Text>
             </View>
             <View className="flex-row items-center gap-1">
               <Clock size={14} color="rgba(255,255,255,0.50)" />
@@ -133,7 +129,7 @@ export const CourseCard: React.FC<CourseCardProps> = ({
           </View>
           <View className="flex-row items-center justify-between mt-3 pt-3 border-t border-white/10">
             <Text className="text-base font-sans-bold text-blue-300">
-              {formatPrice(course.effective_price)}
+              {formatPrice(course.effective_price, t, i18n.language)}
             </Text>
           </View>
         </View>

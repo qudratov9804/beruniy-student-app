@@ -10,11 +10,13 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { ChevronLeft, User, Mail, FileText, Briefcase, Globe, Lock } from 'lucide-react-native';
+import { useTranslation } from 'react-i18next';
 import { Input, Button } from '@/components/ui';
 import { useAuth } from '@/hooks/useAuth';
 
 export default function EditProfileScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const {
     user,
     updateProfile, isUpdatingProfile,
@@ -47,19 +49,19 @@ export default function EditProfileScreen() {
 
   const validateProfile = () => {
     const errs: Record<string, string> = {};
-    if (!name.trim()) errs.name = 'Ism kiritish shart';
-    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errs.email = "Email noto'g'ri";
+    if (!name.trim()) errs.name = t('editProfile.errors.nameRequired');
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errs.email = t('editProfile.errors.emailInvalid');
     setProfileErrors(errs);
     return Object.keys(errs).length === 0;
   };
 
   const validatePassword = () => {
     const errs: Record<string, string> = {};
-    if (user?.has_password && !currentPassword) errs.currentPassword = 'Joriy parolni kiriting';
-    if (!newPassword) errs.newPassword = 'Yangi parol kiriting';
-    else if (newPassword.length < 6) errs.newPassword = 'Parol kamida 6 ta belgi';
-    if (!confirmPassword) errs.confirmPassword = 'Parolni tasdiqlang';
-    else if (newPassword !== confirmPassword) errs.confirmPassword = 'Parollar mos kelmaydi';
+    if (user?.has_password && !currentPassword) errs.currentPassword = t('editProfile.errors.currentPasswordRequired');
+    if (!newPassword) errs.newPassword = t('editProfile.errors.newPasswordRequired');
+    else if (newPassword.length < 6) errs.newPassword = t('editProfile.errors.passwordMinLength');
+    if (!confirmPassword) errs.confirmPassword = t('editProfile.errors.confirmPasswordRequired');
+    else if (newPassword !== confirmPassword) errs.confirmPassword = t('editProfile.errors.passwordMismatch');
     setPasswordErrors(errs);
     return Object.keys(errs).length === 0;
   };
@@ -74,17 +76,17 @@ export default function EditProfileScreen() {
         headline: headline.trim() || undefined,
         website: website.trim() || undefined,
       });
-      const msg = "Profil muvaffaqiyatli yangilandi";
+      const msg = t('editProfile.profileUpdated');
       if (Platform.OS === 'web') {
         window.alert(msg);
       } else {
-        Alert.alert('Muvaffaqiyatli!', msg);
+        Alert.alert(t('common.success'), msg);
       }
     } catch (err: unknown) {
       const e = err as { response?: { data?: { message?: string } } };
-      const msg = e?.response?.data?.message ?? "Profilni saqlashda xatolik";
+      const msg = e?.response?.data?.message ?? t('editProfile.profileSaveError');
       if (Platform.OS === 'web') window.alert(msg);
-      else Alert.alert('Xatolik', msg);
+      else Alert.alert(t('common.error'), msg);
     }
   };
 
@@ -106,14 +108,14 @@ export default function EditProfileScreen() {
       setCurrentPassword('');
       setNewPassword('');
       setConfirmPassword('');
-      const msg = "Parol muvaffaqiyatli saqlandi";
+      const msg = t('editProfile.passwordSaved');
       if (Platform.OS === 'web') window.alert(msg);
-      else Alert.alert('Muvaffaqiyatli!', msg);
+      else Alert.alert(t('common.success'), msg);
     } catch (err: unknown) {
       const e = err as { response?: { data?: { message?: string } } };
-      const msg = e?.response?.data?.message ?? "Parolni saqlashda xatolik";
+      const msg = e?.response?.data?.message ?? t('editProfile.passwordSaveError');
       if (Platform.OS === 'web') window.alert(msg);
-      else Alert.alert('Xatolik', msg);
+      else Alert.alert(t('common.error'), msg);
     }
   };
 
@@ -124,26 +126,26 @@ export default function EditProfileScreen() {
         <TouchableOpacity onPress={() => router.back()} className="p-1 -ml-1 mr-3">
           <ChevronLeft size={26} color="#0F172A" />
         </TouchableOpacity>
-        <Text className="text-lg font-sans-bold text-slate-800">Profilni tahrirlash</Text>
+        <Text className="text-lg font-sans-bold text-slate-800">{t('editProfile.title')}</Text>
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
         {/* Profile Info */}
         <View className="mx-5 mt-5 bg-white rounded-2xl p-5">
           <Text className="text-sm font-sans-bold text-slate-500 uppercase tracking-wider mb-4">
-            Shaxsiy ma'lumotlar
+            {t('editProfile.personalInfo')}
           </Text>
 
           <Input
-            label="Ism"
-            placeholder="Ismingizni kiriting"
+            label={t('editProfile.name')}
+            placeholder={t('editProfile.namePlaceholder')}
             value={name}
             onChangeText={setName}
             error={profileErrors.name}
             leftIcon={<User size={18} color="#94A3B8" />}
           />
           <Input
-            label="Email"
+            label={t('editProfile.email')}
             placeholder="email@example.com"
             value={email}
             onChangeText={setEmail}
@@ -153,14 +155,14 @@ export default function EditProfileScreen() {
             leftIcon={<Mail size={18} color="#94A3B8" />}
           />
           <Input
-            label="Telefon (o'zgartirib bo'lmaydi)"
+            label={t('editProfile.phoneImmutable')}
             value={user?.phone ?? ''}
             editable={false}
             leftIcon={<User size={18} color="#94A3B8" />}
           />
           <Input
-            label="Bio"
-            placeholder="O'zingiz haqingizda qisqacha"
+            label={t('editProfile.bio')}
+            placeholder={t('editProfile.bioPlaceholder')}
             value={bio}
             onChangeText={setBio}
             multiline
@@ -168,14 +170,14 @@ export default function EditProfileScreen() {
             leftIcon={<FileText size={18} color="#94A3B8" />}
           />
           <Input
-            label="Sarlavha"
-            placeholder="Masalan: Frontend dasturchi"
+            label={t('editProfile.headline')}
+            placeholder={t('editProfile.headlinePlaceholder')}
             value={headline}
             onChangeText={setHeadline}
             leftIcon={<Briefcase size={18} color="#94A3B8" />}
           />
           <Input
-            label="Veb-sayt"
+            label={t('editProfile.website')}
             placeholder="https://example.com"
             value={website}
             onChangeText={setWebsite}
@@ -189,20 +191,20 @@ export default function EditProfileScreen() {
             onPress={handleSaveProfile}
             loading={isUpdatingProfile}
           >
-            Saqlash
+            {t('common.save')}
           </Button>
         </View>
 
         {/* Password */}
         <View className="mx-5 mt-4 mb-8 bg-white rounded-2xl p-5">
           <Text className="text-sm font-sans-bold text-slate-500 uppercase tracking-wider mb-4">
-            {user?.has_password ? "Parolni o'zgartirish" : 'Parol o\'rnatish'}
+            {user?.has_password ? t('editProfile.changePassword') : t('editProfile.setPassword')}
           </Text>
 
           {user?.has_password && (
             <Input
-              label="Joriy parol"
-              placeholder="Joriy parolni kiriting"
+              label={t('editProfile.currentPassword')}
+              placeholder={t('editProfile.currentPasswordPlaceholder')}
               value={currentPassword}
               onChangeText={setCurrentPassword}
               isPassword
@@ -211,8 +213,8 @@ export default function EditProfileScreen() {
             />
           )}
           <Input
-            label="Yangi parol"
-            placeholder="Kamida 6 ta belgi"
+            label={t('editProfile.newPassword')}
+            placeholder={t('editProfile.newPasswordPlaceholder')}
             value={newPassword}
             onChangeText={setNewPassword}
             isPassword
@@ -220,8 +222,8 @@ export default function EditProfileScreen() {
             leftIcon={<Lock size={18} color="#94A3B8" />}
           />
           <Input
-            label="Parolni tasdiqlang"
-            placeholder="Yangi parolni qayta kiriting"
+            label={t('editProfile.confirmPassword')}
+            placeholder={t('editProfile.confirmPasswordPlaceholder')}
             value={confirmPassword}
             onChangeText={setConfirmPassword}
             isPassword
@@ -235,7 +237,7 @@ export default function EditProfileScreen() {
             onPress={handleSavePassword}
             loading={isPasswordLoading}
           >
-            {user?.has_password ? "Parolni o'zgartirish" : 'Parol o\'rnatish'}
+            {user?.has_password ? t('editProfile.changePassword') : t('editProfile.setPassword')}
           </Button>
         </View>
       </ScrollView>

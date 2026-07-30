@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { View, Text, Modal, TouchableOpacity, ScrollView, Pressable } from 'react-native';
 import { X, ChevronDown, ChevronRight, Lock, CheckCircle } from 'lucide-react-native';
-import type { Section, SectionLesson } from '@/types';
+import { useTranslation } from 'react-i18next';
+import type { SectionLesson } from '@/types';
 import { groupLessonsByModule, LESSON_SLOT_ORDER } from '@/utils';
 import { LessonTypeIcon } from './LessonTypeIcon';
 
@@ -10,7 +11,7 @@ interface CourseSidebarProps {
   onClose: () => void;
   courseTitle: string;
   categoryName?: string | null;
-  sections: Section[];
+  lessons: SectionLesson[];
   currentLessonId: number;
   unlockedLessonIds: Set<number>;
   completedLessonIds: Set<number>;
@@ -22,13 +23,14 @@ export function CourseSidebar({
   onClose,
   courseTitle,
   categoryName,
-  sections,
+  lessons,
   currentLessonId,
   unlockedLessonIds,
   completedLessonIds,
   onSelectLesson,
 }: CourseSidebarProps) {
-  const { modules, legacy } = groupLessonsByModule(sections.flatMap((s) => s.lessons ?? []));
+  const { t } = useTranslation();
+  const { modules, legacy } = groupLessonsByModule(lessons);
   const currentModule = modules.find((mod) =>
     Object.values(mod.items).some((lesson) => lesson?.id === currentLessonId)
   );
@@ -109,7 +111,7 @@ export function CourseSidebar({
                     activeOpacity={0.7}
                   >
                     <Text className="flex-1 text-sm font-sans-semibold text-slate-700 pr-3" numberOfLines={2}>
-                      {`Dars ${mod.title}`}
+                      {t('course.moduleLabel', { title: mod.title })}
                     </Text>
                     {isOpen ? (
                       <ChevronDown size={18} color="#64748B" />

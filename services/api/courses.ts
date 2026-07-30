@@ -46,9 +46,9 @@ export const coursesService = {
     return res.data.data;
   },
 
-  search: async (query: string, filters?: Omit<CoursesFilter, 'search'>): Promise<PaginatedResponse<Course>> => {
+  search: async (query: string, categoryId?: number): Promise<PaginatedResponse<Course>> => {
     const res = await apiClient.get<PaginatedResponse<Course>>('/courses/search', {
-      params: { search: query, ...filters },
+      params: { q: query, category_id: categoryId },
     });
     return res.data;
   },
