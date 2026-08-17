@@ -100,7 +100,10 @@
       "sentTitle": "SMS отправлено!",
       "sentSubtitle": "Код подтверждения отправлен на номер {{phone}}.",
       "back": "Назад",
-      "sendError": "Ошибка при отправке OTP"
+      "sendError": "Ошибка при отправке OTP",
+      "newPasswordTitle": "Установите новый пароль",
+      "newPasswordSubtitle": "Придумайте новый пароль для вашего аккаунта.",
+      "newPasswordSubmit": "Сохранить"
     },
     "pinLogin": {
       "title": "Введите PIN-код",
