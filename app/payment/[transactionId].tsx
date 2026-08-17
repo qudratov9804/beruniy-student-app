@@ -24,10 +24,24 @@ export default function PaymentStatusScreen() {
   const openedOnce = useRef(false);
   const invalidatedOnce = useRef(false);
 
+  // `paymentUrl` travels through expo-router's URL-serialized params, so it can
+  // arrive as an array if the value was ever duplicated, and Linking.openURL
+  // throws synchronously (not a promise rejection) on a malformed/non-string
+  // URI on Android — that throw was previously uncaught and crashed the app.
+  const openPaymentUrl = (url?: string | string[]) => {
+    const target = Array.isArray(url) ? url[0] : url;
+    if (!target) return;
+    try {
+      Linking.openURL(target).catch(() => {});
+    } catch {
+      // Malformed URI on the native side — nothing more we can do here.
+    }
+  };
+
   useEffect(() => {
     if (!openedOnce.current && paymentUrl) {
       openedOnce.current = true;
-      Linking.openURL(paymentUrl).catch(() => {});
+      openPaymentUrl(paymentUrl);
     }
   }, [paymentUrl]);
 
@@ -54,9 +68,7 @@ export default function PaymentStatusScreen() {
     return () => timers.forEach(clearTimeout);
   }, [payment?.status, courseSlug, courseId, queryClient]);
 
-  const handleReopen = () => {
-    if (paymentUrl) Linking.openURL(paymentUrl).catch(() => {});
-  };
+  const handleReopen = () => openPaymentUrl(paymentUrl);
 
   const status = payment?.status;
 
