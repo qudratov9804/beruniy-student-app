@@ -15,6 +15,7 @@ import { Button, Skeleton } from '@/components/ui';
 import { EmptyState } from '@/components/common/EmptyState';
 import { HtmlText } from '@/components/common/HtmlText';
 import { QUERY_KEYS } from '@/constants/config';
+import { maybeRequestReview } from '@/utils';
 import type { Quiz, QuizAnswers } from '@/types';
 
 const getErrorMessage = (err: unknown, t: TFunction): string => {
@@ -149,6 +150,9 @@ export default function QuizScreen() {
       justSubmittedRef.current = true;
       setResult(data);
       invalidateProgress();
+      // A passed quiz is the clearest "this is going well" moment we have —
+      // ask here rather than on every lesson so the prompt stays rare.
+      if (data.passed) maybeRequestReview();
     },
     onError: async (err: unknown) => {
       const e = err as { response?: { status?: number; data?: { message?: string } } };
