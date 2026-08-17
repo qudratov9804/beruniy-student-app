@@ -100,7 +100,10 @@
       "sentTitle": "SMS yuborildi!",
       "sentSubtitle": "{{phone}} raqamiga tasdiqlash kodi yuborildi.",
       "back": "Ortga qaytish",
-      "sendError": "OTP yuborishda xato yuz berdi"
+      "sendError": "OTP yuborishda xato yuz berdi",
+      "newPasswordTitle": "Yangi parol o'rnating",
+      "newPasswordSubtitle": "Hisobingiz uchun yangi parol yarating.",
+      "newPasswordSubmit": "Saqlash"
     },
     "pinLogin": {
       "title": "PIN kod kiriting",

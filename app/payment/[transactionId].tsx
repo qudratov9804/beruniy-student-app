@@ -1,8 +1,9 @@
 import React, { useEffect, useRef } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator, Linking } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useQueryClient } from '@tanstack/react-query';
+import * as WebBrowser from 'expo-web-browser';
 import { CheckCircle2, XCircle, ExternalLink, ChevronLeft } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 import { usePaymentStatus } from '@/hooks/usePayments';
@@ -25,17 +26,16 @@ export default function PaymentStatusScreen() {
   const invalidatedOnce = useRef(false);
 
   // `paymentUrl` travels through expo-router's URL-serialized params, so it can
-  // arrive as an array if the value was ever duplicated, and Linking.openURL
-  // throws synchronously (not a promise rejection) on a malformed/non-string
-  // URI on Android — that throw was previously uncaught and crashed the app.
+  // arrive as an array if the value was ever duplicated. We open it inside an
+  // in-app browser tab (Chrome Custom Tabs / SFSafariViewController) instead of
+  // handing off to an external app via Linking.openURL — that used to throw
+  // synchronously (uncaught, crashing the app) on malformed URIs or on devices
+  // that couldn't resolve the payment provider's app, and it also made users
+  // feel like they'd been "kicked out" of Beruniy entirely.
   const openPaymentUrl = (url?: string | string[]) => {
     const target = Array.isArray(url) ? url[0] : url;
     if (!target) return;
-    try {
-      Linking.openURL(target).catch(() => {});
-    } catch {
-      // Malformed URI on the native side — nothing more we can do here.
-    }
+    WebBrowser.openBrowserAsync(target).catch(() => {});
   };
 
   useEffect(() => {

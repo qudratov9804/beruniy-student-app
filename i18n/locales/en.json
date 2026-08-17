@@ -100,7 +100,10 @@
       "sentTitle": "SMS sent!",
       "sentSubtitle": "A verification code has been sent to {{phone}}.",
       "back": "Go back",
-      "sendError": "Failed to send OTP"
+      "sendError": "Failed to send OTP",
+      "newPasswordTitle": "Set a new password",
+      "newPasswordSubtitle": "Create a new password for your account.",
+      "newPasswordSubmit": "Save"
     },
     "pinLogin": {
       "title": "Enter PIN code",
