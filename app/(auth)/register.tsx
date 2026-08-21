@@ -187,11 +187,13 @@ export default function RegisterScreen() {
                 {/* PHONE STEP */}
                 {step === 'phone' && (
                   <>
-                    <Image
-                      source={{ uri: 'https://beruniy-talim.uz/_next/image?url=%2Flogo-400.png&w=750&q=75' }}
-                      style={{ width: 120, height: 60, marginBottom: 16 }}
-                      contentFit="contain"
-                    />
+                    <View className="bg-white rounded-2xl px-4 py-2 mb-4 self-start">
+                      <Image
+                        source={{ uri: 'https://beruniy-talim.uz/_next/image?url=%2Flogo-400.png&w=750&q=75' }}
+                        style={{ width: 120, height: 60 }}
+                        contentFit="contain"
+                      />
+                    </View>
                     <Text className="text-2xl font-sans-bold text-white mb-1">{t('auth.register.title')}</Text>
                     <Text className="text-base text-white/70 mb-8">{t('auth.register.subtitle')}</Text>
 

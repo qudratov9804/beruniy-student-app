@@ -33,6 +33,7 @@ import { useEnrolledCourses } from '@/hooks/useCourses';
 import { CourseCardSkeleton } from '@/components/ui';
 import { ScreenBackground, AppHeader } from '@/components/common';
 import { apiClient } from '@/services/api/client';
+import { toPercent } from '@/utils';
 
 const ICON_SIZE = 54;
 
@@ -63,7 +64,7 @@ export default function HomeScreen() {
   };
 
   const activeCourses =
-    enrollments?.filter((e) => e.status === 'active' && e.progress_percent < 100) ?? [];
+    enrollments?.filter((e) => e.status === 'active' && toPercent(e.progress_percent) < 100) ?? [];
 
   const submitReview = async () => {
     if (rating === 0) { Alert.alert(t('common.error'), t('home.reviewModal.ratingRequired')); return; }
@@ -229,12 +230,12 @@ export default function HomeScreen() {
                         {item.course?.title}
                       </Text>
                       <Text className="text-xs text-white/60 mt-2">
-                        {t('home.percentDone', { percent: item.progress_percent })}
+                        {t('home.percentDone', { percent: toPercent(item.progress_percent) })}
                       </Text>
                       <View className="h-2 bg-white/20 rounded-full mt-2">
                         <View
                           className="h-2 bg-blue-400 rounded-full"
-                          style={{ width: `${item.progress_percent}%` }}
+                          style={{ width: `${toPercent(item.progress_percent)}%` }}
                         />
                       </View>
                     </View>

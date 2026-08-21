@@ -14,6 +14,7 @@ import { QuizOption, QuizProgressHeader, QuizResultCard, QuizAttemptHistory } fr
 import { Button, Skeleton } from '@/components/ui';
 import { EmptyState } from '@/components/common/EmptyState';
 import { HtmlText } from '@/components/common/HtmlText';
+import { ConfirmDialog } from '@/components/common/ConfirmDialog';
 import { QUERY_KEYS } from '@/constants/config';
 import { maybeRequestReview } from '@/utils';
 import type { Quiz, QuizAnswers } from '@/types';
@@ -194,16 +195,8 @@ export default function QuizScreen() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [quiz?.questions_count, lockedWithPastResult]);
 
-  const handleClose = () => {
-    Alert.alert(t('quiz.leaveTitle'), t('quiz.leaveMessage'), [
-      { text: t('quiz.stay'), style: 'cancel' },
-      {
-        text: t('quiz.exit'),
-        style: 'destructive',
-        onPress: goBackToLesson,
-      },
-    ]);
-  };
+  const [leaveConfirmVisible, setLeaveConfirmVisible] = React.useState(false);
+  const handleClose = () => setLeaveConfirmVisible(true);
 
   if (isError) {
     return (
@@ -415,6 +408,20 @@ export default function QuizScreen() {
           {isLastQuestion ? t('quiz.finish') : t('quiz.next')}
         </Button>
       </View>
+
+      <ConfirmDialog
+        visible={leaveConfirmVisible}
+        title={t('quiz.leaveTitle')}
+        message={t('quiz.leaveMessage')}
+        cancelLabel={t('quiz.stay')}
+        confirmLabel={t('quiz.exit')}
+        destructive
+        onCancel={() => setLeaveConfirmVisible(false)}
+        onConfirm={() => {
+          setLeaveConfirmVisible(false);
+          goBackToLesson();
+        }}
+      />
     </SafeAreaView>
   );
 }
