@@ -21,6 +21,7 @@ module.exports = function (api) {
             '@/constants': './constants',
             '@/utils': './utils',
             '@/i18n': './i18n',
+            'react-native-device-info': './react-native-device-info.js',
           },
         },
       ],

@@ -11,6 +11,7 @@ import { useColorScheme } from 'nativewind';
 import '../global.css';
 import i18n, { resolveDeviceLanguage } from '@/i18n';
 import { useAuthStore, useThemeStore, useLocaleStore } from '@/stores';
+import { InAppUpdatePrompt } from '@/components/common';
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
@@ -108,6 +109,7 @@ export default function RootLayout() {
               options={{ presentation: 'fullScreenModal', animation: 'slide_from_bottom' }}
             />
           </Stack>
+          <InAppUpdatePrompt />
         </QueryClientProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>

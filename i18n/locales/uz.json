@@ -437,5 +437,14 @@
   "errorBoundary": {
     "title": "Xatolik yuz berdi",
     "subtitle": "Nimadir noto'g'ri ketdi. Sahifani yangilang."
+  },
+  "update": {
+    "title": "Yangilanish mavjud",
+    "message": "Ilovaning yangi versiyasi chiqdi. Yangi imkoniyatlar va tuzatishlardan foydalanish uchun yangilang.",
+    "upgrade": "Yangilash",
+    "later": "Keyinroq",
+    "readyTitle": "Yangilanish tayyor",
+    "readyMessage": "Yangilanish yuklab olindi. Qo'llash uchun ilovani qayta ishga tushiring.",
+    "restart": "Qayta ishga tushirish"
   }
 }
