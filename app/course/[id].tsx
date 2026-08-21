@@ -47,6 +47,7 @@ import {
   LESSON_SLOT_ORDER,
   flattenLessonsInModuleOrder,
   toPercent,
+  toCount,
 } from '@/utils';
 import type { PaymentProvider, SectionLesson } from '@/types';
 
@@ -259,7 +260,7 @@ export default function CourseDetailScreen() {
             {/* Stats */}
             <View style={styles.statsRow}>
               {[
-                { icon: <Star size={14} color="#F59E0B" fill="#F59E0B" />, value: Number(course.rating).toFixed(1) },
+                { icon: <Star size={14} color="#F59E0B" fill="#F59E0B" />, value: toCount(course.rating).toFixed(1) },
                 { icon: <Users size={14} color="#60a5fa" />, value: t('course.studentsCount', { count: course.enrolled_count }) },
                 { icon: <BookOpen size={14} color="#60a5fa" />, value: t('myCourses.lessonsCount', { count: course.lessons_count }) },
                 { icon: <Clock size={14} color="#60a5fa" />, value: `${Number(course.duration_hours).toFixed(1)}h` },
@@ -529,14 +530,14 @@ export default function CourseDetailScreen() {
             {reviewsSummary && reviewsSummary.total > 0 && (
               <View style={styles.summaryCard}>
                 <View style={styles.summaryLeft}>
-                  <Text style={styles.summaryAvg}>{Number(reviewsSummary.avg_rating).toFixed(1)}</Text>
+                  <Text style={styles.summaryAvg}>{toCount(reviewsSummary.avg_rating).toFixed(1)}</Text>
                   <View style={{ flexDirection: 'row', gap: 2 }}>
                     {[1, 2, 3, 4, 5].map((n) => (
                       <Star
                         key={n}
                         size={12}
                         color="#fbbf24"
-                        fill={n <= Math.round(reviewsSummary.avg_rating) ? '#fbbf24' : 'transparent'}
+                        fill={n <= Math.round(toCount(reviewsSummary.avg_rating)) ? '#fbbf24' : 'transparent'}
                       />
                     ))}
                   </View>
@@ -544,7 +545,7 @@ export default function CourseDetailScreen() {
                 </View>
                 <View style={styles.summaryBars}>
                   {[5, 4, 3, 2, 1].map((star) => {
-                    const count = reviewsSummary.distribution?.[String(star)] ?? 0;
+                    const count = toCount(reviewsSummary.distribution?.[String(star)]);
                     const pct = reviewsSummary.total > 0 ? (count / reviewsSummary.total) * 100 : 0;
                     return (
                       <View key={star} style={styles.barRow}>
@@ -583,7 +584,7 @@ export default function CourseDetailScreen() {
                             key={n}
                             size={11}
                             color="#fbbf24"
-                            fill={n <= review.rating ? '#fbbf24' : 'transparent'}
+                            fill={n <= toCount(review.rating) ? '#fbbf24' : 'transparent'}
                           />
                         ))}
                       </View>

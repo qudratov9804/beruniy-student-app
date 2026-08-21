@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { quizService } from '@/services/api';
 import { Card, Skeleton } from '@/components/ui';
 import { QUERY_KEYS } from '@/constants/config';
-import { formatDate } from '@/utils';
+import { formatDate, toCount } from '@/utils';
 
 interface QuizAttemptHistoryProps {
   lessonId: number;
@@ -31,14 +31,14 @@ export const QuizAttemptHistory: React.FC<QuizAttemptHistoryProps> = ({ lessonId
 
   if (!history || history.attempts.length === 0) return null;
 
-  const bestScore = history.best_score;
+  const bestScore = toCount(history.best_score);
   const sorted = [...history.attempts].sort((a, b) => b.attempt_number - a.attempt_number);
 
   return (
     <View className="px-6 mt-2 mb-8">
       <Text className="text-sm font-sans-bold text-slate-700 mb-3">{t('quiz.history.title')}</Text>
       {sorted.map((attempt) => {
-        const isBest = attempt.score === bestScore;
+        const isBest = toCount(attempt.score) === bestScore;
         return (
           <Card
             key={attempt.attempt_number}
@@ -63,7 +63,7 @@ export const QuizAttemptHistory: React.FC<QuizAttemptHistoryProps> = ({ lessonId
                   attempt.passed ? 'text-green-600' : 'text-red-500'
                 }`}
               >
-                {attempt.score}%
+                {toCount(attempt.score)}%
               </Text>
               <Text className="text-xs text-slate-400">
                 {attempt.correct_answers}/{attempt.total_questions}
