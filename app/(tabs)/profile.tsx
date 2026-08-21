@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Alert, Platform } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, ScrollView, TouchableOpacity, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
 import {
@@ -19,7 +19,7 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/hooks/useAuth';
-import { ScreenBackground } from '@/components/common';
+import { ScreenBackground, ConfirmDialog } from '@/components/common';
 import { useRouter } from 'expo-router';
 
 interface MenuItemProps {
@@ -53,16 +53,14 @@ export default function ProfileScreen() {
   const { t } = useTranslation();
   const { user, logout, isLoggingOut } = useAuth();
   const router = useRouter();
+  const [logoutConfirmVisible, setLogoutConfirmVisible] = useState(false);
 
   const handleLogout = () => {
     if (Platform.OS === 'web') {
       if (window.confirm(t('profile.logoutConfirm'))) logout();
       return;
     }
-    Alert.alert(t('common.logout'), t('profile.logoutConfirm'), [
-      { text: t('common.cancel'), style: 'cancel' },
-      { text: t('common.logout'), style: 'destructive', onPress: () => logout() },
-    ]);
+    setLogoutConfirmVisible(true);
   };
 
   const initials = user?.name ? user.name.charAt(0).toUpperCase() : 'U';
@@ -180,6 +178,20 @@ export default function ProfileScreen() {
           </View>
         </ScrollView>
       </SafeAreaView>
+
+      <ConfirmDialog
+        visible={logoutConfirmVisible}
+        title={t('common.logout')}
+        message={t('profile.logoutConfirm')}
+        cancelLabel={t('common.cancel')}
+        confirmLabel={t('common.logout')}
+        destructive
+        onCancel={() => setLogoutConfirmVisible(false)}
+        onConfirm={() => {
+          setLogoutConfirmVisible(false);
+          logout();
+        }}
+      />
     </ScreenBackground>
   );
 }

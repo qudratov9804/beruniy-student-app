@@ -8,6 +8,7 @@ import { useCertificates } from '@/hooks/useProgress';
 import { useAuth } from '@/hooks/useAuth';
 import { Skeleton } from '@/components/ui';
 import { ScreenBackground, AppHeader } from '@/components/common';
+import { toPercent } from '@/utils';
 
 export default function ProgressScreen() {
   const { t } = useTranslation();
@@ -19,7 +20,7 @@ export default function ProgressScreen() {
   const active = enrollments?.filter((e) => e.status === 'active') ?? [];
   const avgProgress =
     active.length > 0
-      ? Math.round(active.reduce((sum, e) => sum + e.progress_percent, 0) / active.length)
+      ? Math.round(active.reduce((sum, e) => sum + toPercent(e.progress_percent), 0) / active.length)
       : 0;
 
   return (
@@ -70,13 +71,13 @@ export default function ProgressScreen() {
                       {enrollment.course?.title ?? t('myCourses.course')}
                     </Text>
                     <Text className="text-sm font-sans-bold text-blue-300">
-                      {enrollment.progress_percent}%
+                      {toPercent(enrollment.progress_percent)}%
                     </Text>
                   </View>
                   <View className="h-2 bg-white/20 rounded-full mt-2">
                     <View
                       className="h-2 bg-blue-400 rounded-full"
-                      style={{ width: `${enrollment.progress_percent}%` }}
+                      style={{ width: `${toPercent(enrollment.progress_percent)}%` }}
                     />
                   </View>
                 </View>

@@ -13,6 +13,18 @@ export const formatTimestamp = (seconds: number): string => {
   return `${mins}:${String(secs).padStart(2, '0')}`;
 };
 
+// The enrollments API has occasionally sent progress_percent as
+// { number, percent } instead of a plain number, which crashed any screen
+// that rendered it directly as a Text child — coerce defensively at render time.
+export const toPercent = (value: unknown): number => {
+  if (typeof value === 'number') return Number.isFinite(value) ? value : 0;
+  if (value && typeof value === 'object' && 'percent' in value) {
+    return toPercent((value as { percent: unknown }).percent);
+  }
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : 0;
+};
+
 export const formatXp = (xp: number): string => {
   if (xp >= 1000) return `${(xp / 1000).toFixed(1)}k XP`;
   return `${xp} XP`;

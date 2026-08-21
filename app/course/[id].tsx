@@ -46,6 +46,7 @@ import {
   groupLessonsByModule,
   LESSON_SLOT_ORDER,
   flattenLessonsInModuleOrder,
+  toPercent,
 } from '@/utils';
 import type { PaymentProvider, SectionLesson } from '@/types';
 
@@ -149,7 +150,7 @@ export default function CourseDetailScreen() {
 
   const enrollment = enrollmentDetail?.enrollment;
   const isEnrolled = !!enrollment || course.is_enrolled === true;
-  const progressPercent = enrollment?.progress_percent ?? 0;
+  const progressPercent = toPercent(enrollment?.progress_percent);
 
   // Lessons unlock in order: a lesson is playable once the previous one is completed.
   // The course-detail endpoint doesn't return per-lesson completion, so we

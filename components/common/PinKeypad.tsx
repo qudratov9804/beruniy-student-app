@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 
-const DIGITS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '', '0', '⌫'];
+const DIGITS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '⌫', ''];
 
 interface PinKeypadProps {
   onPress: (digit: string) => void;

@@ -57,11 +57,13 @@ export default function LoginScreen() {
             <View className="flex-1 px-6 pt-12 pb-8">
               {/* Header */}
               <View className="items-center mb-10">
-                <Image
-                  source={{ uri: 'https://beruniy-talim.uz/_next/image?url=%2Flogo-400.png&w=750&q=75' }}
-                  style={{ width: 160, height: 80, marginBottom: 16 }}
-                  contentFit="contain"
-                />
+                <View className="bg-white rounded-3xl px-5 py-3 mb-4">
+                  <Image
+                    source={{ uri: 'https://beruniy-talim.uz/_next/image?url=%2Flogo-400.png&w=750&q=75' }}
+                    style={{ width: 160, height: 80 }}
+                    contentFit="contain"
+                  />
+                </View>
                 <Text className="text-2xl font-sans-bold text-white mb-2">{t('auth.login.title')}</Text>
                 <Text className="text-base text-white/70 text-center">
                   {t('auth.login.subtitle')}

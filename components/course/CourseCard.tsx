@@ -5,7 +5,7 @@ import { Image } from 'expo-image';
 import { Star, Clock, Users, BookOpen } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 import { Card, Badge, ProgressBar } from '@/components/ui';
-import { formatPrice, stripHtml } from '@/utils';
+import { formatPrice, stripHtml, toPercent } from '@/utils';
 import type { Course } from '@/types';
 
 interface CourseCardProps {
@@ -51,6 +51,7 @@ export const CourseCard: React.FC<CourseCardProps> = ({
   }
 
   if (variant === 'enrolled' && progressPercent !== undefined) {
+    const safeProgress = toPercent(progressPercent);
     return (
       <TouchableOpacity onPress={handlePress} activeOpacity={0.85} className="mb-4">
         <Card variant="elevated" padding="none" className="overflow-hidden">
@@ -69,8 +70,8 @@ export const CourseCard: React.FC<CourseCardProps> = ({
             <Text className="text-base font-sans-bold text-white mt-2 mb-1" numberOfLines={2}>
               {course.title}
             </Text>
-            <Text className="text-xs text-white/60 mb-2">{t('home.percentDone', { percent: progressPercent })}</Text>
-            <ProgressBar progress={progressPercent} height={6} />
+            <Text className="text-xs text-white/60 mb-2">{t('home.percentDone', { percent: safeProgress })}</Text>
+            <ProgressBar progress={safeProgress} height={6} />
           </View>
         </Card>
       </TouchableOpacity>

@@ -14,6 +14,7 @@ import { useTranslation } from 'react-i18next';
 import { BookOpen, CheckCircle, Clock, ChevronRight, GraduationCap } from 'lucide-react-native';
 import { ScreenBackground, AppHeader } from '@/components/common';
 import { useEnrolledCourses } from '@/hooks/useCourses';
+import { toPercent } from '@/utils';
 import type { Enrollment } from '@/types';
 
 type Filter = 'all' | 'active' | 'completed';
@@ -62,9 +63,9 @@ function EnrolledCourseCard({ item }: { item: Enrollment }) {
         {/* Progress */}
         <View style={styles.progressRow}>
           <View style={styles.progressTrack}>
-            <View style={[styles.progressFill, { width: `${item.progress_percent}%` }]} />
+            <View style={[styles.progressFill, { width: `${toPercent(item.progress_percent)}%` }]} />
           </View>
-          <Text style={styles.progressText}>{item.progress_percent}%</Text>
+          <Text style={styles.progressText}>{toPercent(item.progress_percent)}%</Text>
         </View>
 
         {/* Status row */}
