@@ -187,10 +187,10 @@ export default function RegisterScreen() {
                 {/* PHONE STEP */}
                 {step === 'phone' && (
                   <>
-                    <View className="bg-white rounded-2xl px-4 py-2 mb-4 self-start">
+                    <View className="bg-white rounded-full p-2 mb-4 self-start">
                       <Image
                         source={{ uri: 'https://beruniy-talim.uz/_next/image?url=%2Flogo-400.png&w=750&q=75' }}
-                        style={{ width: 120, height: 60 }}
+                        style={{ width: 64, height: 64 }}
                         contentFit="contain"
                       />
                     </View>

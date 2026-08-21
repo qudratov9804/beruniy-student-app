@@ -57,10 +57,10 @@ export default function LoginScreen() {
             <View className="flex-1 px-6 pt-12 pb-8">
               {/* Header */}
               <View className="items-center mb-10">
-                <View className="bg-white rounded-3xl px-5 py-3 mb-4">
+                <View className="bg-white rounded-full p-2 mb-4">
                   <Image
                     source={{ uri: 'https://beruniy-talim.uz/_next/image?url=%2Flogo-400.png&w=750&q=75' }}
-                    style={{ width: 160, height: 80 }}
+                    style={{ width: 88, height: 88 }}
                     contentFit="contain"
                   />
                 </View>

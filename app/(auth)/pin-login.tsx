@@ -70,10 +70,10 @@ export default function PinLoginScreen() {
     <ScreenBackground>
       <SafeAreaView className="flex-1 bg-transparent">
         <View className="flex-1 items-center justify-between px-6 py-10">
-          <View className="bg-white rounded-3xl px-5 py-3">
+          <View className="bg-white rounded-full p-2">
             <Image
               source={{ uri: 'https://beruniy-talim.uz/_next/image?url=%2Flogo-400.png&w=750&q=75' }}
-              style={{ width: 140, height: 70 }}
+              style={{ width: 76, height: 76 }}
               contentFit="contain"
             />
           </View>
