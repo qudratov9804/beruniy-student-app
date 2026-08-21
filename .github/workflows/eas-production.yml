@@ -81,10 +81,18 @@ jobs:
 
       - name: Submit to Play Store
         if: steps.write-key.outputs.has_key == 'true'
+        env:
+          TRACK: ${{ github.event.inputs.track }}
         run: |
+          case "$TRACK" in
+            internal) PROFILE=playInternal ;;
+            beta) PROFILE=playBeta ;;
+            production) PROFILE=playProduction ;;
+            *) PROFILE=production ;;
+          esac
           eas submit \
             --platform android \
-            --profile production \
+            --profile "$PROFILE" \
             --latest \
             --non-interactive
 

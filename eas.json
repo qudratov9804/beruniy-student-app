@@ -28,6 +28,24 @@
         "serviceAccountKeyPath": "./google-service-account-key.json",
         "track": "alpha"
       }
+    },
+    "playInternal": {
+      "android": {
+        "serviceAccountKeyPath": "./google-service-account-key.json",
+        "track": "internal"
+      }
+    },
+    "playBeta": {
+      "android": {
+        "serviceAccountKeyPath": "./google-service-account-key.json",
+        "track": "beta"
+      }
+    },
+    "playProduction": {
+      "android": {
+        "serviceAccountKeyPath": "./google-service-account-key.json",
+        "track": "production"
+      }
     }
   }
 }
