@@ -5,7 +5,7 @@ import { Image } from 'expo-image';
 import { Star, Clock, Users, BookOpen } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 import { Card, Badge, ProgressBar } from '@/components/ui';
-import { formatPrice, stripHtml, toPercent } from '@/utils';
+import { formatPrice, stripHtml, toPercent, toCount } from '@/utils';
 import type { Course } from '@/types';
 
 interface CourseCardProps {
@@ -112,7 +112,7 @@ export const CourseCard: React.FC<CourseCardProps> = ({
             <View className="flex-row items-center gap-1">
               <Star size={14} color="#F59E0B" fill="#F59E0B" />
               <Text className="text-xs font-sans-semibold text-white/80">
-                {Number(course.rating).toFixed(1)}
+                {toCount(course.rating).toFixed(1)}
               </Text>
             </View>
             <View className="flex-row items-center gap-1">

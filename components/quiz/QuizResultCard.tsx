@@ -3,6 +3,7 @@ import { View, Text } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { Trophy, CheckCircle, XCircle } from 'lucide-react-native';
 import { Card, Button } from '@/components/ui';
+import { toCount } from '@/utils';
 import type { QuizSubmitResult } from '@/types';
 
 interface QuizResultCardProps {
@@ -38,7 +39,7 @@ export const QuizResultCard: React.FC<QuizResultCardProps> = ({ result, onContin
           <View className="mb-2">
             <CheckCircle size={24} color="#22C55E" />
           </View>
-          <Text className="text-xl font-sans-bold text-slate-800">{result.score}%</Text>
+          <Text className="text-xl font-sans-bold text-slate-800">{toCount(result.score)}%</Text>
           <Text className="text-xs text-slate-500 mt-1">{t('quiz.result.score')}</Text>
         </Card>
         <Card variant="filled" theme="light" padding="md" className="flex-1 items-center">
