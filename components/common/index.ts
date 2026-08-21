@@ -6,5 +6,6 @@ export { AppHeader } from './AppHeader';
 export { AITutor } from './AITutor';
 export { PinKeypad } from './PinKeypad';
 export { ConfirmDialog } from './ConfirmDialog';
+export { InAppUpdatePrompt } from './InAppUpdatePrompt';
 export { LogoLoader } from './LogoLoader';
 export * from './illustrations';

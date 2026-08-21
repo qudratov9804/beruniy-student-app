@@ -18,7 +18,8 @@
       "bundleIdentifier": "uz.beruniy.student",
       "infoPlist": {
         "NSFaceIDUsageDescription": "Tizimga kirish uchun Face ID ishlatiladi",
-        "NSCameraUsageDescription": "Profil rasmini yuklash uchun kamera kerak"
+        "NSCameraUsageDescription": "Profil rasmini yuklash uchun kamera kerak",
+        "LSApplicationQueriesSchemes": ["itms-apps"]
       }
     },
     "android": {

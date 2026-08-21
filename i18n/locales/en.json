@@ -437,5 +437,14 @@
   "errorBoundary": {
     "title": "Something went wrong",
     "subtitle": "Something went wrong. Please refresh the page."
+  },
+  "update": {
+    "title": "Update available",
+    "message": "A new version of the app is available. Update to get the latest features and fixes.",
+    "upgrade": "Update",
+    "later": "Later",
+    "readyTitle": "Update ready",
+    "readyMessage": "The update has been downloaded. Restart the app to apply it.",
+    "restart": "Restart"
   }
 }
